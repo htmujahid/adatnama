@@ -23,15 +23,18 @@ export function SetupForm() {
 
   const form = useForm({
     defaultValues: {
-      name: "",
       username: "",
-      email: "",
       password: "",
     },
     onSubmit: async ({ value }) => {
       setError(null)
 
-      const { error: signUpError } = await authClient.signUp.email(value)
+      const { error: signUpError } = await authClient.signUp.email({
+        name: value.username,
+        username: value.username,
+        email: `${value.username}@forming.local`,
+        password: value.password,
+      })
       if (signUpError) {
         setError(signUpError.message ?? "Unable to create your account.")
         return
@@ -52,32 +55,6 @@ export function SetupForm() {
     >
       <FieldGroup>
         <form.Field
-          name="name"
-          validators={{
-            onChange: ({ value }) => (value ? undefined : "Name is required"),
-          }}
-        >
-          {(field) => (
-            <Field data-invalid={field.state.meta.errors.length > 0}>
-              <FieldLabel htmlFor={field.name}>Name</FieldLabel>
-              <Input
-                id={field.name}
-                name={field.name}
-                autoComplete="name"
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(event) => field.handleChange(event.target.value)}
-              />
-              <FieldError
-                errors={field.state.meta.errors.map((fieldError) => ({
-                  message: String(fieldError),
-                }))}
-              />
-            </Field>
-          )}
-        </form.Field>
-
-        <form.Field
           name="username"
           validators={{
             onChange: ({ value }) =>
@@ -92,33 +69,6 @@ export function SetupForm() {
                 name={field.name}
                 type="text"
                 autoComplete="username"
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(event) => field.handleChange(event.target.value)}
-              />
-              <FieldError
-                errors={field.state.meta.errors.map((fieldError) => ({
-                  message: String(fieldError),
-                }))}
-              />
-            </Field>
-          )}
-        </form.Field>
-
-        <form.Field
-          name="email"
-          validators={{
-            onChange: ({ value }) => (value ? undefined : "Email is required"),
-          }}
-        >
-          {(field) => (
-            <Field data-invalid={field.state.meta.errors.length > 0}>
-              <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-              <Input
-                id={field.name}
-                name={field.name}
-                type="email"
-                autoComplete="email"
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(event) => field.handleChange(event.target.value)}

@@ -19,7 +19,7 @@ import { sessionQueryOptions } from "@/lib/data/auth"
 export function ProfileForm({
   user,
 }: {
-  user: { name: string; username?: string | null }
+  user: { name: string; username?: string | null; email: string }
 }) {
   const router = useRouter()
   const queryClient = useQueryClient()
@@ -39,6 +39,17 @@ export function ProfileForm({
       if (updateError) {
         setError(updateError.message ?? "Unable to update your profile.")
         return
+      }
+
+      const newEmail = `${value.username}@forming.local`
+      if (newEmail !== user.email) {
+        const { error: emailError } = await authClient.changeEmail({
+          newEmail,
+        })
+        if (emailError) {
+          setError(emailError.message ?? "Unable to update your email.")
+          return
+        }
       }
 
       queryClient.removeQueries({ queryKey: sessionQueryOptions().queryKey })

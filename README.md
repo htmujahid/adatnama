@@ -1,4 +1,6 @@
-Welcome to your new TanStack Start app!
+# Forming
+
+Forming is a form-building framework for reactive, local-first applications, built on TanStack Start and deployed to Cloudflare. Define a form and its schema, and Forming gives you a typed route, accessible shadcn/ui fields, server-side validation, a submission endpoint, and a live view of the responses. The whole app ships to Cloudflare Workers, with KV, D1, R2, and Durable Objects available as edge storage for your forms.
 
 # Getting Started
 
@@ -50,7 +52,7 @@ This project uses the Cloudflare Vite plugin (configured in `vite.config.ts`) an
 
 For production env vars, run `wrangler secret put MY_VAR` for each secret listed in `.env.example`. Public (non-secret) vars go in `wrangler.jsonc` under `vars`.
 
-KV, D1, R2, and Durable Object bindings are configured in `wrangler.jsonc` — see https://developers.cloudflare.com/workers/wrangler/configuration/.
+KV, D1, R2, and Durable Object bindings are configured in `wrangler.jsonc`. See https://developers.cloudflare.com/workers/wrangler/configuration/.
 
 ## Routing
 

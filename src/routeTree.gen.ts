@@ -12,19 +12,36 @@ import type { createStart } from "@tanstack/react-start"
 
 import type { getRouter } from "./router.tsx"
 import { Route as rootRouteImport } from "./routes/__root"
+import { Route as MarketingAboutRouteImport } from "./routes/_marketing/about"
+import { Route as MarketingFeaturesRouteImport } from "./routes/_marketing/features"
+import { Route as MarketingIndexRouteImport } from "./routes/_marketing/index"
+import { Route as MarketingRouteRouteImport } from "./routes/_marketing/route"
+import { Route as MarketingStatusRouteImport } from "./routes/_marketing/status"
 import { Route as ApiStatusRouteImport } from "./routes/api/status"
-import { Route as IndexRouteImport } from "./routes/index"
-import { Route as StatusRouteImport } from "./routes/status"
 
-const IndexRoute = IndexRouteImport.update({
-  id: "/",
-  path: "/",
+const MarketingRouteRoute = MarketingRouteRouteImport.update({
+  id: "/_marketing",
   getParentRoute: () => rootRouteImport,
 } as any)
-const StatusRoute = StatusRouteImport.update({
+const MarketingIndexRoute = MarketingIndexRouteImport.update({
+  id: "/",
+  path: "/",
+  getParentRoute: () => MarketingRouteRoute,
+} as any)
+const MarketingAboutRoute = MarketingAboutRouteImport.update({
+  id: "/about",
+  path: "/about",
+  getParentRoute: () => MarketingRouteRoute,
+} as any)
+const MarketingFeaturesRoute = MarketingFeaturesRouteImport.update({
+  id: "/features",
+  path: "/features",
+  getParentRoute: () => MarketingRouteRoute,
+} as any)
+const MarketingStatusRoute = MarketingStatusRouteImport.update({
   id: "/status",
   path: "/status",
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => MarketingRouteRoute,
 } as any)
 const ApiStatusRoute = ApiStatusRouteImport.update({
   id: "/api/status",
@@ -33,50 +50,84 @@ const ApiStatusRoute = ApiStatusRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute
-  "/status": typeof StatusRoute
+  "/": typeof MarketingIndexRoute
+  "/about": typeof MarketingAboutRoute
+  "/features": typeof MarketingFeaturesRoute
+  "/status": typeof MarketingStatusRoute
   "/api/status": typeof ApiStatusRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute
-  "/status": typeof StatusRoute
+  "/about": typeof MarketingAboutRoute
+  "/features": typeof MarketingFeaturesRoute
+  "/status": typeof MarketingStatusRoute
   "/api/status": typeof ApiStatusRoute
+  "/": typeof MarketingIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  "/": typeof IndexRoute
-  "/status": typeof StatusRoute
+  "/_marketing": typeof MarketingRouteRouteWithChildren
+  "/_marketing/about": typeof MarketingAboutRoute
+  "/_marketing/features": typeof MarketingFeaturesRoute
+  "/_marketing/status": typeof MarketingStatusRoute
   "/api/status": typeof ApiStatusRoute
+  "/_marketing/": typeof MarketingIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: "/" | "/status" | "/api/status"
+  fullPaths: "/" | "/about" | "/features" | "/status" | "/api/status"
   fileRoutesByTo: FileRoutesByTo
-  to: "/" | "/status" | "/api/status"
-  id: "__root__" | "/" | "/status" | "/api/status"
+  to: "/about" | "/features" | "/status" | "/api/status" | "/"
+  id:
+    | "__root__"
+    | "/_marketing"
+    | "/_marketing/about"
+    | "/_marketing/features"
+    | "/_marketing/status"
+    | "/api/status"
+    | "/_marketing/"
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  StatusRoute: typeof StatusRoute
+  MarketingRouteRoute: typeof MarketingRouteRouteWithChildren
   ApiStatusRoute: typeof ApiStatusRoute
 }
 
 declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    "/": {
-      id: "/"
-      path: "/"
+    "/_marketing": {
+      id: "/_marketing"
+      path: ""
       fullPath: "/"
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof MarketingRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    "/status": {
-      id: "/status"
+    "/_marketing/": {
+      id: "/_marketing/"
+      path: "/"
+      fullPath: "/"
+      preLoaderRoute: typeof MarketingIndexRouteImport
+      parentRoute: typeof MarketingRouteRoute
+    }
+    "/_marketing/about": {
+      id: "/_marketing/about"
+      path: "/about"
+      fullPath: "/about"
+      preLoaderRoute: typeof MarketingAboutRouteImport
+      parentRoute: typeof MarketingRouteRoute
+    }
+    "/_marketing/features": {
+      id: "/_marketing/features"
+      path: "/features"
+      fullPath: "/features"
+      preLoaderRoute: typeof MarketingFeaturesRouteImport
+      parentRoute: typeof MarketingRouteRoute
+    }
+    "/_marketing/status": {
+      id: "/_marketing/status"
       path: "/status"
       fullPath: "/status"
-      preLoaderRoute: typeof StatusRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof MarketingStatusRouteImport
+      parentRoute: typeof MarketingRouteRoute
     }
     "/api/status": {
       id: "/api/status"
@@ -88,9 +139,26 @@ declare module "@tanstack/react-router" {
   }
 }
 
+interface MarketingRouteRouteChildren {
+  MarketingAboutRoute: typeof MarketingAboutRoute
+  MarketingFeaturesRoute: typeof MarketingFeaturesRoute
+  MarketingStatusRoute: typeof MarketingStatusRoute
+  MarketingIndexRoute: typeof MarketingIndexRoute
+}
+
+const MarketingRouteRouteChildren: MarketingRouteRouteChildren = {
+  MarketingAboutRoute: MarketingAboutRoute,
+  MarketingFeaturesRoute: MarketingFeaturesRoute,
+  MarketingStatusRoute: MarketingStatusRoute,
+  MarketingIndexRoute: MarketingIndexRoute,
+}
+
+const MarketingRouteRouteWithChildren = MarketingRouteRoute._addFileChildren(
+  MarketingRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  StatusRoute: StatusRoute,
+  MarketingRouteRoute: MarketingRouteRouteWithChildren,
   ApiStatusRoute: ApiStatusRoute,
 }
 export const routeTree = rootRouteImport

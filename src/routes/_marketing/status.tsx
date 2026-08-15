@@ -30,7 +30,7 @@ import { statusQueryOptions } from "@/lib/data/status"
 import type { ComponentStatus } from "@/lib/data/status"
 import { cn } from "@/lib/utils"
 
-export const Route = createFileRoute("/status")({
+export const Route = createFileRoute("/_marketing/status")({
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(statusQueryOptions())
   },
@@ -97,7 +97,7 @@ function StatusPage() {
   const OverallIcon = overall.icon
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 py-16">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 py-16 sm:px-6 lg:px-8">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="font-heading text-2xl font-semibold">System Status</h1>
@@ -161,6 +161,6 @@ function StatusPage() {
       <p className="text-center text-xs text-muted-foreground">
         Last checked {format(new Date(data.timestamp), "PPpp")}
       </p>
-    </main>
+    </div>
   )
 }

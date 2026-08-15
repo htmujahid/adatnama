@@ -27,7 +27,12 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "TanStack Start Starter",
+        name: "description",
+        content:
+          "Forming is a form-building framework for reactive, local-first applications, built on TanStack Start and deployed to Cloudflare.",
+      },
+      {
+        title: "Forming",
       },
     ],
     links: [

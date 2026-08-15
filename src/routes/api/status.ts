@@ -1,11 +1,12 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { computeStatus } from '@/lib/data/status'
+import { createFileRoute } from "@tanstack/react-router"
 
-export const Route = createFileRoute('/api/status')({
+import { computeStatus } from "@/lib/data/status"
+
+export const Route = createFileRoute("/api/status")({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const body = await computeStatus(request.headers.get('cf-ray'))
+        const body = await computeStatus(request.headers.get("cf-ray"))
         return Response.json(body)
       },
     },

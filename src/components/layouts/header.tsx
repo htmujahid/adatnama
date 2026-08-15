@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { Link, useRouter } from "@tanstack/react-router"
 import { LogOutIcon, MenuIcon } from "lucide-react"
 
+import { BrandMark } from "@/components/layouts/brand-mark"
 import { NAV_LINKS } from "@/components/layouts/nav-links"
 import { ThemeToggle } from "@/components/layouts/theme-toggle"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -25,20 +26,6 @@ import {
 import { useSession } from "@/hooks/use-session"
 import { authClient } from "@/lib/auth-client"
 import { sessionQueryOptions } from "@/lib/data/auth"
-
-function BrandMark() {
-  return (
-    <Link
-      to="/"
-      className="flex items-center gap-2 text-base font-semibold tracking-tight"
-    >
-      <span className="flex size-7 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
-        F
-      </span>
-      Forming
-    </Link>
-  )
-}
 
 function HeaderAuth() {
   const router = useRouter()

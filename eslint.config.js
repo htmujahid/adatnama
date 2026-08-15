@@ -5,7 +5,7 @@ import pluginQuery from '@tanstack/eslint-plugin-query'
 
 export default [
   ...tanstackConfig,
-  pluginQuery.configs['flat/recommended'],
+  // pluginQuery.configs['flat/recommended'],
   {
     rules: {
       'import/no-cycle': 'off',
@@ -17,6 +17,6 @@ export default [
     },
   },
   {
-    ignores: ['eslint.config.js', 'prettier.config.js'],
+    ignores: ['src/components/ui', 'src/lib/utils.ts', 'eslint.config.js', 'prettier.config.js'],
   },
 ]

@@ -1,6 +1,12 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { Link, useRouter } from "@tanstack/react-router"
-import { BadgeCheckIcon, HomeIcon, LogOutIcon, MenuIcon } from "lucide-react"
+import {
+  BadgeCheckIcon,
+  ChevronsUpDownIcon,
+  HomeIcon,
+  LogOutIcon,
+  MenuIcon,
+} from "lucide-react"
 
 import { BrandMark } from "@/components/layouts/brand-mark"
 import { NAV_LINKS } from "@/components/layouts/nav-links"
@@ -41,25 +47,43 @@ function HeaderAuth() {
     )
   }
 
-  const initial = (session.user.name || session.user.email)
-    .charAt(0)
-    .toUpperCase()
+  const username = session.user.username ?? session.user.name
+  const initial = (session.user.name || username).charAt(0).toUpperCase()
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="ghost" size="icon" aria-label="Account menu" />
+          <Button
+            variant="ghost"
+            className="h-auto gap-2 px-2 py-1.5 aria-expanded:bg-muted"
+          />
         }
       >
         <Avatar className="size-7">
           <AvatarFallback>{initial}</AvatarFallback>
         </Avatar>
+        <span className="hidden text-sm font-medium sm:inline">
+          {session.user.name}
+        </span>
+        <ChevronsUpDownIcon className="hidden size-4 text-muted-foreground sm:inline" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-48">
+      <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuGroup>
-          <DropdownMenuLabel className="truncate">
-            {session.user.email}
+          <DropdownMenuLabel className="p-0 font-normal">
+            <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+              <Avatar>
+                <AvatarFallback>{initial}</AvatarFallback>
+              </Avatar>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">
+                  {session.user.name}
+                </span>
+                <span className="truncate text-xs text-muted-foreground">
+                  {username}
+                </span>
+              </div>
+            </div>
           </DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />

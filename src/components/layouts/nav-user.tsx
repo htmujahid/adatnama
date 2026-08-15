@@ -30,13 +30,12 @@ export function NavUser({
 }: {
   user: {
     name: string
-    username?: string | null
+    email: string
   }
   onSignOut: () => void
 }) {
   const { isMobile } = useSidebar()
-  const username = user.username ?? user.name
-  const initial = (user.name || username).charAt(0).toUpperCase()
+  const initial = (user.name || user.email).charAt(0).toUpperCase()
 
   return (
     <SidebarMenu>
@@ -52,7 +51,7 @@ export function NavUser({
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">{user.name}</span>
-              <span className="truncate text-xs">{username}</span>
+              <span className="truncate text-xs">{user.email}</span>
             </div>
             <ChevronsUpDownIcon className="ml-auto size-4" />
           </DropdownMenuTrigger>
@@ -70,7 +69,7 @@ export function NavUser({
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-medium">{user.name}</span>
-                    <span className="truncate text-xs">{username}</span>
+                    <span className="truncate text-xs">{user.email}</span>
                   </div>
                 </div>
               </DropdownMenuLabel>

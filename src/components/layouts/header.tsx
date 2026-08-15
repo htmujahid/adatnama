@@ -47,8 +47,9 @@ function HeaderAuth() {
     )
   }
 
-  const username = session.user.username ?? session.user.name
-  const initial = (session.user.name || username).charAt(0).toUpperCase()
+  const initial = (session.user.name || session.user.email)
+    .charAt(0)
+    .toUpperCase()
 
   return (
     <DropdownMenu>
@@ -80,7 +81,7 @@ function HeaderAuth() {
                   {session.user.name}
                 </span>
                 <span className="truncate text-xs text-muted-foreground">
-                  {username}
+                  {session.user.email}
                 </span>
               </div>
             </div>

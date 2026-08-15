@@ -22,6 +22,7 @@ export default [
       "src/lib/utils.ts",
       "eslint.config.js",
       "prettier.config.js",
+      "worker-configuration.d.ts",
     ],
   },
 ]

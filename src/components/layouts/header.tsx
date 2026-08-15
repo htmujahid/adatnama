@@ -1,9 +1,19 @@
-import { Link } from "@tanstack/react-router"
-import { MenuIcon } from "lucide-react"
+import { useQueryClient } from "@tanstack/react-query"
+import { Link, useRouter } from "@tanstack/react-router"
+import { LogOutIcon, MenuIcon } from "lucide-react"
 
 import { NAV_LINKS } from "@/components/layouts/nav-links"
 import { ThemeToggle } from "@/components/layouts/theme-toggle"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   Sheet,
   SheetClose,
@@ -12,6 +22,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import { useSession } from "@/hooks/use-session"
+import { authClient } from "@/lib/auth-client"
+import { sessionQueryOptions } from "@/lib/data/auth"
 
 function BrandMark() {
   return (
@@ -24,6 +37,57 @@ function BrandMark() {
       </span>
       Forming
     </Link>
+  )
+}
+
+function HeaderAuth() {
+  const router = useRouter()
+  const queryClient = useQueryClient()
+  const session = useSession()
+
+  if (!session) {
+    return (
+      <Button size="sm" nativeButton={false} render={<Link to="/login" />}>
+        Get started
+      </Button>
+    )
+  }
+
+  const initial = (session.user.name || session.user.email)
+    .charAt(0)
+    .toUpperCase()
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button variant="ghost" size="icon" aria-label="Account menu" />
+        }
+      >
+        <Avatar className="size-7">
+          <AvatarFallback>{initial}</AvatarFallback>
+        </Avatar>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-48">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="truncate">
+            {session.user.email}
+          </DropdownMenuLabel>
+          <DropdownMenuItem
+            onClick={async () => {
+              await authClient.signOut()
+              queryClient.removeQueries({
+                queryKey: sessionQueryOptions().queryKey,
+              })
+              await router.invalidate({ sync: true })
+            }}
+          >
+            <LogOutIcon />
+            Sign out
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
@@ -49,6 +113,7 @@ export function Header() {
 
         <div className="flex items-center gap-1">
           <ThemeToggle />
+          <HeaderAuth />
 
           <Sheet>
             <SheetTrigger

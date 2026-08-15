@@ -18,6 +18,7 @@ Before writing any code, gather requirements by scanning the project and asking 
 ### Step 1: Scan the project
 
 Analyze the codebase to auto-detect:
+
 - **Framework** — Look for `next.config`, `svelte.config`, `nuxt.config`, `astro.config`, `vite.config`, or Express/Hono entry files.
 - **Database/ORM** — Look for `prisma/schema.prisma`, `drizzle.config.ts`, `package.json` deps (`pg`, `postgres`, `@neondatabase/serverless`, `mysql2`, `better-sqlite3`, `mongoose`, `mongodb`). If `drizzle.config.ts` exists, read its `dialect` field to determine the DB type (e.g., `"postgresql"` → Drizzle + Postgres). Also check which Drizzle driver is installed (`drizzle-orm/node-postgres` → `pg`, `drizzle-orm/postgres-js` → `postgres`, `drizzle-orm/neon-http` → Neon).
 - **Existing auth** — Look for existing auth libraries (`next-auth`, `lucia`, `clerk`, `supabase/auth`, `firebase/auth`) in `package.json` or imports.
@@ -75,8 +76,9 @@ Use the `AskQuestion` tool to ask the user **all applicable questions in a singl
    - `allow_multiple: true`
 
 10. **Auth UI style** (always ask)
-   - Prompt: "What style do you want for the auth pages? Pick one or describe your own."
-   - Options: Minimal & clean | Centered card with background | Split layout (form + hero image) | Floating / glassmorphism | Other (I'll describe)
+
+- Prompt: "What style do you want for the auth pages? Pick one or describe your own."
+- Options: Minimal & clean | Centered card with background | Split layout (form + hero image) | Floating / glassmorphism | Other (I'll describe)
 
 ### Step 3: Summarize the plan
 
@@ -153,13 +155,14 @@ At the end of implementation, guide users thoroughly on remaining next steps (e.
 **Core:** `npm install better-auth`
 
 **Scoped packages (as needed):**
-| Package | Use case |
-|---------|----------|
-| `@better-auth/passkey` | WebAuthn/Passkey auth |
-| `@better-auth/sso` | SAML/OIDC enterprise SSO |
-| `@better-auth/stripe` | Stripe payments |
-| `@better-auth/scim` | SCIM user provisioning |
-| `@better-auth/expo` | React Native/Expo |
+
+| Package                | Use case                 |
+| ---------------------- | ------------------------ |
+| `@better-auth/passkey` | WebAuthn/Passkey auth    |
+| `@better-auth/sso`     | SAML/OIDC enterprise SSO |
+| `@better-auth/stripe`  | Stripe payments          |
+| `@better-auth/scim`    | SCIM user provisioning   |
+| `@better-auth/expo`    | React Native/Expo        |
 
 ---
 
@@ -180,15 +183,18 @@ Add OAuth secrets as needed: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `GOOGLE
 **Location:** `lib/auth.ts` or `src/lib/auth.ts`
 
 **Minimal config needs:**
+
 - `database` - Connection or adapter
 - `emailAndPassword: { enabled: true }` - For email/password auth
 
 **Standard config adds:**
+
 - `socialProviders` - OAuth providers (google, github, etc.)
 - `emailVerification.sendVerificationEmail` - Email verification handler
 - `emailAndPassword.sendResetPassword` - Password reset handler
 
 **Full config adds:**
+
 - `plugins` - Array of feature plugins
 - `session` - Expiry, cookie cache settings
 - `account.accountLinking` - Multi-provider linking
@@ -201,13 +207,14 @@ Add OAuth secrets as needed: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `GOOGLE
 ## Client Config (auth-client.ts)
 
 **Import by framework:**
-| Framework | Import |
-|-----------|--------|
-| React/Next.js | `better-auth/react` |
-| Vue | `better-auth/vue` |
-| Svelte | `better-auth/svelte` |
-| Solid | `better-auth/solid` |
-| Vanilla JS | `better-auth/client` |
+
+| Framework     | Import               |
+| ------------- | -------------------- |
+| React/Next.js | `better-auth/react`  |
+| Vue           | `better-auth/vue`    |
+| Svelte        | `better-auth/svelte` |
+| Solid         | `better-auth/solid`  |
+| Vanilla JS    | `better-auth/client` |
 
 **Client plugins** go in `createAuthClient({ plugins: [...] })`.
 
@@ -217,14 +224,14 @@ Add OAuth secrets as needed: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `GOOGLE
 
 ## Route Handler Setup
 
-| Framework | File | Handler |
-|-----------|------|---------|
+| Framework          | File                             | Handler                                          |
+| ------------------ | -------------------------------- | ------------------------------------------------ |
 | Next.js App Router | `app/api/auth/[...all]/route.ts` | `toNextJsHandler(auth)` → export `{ GET, POST }` |
-| Next.js Pages | `pages/api/auth/[...all].ts` | `toNextJsHandler(auth)` → default export |
-| Express | Any file | `app.all("/api/auth/*", toNodeHandler(auth))` |
-| SvelteKit | `src/hooks.server.ts` | `svelteKitHandler(auth)` |
-| SolidStart | Route file | `solidStartHandler(auth)` |
-| Hono | Route file | `auth.handler(c.req.raw)` |
+| Next.js Pages      | `pages/api/auth/[...all].ts`     | `toNextJsHandler(auth)` → default export         |
+| Express            | Any file                         | `app.all("/api/auth/*", toNodeHandler(auth))`    |
+| SvelteKit          | `src/hooks.server.ts`            | `svelteKitHandler(auth)`                         |
+| SolidStart         | Route file                       | `solidStartHandler(auth)`                        |
+| Hono               | Route file                       | `auth.handler(c.req.raw)`                        |
 
 **Next.js Server Components:** Add `nextCookies()` plugin to auth config.
 
@@ -232,12 +239,12 @@ Add OAuth secrets as needed: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `GOOGLE
 
 ## Database Migrations
 
-| Adapter | Command |
-|---------|---------|
-| Built-in Kysely | `npx @better-auth/cli@latest migrate` (applies directly) |
-| Prisma | `npx @better-auth/cli@latest generate --output prisma/schema.prisma` then `npx prisma migrate dev` |
-| Drizzle (dev) | `npx @better-auth/cli@latest generate --output src/db/auth-schema.ts` then `npx drizzle-kit push` |
-| Drizzle (prod) | `npx @better-auth/cli@latest generate --output src/db/auth-schema.ts` then `npx drizzle-kit generate` then `npx drizzle-kit migrate` |
+| Adapter         | Command                                                                                                                              |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Built-in Kysely | `npx @better-auth/cli@latest migrate` (applies directly)                                                                             |
+| Prisma          | `npx @better-auth/cli@latest generate --output prisma/schema.prisma` then `npx prisma migrate dev`                                   |
+| Drizzle (dev)   | `npx @better-auth/cli@latest generate --output src/db/auth-schema.ts` then `npx drizzle-kit push`                                    |
+| Drizzle (prod)  | `npx @better-auth/cli@latest generate --output src/db/auth-schema.ts` then `npx drizzle-kit generate` then `npx drizzle-kit migrate` |
 
 > **Note:** `drizzle-kit push` skips migration files and is only safe for development. Use `drizzle-kit generate` + `drizzle-kit migrate` in production.
 
@@ -247,16 +254,16 @@ Add OAuth secrets as needed: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `GOOGLE
 
 ## Database Adapters
 
-| Database | Setup |
-|----------|-------|
-| SQLite | Pass `better-sqlite3` or `bun:sqlite` instance directly |
-| PostgreSQL | Pass `pg.Pool` instance directly |
-| MySQL | Pass `mysql2` pool directly |
-| Prisma | `prismaAdapter(prisma, { provider: "postgresql" })` from `better-auth/adapters/prisma` |
-| Drizzle (pg) | `drizzleAdapter(db, { provider: "pg" })` from `better-auth/adapters/drizzle` |
-| Drizzle (mysql) | `drizzleAdapter(db, { provider: "mysql" })` from `better-auth/adapters/drizzle` |
-| Drizzle (sqlite) | `drizzleAdapter(db, { provider: "sqlite" })` from `better-auth/adapters/drizzle` |
-| MongoDB | `mongodbAdapter(db)` from `better-auth/adapters/mongodb` |
+| Database         | Setup                                                                                  |
+| ---------------- | -------------------------------------------------------------------------------------- |
+| SQLite           | Pass `better-sqlite3` or `bun:sqlite` instance directly                                |
+| PostgreSQL       | Pass `pg.Pool` instance directly                                                       |
+| MySQL            | Pass `mysql2` pool directly                                                            |
+| Prisma           | `prismaAdapter(prisma, { provider: "postgresql" })` from `better-auth/adapters/prisma` |
+| Drizzle (pg)     | `drizzleAdapter(db, { provider: "pg" })` from `better-auth/adapters/drizzle`           |
+| Drizzle (mysql)  | `drizzleAdapter(db, { provider: "mysql" })` from `better-auth/adapters/drizzle`        |
+| Drizzle (sqlite) | `drizzleAdapter(db, { provider: "sqlite" })` from `better-auth/adapters/drizzle`       |
+| MongoDB          | `mongodbAdapter(db)` from `better-auth/adapters/mongodb`                               |
 
 ### Drizzle + PostgreSQL Setup
 
@@ -266,6 +273,7 @@ Before using `drizzleAdapter`, initialize the `db` instance:
 // Option 1: node-postgres (pg)
 import { drizzle } from "drizzle-orm/node-postgres"
 import { Pool } from "pg"
+
 import * as schema from "./auth-schema"
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
@@ -276,6 +284,7 @@ export const db = drizzle(pool, { schema })
 // Option 2: postgres.js
 import { drizzle } from "drizzle-orm/postgres-js"
 import postgres from "postgres"
+
 import * as schema from "./auth-schema"
 
 const client = postgres(process.env.DATABASE_URL!)
@@ -284,8 +293,9 @@ export const db = drizzle(client, { schema })
 
 ```ts
 // Option 3: Neon serverless
-import { drizzle } from "drizzle-orm/neon-http"
 import { neon } from "@neondatabase/serverless"
+import { drizzle } from "drizzle-orm/neon-http"
+
 import * as schema from "./auth-schema"
 
 const sql = neon(process.env.DATABASE_URL!)
@@ -297,6 +307,7 @@ Then pass to Better Auth:
 ```ts
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
+
 import { db } from "./db"
 
 export const auth = betterAuth({
@@ -326,15 +337,15 @@ export default defineConfig({
 
 ## Common Plugins
 
-| Plugin | Server Import | Client Import | Purpose |
-|--------|---------------|---------------|---------|
-| `twoFactor` | `better-auth/plugins` | `twoFactorClient` | 2FA with TOTP/OTP |
-| `organization` | `better-auth/plugins` | `organizationClient` | Teams/orgs |
-| `admin` | `better-auth/plugins` | `adminClient` | User management |
-| `bearer` | `better-auth/plugins` | - | API token auth |
-| `openAPI` | `better-auth/plugins` | - | API docs |
-| `passkey` | `@better-auth/passkey` | `passkeyClient` | WebAuthn |
-| `sso` | `@better-auth/sso` | - | Enterprise SSO |
+| Plugin         | Server Import          | Client Import        | Purpose           |
+| -------------- | ---------------------- | -------------------- | ----------------- |
+| `twoFactor`    | `better-auth/plugins`  | `twoFactorClient`    | 2FA with TOTP/OTP |
+| `organization` | `better-auth/plugins`  | `organizationClient` | Teams/orgs        |
+| `admin`        | `better-auth/plugins`  | `adminClient`        | User management   |
+| `bearer`       | `better-auth/plugins`  | -                    | API token auth    |
+| `openAPI`      | `better-auth/plugins`  | -                    | API docs          |
+| `passkey`      | `@better-auth/passkey` | `passkeyClient`      | WebAuthn          |
+| `sso`          | `@better-auth/sso`     | -                    | Enterprise SSO    |
 
 **Plugin pattern:** Server plugin + client plugin + run migrations.
 
@@ -343,6 +354,7 @@ export default defineConfig({
 ## Auth UI Implementation
 
 **Sign in flow:**
+
 1. `signIn.email({ email, password })` or `signIn.social({ provider, callbackURL })`
 2. Handle `error` in response
 3. Redirect on success
@@ -371,13 +383,13 @@ export default defineConfig({
 
 ## Troubleshooting
 
-| Issue | Fix |
-|-------|-----|
-| "Secret not set" | Add `BETTER_AUTH_SECRET` env var |
-| "Invalid Origin" | Add domain to `trustedOrigins` |
-| Cookies not setting | Check `baseURL` matches domain; enable secure cookies in prod |
-| OAuth callback errors | Verify redirect URIs in provider dashboard |
-| Type errors after adding plugin | Re-run CLI generate/migrate |
+| Issue                           | Fix                                                           |
+| ------------------------------- | ------------------------------------------------------------- |
+| "Secret not set"                | Add `BETTER_AUTH_SECRET` env var                              |
+| "Invalid Origin"                | Add domain to `trustedOrigins`                                |
+| Cookies not setting             | Check `baseURL` matches domain; enable secure cookies in prod |
+| OAuth callback errors           | Verify redirect URIs in provider dashboard                    |
+| Type errors after adding plugin | Re-run CLI generate/migrate                                   |
 
 ---
 

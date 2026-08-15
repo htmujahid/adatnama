@@ -8,136 +8,267 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import type { createStart } from "@tanstack/react-start"
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteRouteImport } from './routes/_auth/route'
+import { Route as MarketingRouteRouteImport } from './routes/_marketing/route'
+import { Route as HomeRouteRouteImport } from './routes/home/route'
+import { Route as AuthLoginRouteImport } from './routes/_auth/login'
+import { Route as AuthSetupRouteImport } from './routes/_auth/setup'
+import { Route as MarketingIndexRouteImport } from './routes/_marketing/index'
+import { Route as MarketingAboutRouteImport } from './routes/_marketing/about'
+import { Route as MarketingFeaturesRouteImport } from './routes/_marketing/features'
+import { Route as MarketingStatusRouteImport } from './routes/_marketing/status'
+import { Route as ApiStatusRouteImport } from './routes/api/status'
+import { Route as HomeIndexRouteImport } from './routes/home/index'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
-import type { getRouter } from "./router.tsx"
-import { Route as rootRouteImport } from "./routes/__root"
-import { Route as MarketingAboutRouteImport } from "./routes/_marketing/about"
-import { Route as MarketingFeaturesRouteImport } from "./routes/_marketing/features"
-import { Route as MarketingIndexRouteImport } from "./routes/_marketing/index"
-import { Route as MarketingRouteRouteImport } from "./routes/_marketing/route"
-import { Route as MarketingStatusRouteImport } from "./routes/_marketing/status"
-import { Route as ApiStatusRouteImport } from "./routes/api/status"
-
-const MarketingRouteRoute = MarketingRouteRouteImport.update({
-  id: "/_marketing",
+const AuthRouteRoute = AuthRouteRouteImport.update({
+  id: '/_auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarketingRouteRoute = MarketingRouteRouteImport.update({
+  id: '/_marketing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeRouteRoute = HomeRouteRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthSetupRoute = AuthSetupRouteImport.update({
+  id: '/setup',
+  path: '/setup',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
 const MarketingIndexRoute = MarketingIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => MarketingRouteRoute,
 } as any)
 const MarketingAboutRoute = MarketingAboutRouteImport.update({
-  id: "/about",
-  path: "/about",
+  id: '/about',
+  path: '/about',
   getParentRoute: () => MarketingRouteRoute,
 } as any)
 const MarketingFeaturesRoute = MarketingFeaturesRouteImport.update({
-  id: "/features",
-  path: "/features",
+  id: '/features',
+  path: '/features',
   getParentRoute: () => MarketingRouteRoute,
 } as any)
 const MarketingStatusRoute = MarketingStatusRouteImport.update({
-  id: "/status",
-  path: "/status",
+  id: '/status',
+  path: '/status',
   getParentRoute: () => MarketingRouteRoute,
 } as any)
 const ApiStatusRoute = ApiStatusRouteImport.update({
-  id: "/api/status",
-  path: "/api/status",
+  id: '/api/status',
+  path: '/api/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeIndexRoute = HomeIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => HomeRouteRoute,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof MarketingIndexRoute
-  "/about": typeof MarketingAboutRoute
-  "/features": typeof MarketingFeaturesRoute
-  "/status": typeof MarketingStatusRoute
-  "/api/status": typeof ApiStatusRoute
+  '/': typeof MarketingIndexRoute
+  '/home': typeof HomeRouteRouteWithChildren
+  '/login': typeof AuthLoginRoute
+  '/setup': typeof AuthSetupRoute
+  '/about': typeof MarketingAboutRoute
+  '/features': typeof MarketingFeaturesRoute
+  '/status': typeof MarketingStatusRoute
+  '/api/status': typeof ApiStatusRoute
+  '/home/': typeof HomeIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
-  "/about": typeof MarketingAboutRoute
-  "/features": typeof MarketingFeaturesRoute
-  "/status": typeof MarketingStatusRoute
-  "/api/status": typeof ApiStatusRoute
-  "/": typeof MarketingIndexRoute
+  '/': typeof MarketingIndexRoute
+  '/login': typeof AuthLoginRoute
+  '/setup': typeof AuthSetupRoute
+  '/about': typeof MarketingAboutRoute
+  '/features': typeof MarketingFeaturesRoute
+  '/status': typeof MarketingStatusRoute
+  '/api/status': typeof ApiStatusRoute
+  '/home': typeof HomeIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  "/_marketing": typeof MarketingRouteRouteWithChildren
-  "/_marketing/about": typeof MarketingAboutRoute
-  "/_marketing/features": typeof MarketingFeaturesRoute
-  "/_marketing/status": typeof MarketingStatusRoute
-  "/api/status": typeof ApiStatusRoute
-  "/_marketing/": typeof MarketingIndexRoute
+  '/_auth': typeof AuthRouteRouteWithChildren
+  '/_marketing': typeof MarketingRouteRouteWithChildren
+  '/home': typeof HomeRouteRouteWithChildren
+  '/_auth/login': typeof AuthLoginRoute
+  '/_auth/setup': typeof AuthSetupRoute
+  '/_marketing/about': typeof MarketingAboutRoute
+  '/_marketing/features': typeof MarketingFeaturesRoute
+  '/_marketing/status': typeof MarketingStatusRoute
+  '/api/status': typeof ApiStatusRoute
+  '/_marketing/': typeof MarketingIndexRoute
+  '/home/': typeof HomeIndexRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: "/" | "/about" | "/features" | "/status" | "/api/status"
+  fullPaths:
+    | '/'
+    | '/home'
+    | '/login'
+    | '/setup'
+    | '/about'
+    | '/features'
+    | '/status'
+    | '/api/status'
+    | '/home/'
+    | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: "/about" | "/features" | "/status" | "/api/status" | "/"
+  to:
+    | '/'
+    | '/login'
+    | '/setup'
+    | '/about'
+    | '/features'
+    | '/status'
+    | '/api/status'
+    | '/home'
+    | '/api/auth/$'
   id:
-    | "__root__"
-    | "/_marketing"
-    | "/_marketing/about"
-    | "/_marketing/features"
-    | "/_marketing/status"
-    | "/api/status"
-    | "/_marketing/"
+    | '__root__'
+    | '/_auth'
+    | '/_marketing'
+    | '/home'
+    | '/_auth/login'
+    | '/_auth/setup'
+    | '/_marketing/about'
+    | '/_marketing/features'
+    | '/_marketing/status'
+    | '/api/status'
+    | '/_marketing/'
+    | '/home/'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  AuthRouteRoute: typeof AuthRouteRouteWithChildren
   MarketingRouteRoute: typeof MarketingRouteRouteWithChildren
+  HomeRouteRoute: typeof HomeRouteRouteWithChildren
   ApiStatusRoute: typeof ApiStatusRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/_marketing": {
-      id: "/_marketing"
-      path: ""
-      fullPath: "/"
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_marketing': {
+      id: '/_marketing'
+      path: ''
+      fullPath: '/'
       preLoaderRoute: typeof MarketingRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    "/_marketing/": {
-      id: "/_marketing/"
-      path: "/"
-      fullPath: "/"
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_auth/login': {
+      id: '/_auth/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/_auth/setup': {
+      id: '/_auth/setup'
+      path: '/setup'
+      fullPath: '/setup'
+      preLoaderRoute: typeof AuthSetupRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/_marketing/': {
+      id: '/_marketing/'
+      path: '/'
+      fullPath: '/'
       preLoaderRoute: typeof MarketingIndexRouteImport
       parentRoute: typeof MarketingRouteRoute
     }
-    "/_marketing/about": {
-      id: "/_marketing/about"
-      path: "/about"
-      fullPath: "/about"
+    '/_marketing/about': {
+      id: '/_marketing/about'
+      path: '/about'
+      fullPath: '/about'
       preLoaderRoute: typeof MarketingAboutRouteImport
       parentRoute: typeof MarketingRouteRoute
     }
-    "/_marketing/features": {
-      id: "/_marketing/features"
-      path: "/features"
-      fullPath: "/features"
+    '/_marketing/features': {
+      id: '/_marketing/features'
+      path: '/features'
+      fullPath: '/features'
       preLoaderRoute: typeof MarketingFeaturesRouteImport
       parentRoute: typeof MarketingRouteRoute
     }
-    "/_marketing/status": {
-      id: "/_marketing/status"
-      path: "/status"
-      fullPath: "/status"
+    '/_marketing/status': {
+      id: '/_marketing/status'
+      path: '/status'
+      fullPath: '/status'
       preLoaderRoute: typeof MarketingStatusRouteImport
       parentRoute: typeof MarketingRouteRoute
     }
-    "/api/status": {
-      id: "/api/status"
-      path: "/api/status"
-      fullPath: "/api/status"
+    '/api/status': {
+      id: '/api/status'
+      path: '/api/status'
+      fullPath: '/api/status'
       preLoaderRoute: typeof ApiStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home/': {
+      id: '/home/'
+      path: '/'
+      fullPath: '/home/'
+      preLoaderRoute: typeof HomeIndexRouteImport
+      parentRoute: typeof HomeRouteRoute
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
+
+interface AuthRouteRouteChildren {
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthSetupRoute: typeof AuthSetupRoute
+}
+
+const AuthRouteRouteChildren: AuthRouteRouteChildren = {
+  AuthLoginRoute: AuthLoginRoute,
+  AuthSetupRoute: AuthSetupRoute,
+}
+
+const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
+  AuthRouteRouteChildren,
+)
 
 interface MarketingRouteRouteChildren {
   MarketingAboutRoute: typeof MarketingAboutRoute
@@ -157,15 +288,32 @@ const MarketingRouteRouteWithChildren = MarketingRouteRoute._addFileChildren(
   MarketingRouteRouteChildren,
 )
 
+interface HomeRouteRouteChildren {
+  HomeIndexRoute: typeof HomeIndexRoute
+}
+
+const HomeRouteRouteChildren: HomeRouteRouteChildren = {
+  HomeIndexRoute: HomeIndexRoute,
+}
+
+const HomeRouteRouteWithChildren = HomeRouteRoute._addFileChildren(
+  HomeRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
+  AuthRouteRoute: AuthRouteRouteWithChildren,
   MarketingRouteRoute: MarketingRouteRouteWithChildren,
+  HomeRouteRoute: HomeRouteRouteWithChildren,
   ApiStatusRoute: ApiStatusRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
 
-declare module "@tanstack/react-start" {
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
     router: Awaited<ReturnType<typeof getRouter>>

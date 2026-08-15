@@ -3,3 +3,5 @@ pnpm-lock.yaml
 yarn.lock
 src/components/ui
 src/lib/utils.ts
+worker-configuration.d.ts
+.dev.vars.example

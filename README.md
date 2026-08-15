@@ -42,17 +42,41 @@ npm run format
 npm run check
 ```
 
+## Database (Cloudflare D1)
+
+The app uses a D1 database (binding `DB`, database `forming-db` in `wrangler.jsonc`) queried through [Kysely](https://kysely.dev) (`src/lib/db`). Migrations are plain SQL files in `migrations/`, numbered and tracked by Wrangler:
+
+```bash
+npm run db:migration:create <name>  # create the next numbered migration file
+npm run db:migrate                  # apply pending migrations to the local D1
+npm run db:migrate:remote           # apply pending migrations to the real D1
+```
+
+After changing `wrangler.jsonc` or `.dev.vars`, rerun `npm run cf-typegen` to refresh `worker-configuration.d.ts`.
+
+## Authentication (Better Auth)
+
+Auth is handled by [Better Auth](https://www.better-auth.com), signing in with a username and password (via the `username` plugin):
+
+- Server instance: `src/lib/auth.ts` (Kysely + D1, cookies via `tanstackStartCookies`)
+- API routes: `src/routes/api/auth/$.ts` (everything under `/api/auth/*`)
+- React client: `src/lib/auth-client.ts`; session on the server via `src/lib/data/auth.ts`
+- Page: `/login`, laid out separately from the marketing chrome in `src/routes/_auth/route.tsx` (no header/footer)
+
+Local setup: copy `.dev.vars.example` to `.dev.vars` and fill in `BETTER_AUTH_SECRET` (generate with `openssl rand -base64 32`).
+
 ## Deploy to Cloudflare Workers
 
 This project uses the Cloudflare Vite plugin (configured in `vite.config.ts`) and `wrangler.jsonc`:
 
 1. Install Wrangler: `npm install -g wrangler`
 2. Authenticate: `wrangler login`
-3. Deploy: `npx wrangler deploy`
+3. Apply migrations: `npm run db:migrate:remote`
+4. Set secrets: `wrangler secret put BETTER_AUTH_SECRET`
+5. Add `BETTER_AUTH_URL` (your deployed origin) under `vars` in `wrangler.jsonc`
+6. Deploy: `npx wrangler deploy`
 
-For production env vars, run `wrangler secret put MY_VAR` for each secret listed in `.env.example`. Public (non-secret) vars go in `wrangler.jsonc` under `vars`.
-
-KV, D1, R2, and Durable Object bindings are configured in `wrangler.jsonc`. See https://developers.cloudflare.com/workers/wrangler/configuration/.
+Public (non-secret) vars go in `wrangler.jsonc` under `vars`; secrets are set with `wrangler secret put`. KV, D1, R2, and Durable Object bindings are configured in `wrangler.jsonc`. See https://developers.cloudflare.com/workers/wrangler/configuration/.
 
 ## Routing
 

@@ -1,0 +1,8 @@
+# Copy to .dev.vars for local development. Never commit .dev.vars.
+# In production, set secrets with `wrangler secret put <NAME>`.
+
+# Generate with: openssl rand -base64 32
+BETTER_AUTH_SECRET=
+
+# The origin the app runs on locally.
+BETTER_AUTH_URL=http://localhost:3000

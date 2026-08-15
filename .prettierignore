@@ -2,6 +2,8 @@ package-lock.json
 pnpm-lock.yaml
 yarn.lock
 src/components/ui
+src/components/reui
 src/lib/utils.ts
 worker-configuration.d.ts
+src/routeTree.gen.ts
 .dev.vars.example

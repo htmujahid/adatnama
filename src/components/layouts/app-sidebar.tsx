@@ -13,6 +13,7 @@ import {
   Send,
   Settings2Icon,
   TerminalSquareIcon,
+  UsersIcon,
 } from "lucide-react"
 
 import { NavMain } from "@/components/layouts/nav-main"
@@ -31,9 +32,9 @@ import {
 import { useHomeUser } from "@/hooks/use-home-user"
 import { authClient } from "@/lib/auth-client"
 import { sessionQueryOptions } from "@/lib/data/auth"
+
 import { NavSecondary } from "./nav-secondary"
 
-// This is sample data.
 const data = {
   navMain: [
     {
@@ -127,6 +128,12 @@ const data = {
     },
   ],
   navSecondary: [
+    {
+      title: "Users",
+      url: "/home/users",
+      icon: UsersIcon,
+      roles: ["admin"],
+    },
     {
       title: "Support",
       url: "#",

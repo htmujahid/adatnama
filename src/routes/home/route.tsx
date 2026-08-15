@@ -1,4 +1,9 @@
-import { createFileRoute, Outlet, redirect, useRouterState } from "@tanstack/react-router"
+import {
+  createFileRoute,
+  Outlet,
+  redirect,
+  useRouterState,
+} from "@tanstack/react-router"
 
 import { AppSidebar } from "@/components/layouts/app-sidebar"
 import {
@@ -24,15 +29,23 @@ export const Route = createFileRoute("/home")({
   component: HomeLayout,
 })
 
-const HOME_NAV_LINKS = [
-  { to: "/home", label: "Home" },
-  { to: "/home/profile", label: "Profile" },
-] as const
+function toBreadcrumbLabel(segment: string) {
+  return segment
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
+}
 
 function HomeLayout() {
-  const pathname = useRouterState({ select: (state) => state.location.pathname })
-  const activePage =
-    HOME_NAV_LINKS.find((link) => link.to === pathname) ?? HOME_NAV_LINKS[0]
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  })
+  const segments = pathname.split("/").filter(Boolean)
+  const lastSegment = segments[segments.length - 1]
+  const breadcrumbLabel =
+    !lastSegment || lastSegment === "home"
+      ? "Home"
+      : toBreadcrumbLabel(lastSegment)
 
   return (
     <SidebarProvider>
@@ -48,16 +61,16 @@ function HomeLayout() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem>
-                  <BreadcrumbPage>{activePage.label}</BreadcrumbPage>
+                  <BreadcrumbPage>{breadcrumbLabel}</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
           </div>
         </header>
 
-        <main className="flex flex-1 flex-col">
+        <div className="flex flex-1 flex-col gap-6 px-4 py-6">
           <Outlet />
-        </main>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   )

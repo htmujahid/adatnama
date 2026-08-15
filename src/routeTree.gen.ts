@@ -22,6 +22,9 @@ import { Route as ApiStatusRouteImport } from './routes/api/status'
 import { Route as HomeIndexRouteImport } from './routes/home/index'
 import { Route as HomeProfileRouteImport } from './routes/home/profile'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as HomeUsersIndexRouteImport } from './routes/home/users/index'
+import { Route as HomeUsersCreateRouteImport } from './routes/home/users/create'
+import { Route as HomeUsersUserIdEditRouteImport } from './routes/home/users/$userId.edit'
 
 const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/_auth',
@@ -86,6 +89,21 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HomeUsersIndexRoute = HomeUsersIndexRouteImport.update({
+  id: '/users/',
+  path: '/users/',
+  getParentRoute: () => HomeRouteRoute,
+} as any)
+const HomeUsersCreateRoute = HomeUsersCreateRouteImport.update({
+  id: '/users/create',
+  path: '/users/create',
+  getParentRoute: () => HomeRouteRoute,
+} as any)
+const HomeUsersUserIdEditRoute = HomeUsersUserIdEditRouteImport.update({
+  id: '/users/$userId/edit',
+  path: '/users/$userId/edit',
+  getParentRoute: () => HomeRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof MarketingIndexRoute
@@ -99,6 +117,9 @@ export interface FileRoutesByFullPath {
   '/home/profile': typeof HomeProfileRoute
   '/home/': typeof HomeIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/home/users/create': typeof HomeUsersCreateRoute
+  '/home/users/': typeof HomeUsersIndexRoute
+  '/home/users/$userId/edit': typeof HomeUsersUserIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof MarketingIndexRoute
@@ -111,6 +132,9 @@ export interface FileRoutesByTo {
   '/home/profile': typeof HomeProfileRoute
   '/home': typeof HomeIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/home/users/create': typeof HomeUsersCreateRoute
+  '/home/users': typeof HomeUsersIndexRoute
+  '/home/users/$userId/edit': typeof HomeUsersUserIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -127,6 +151,9 @@ export interface FileRoutesById {
   '/_marketing/': typeof MarketingIndexRoute
   '/home/': typeof HomeIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/home/users/create': typeof HomeUsersCreateRoute
+  '/home/users/': typeof HomeUsersIndexRoute
+  '/home/users/$userId/edit': typeof HomeUsersUserIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -142,6 +169,9 @@ export interface FileRouteTypes {
     | '/home/profile'
     | '/home/'
     | '/api/auth/$'
+    | '/home/users/create'
+    | '/home/users/'
+    | '/home/users/$userId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -154,6 +184,9 @@ export interface FileRouteTypes {
     | '/home/profile'
     | '/home'
     | '/api/auth/$'
+    | '/home/users/create'
+    | '/home/users'
+    | '/home/users/$userId/edit'
   id:
     | '__root__'
     | '/_auth'
@@ -169,6 +202,9 @@ export interface FileRouteTypes {
     | '/_marketing/'
     | '/home/'
     | '/api/auth/$'
+    | '/home/users/create'
+    | '/home/users/'
+    | '/home/users/$userId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -272,6 +308,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/home/users/': {
+      id: '/home/users/'
+      path: '/users'
+      fullPath: '/home/users/'
+      preLoaderRoute: typeof HomeUsersIndexRouteImport
+      parentRoute: typeof HomeRouteRoute
+    }
+    '/home/users/create': {
+      id: '/home/users/create'
+      path: '/users/create'
+      fullPath: '/home/users/create'
+      preLoaderRoute: typeof HomeUsersCreateRouteImport
+      parentRoute: typeof HomeRouteRoute
+    }
+    '/home/users/$userId/edit': {
+      id: '/home/users/$userId/edit'
+      path: '/users/$userId/edit'
+      fullPath: '/home/users/$userId/edit'
+      preLoaderRoute: typeof HomeUsersUserIdEditRouteImport
+      parentRoute: typeof HomeRouteRoute
+    }
   }
 }
 
@@ -310,11 +367,17 @@ const MarketingRouteRouteWithChildren = MarketingRouteRoute._addFileChildren(
 interface HomeRouteRouteChildren {
   HomeProfileRoute: typeof HomeProfileRoute
   HomeIndexRoute: typeof HomeIndexRoute
+  HomeUsersCreateRoute: typeof HomeUsersCreateRoute
+  HomeUsersIndexRoute: typeof HomeUsersIndexRoute
+  HomeUsersUserIdEditRoute: typeof HomeUsersUserIdEditRoute
 }
 
 const HomeRouteRouteChildren: HomeRouteRouteChildren = {
   HomeProfileRoute: HomeProfileRoute,
   HomeIndexRoute: HomeIndexRoute,
+  HomeUsersCreateRoute: HomeUsersCreateRoute,
+  HomeUsersIndexRoute: HomeUsersIndexRoute,
+  HomeUsersUserIdEditRoute: HomeUsersUserIdEditRoute,
 }
 
 const HomeRouteRouteWithChildren = HomeRouteRoute._addFileChildren(

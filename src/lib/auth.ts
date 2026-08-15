@@ -1,5 +1,5 @@
 import { betterAuth } from "better-auth"
-import { username } from "better-auth/plugins"
+import { admin, username } from "better-auth/plugins"
 import { tanstackStartCookies } from "better-auth/tanstack-start"
 import { env } from "cloudflare:workers"
 
@@ -12,5 +12,23 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  plugins: [username(), tanstackStartCookies()],
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user) => {
+          const { count } = await db
+            .selectFrom("user")
+            .select((eb) => eb.fn.countAll<number>().as("count"))
+            .executeTakeFirstOrThrow()
+
+          if (Number(count) === 0) {
+            return { data: { ...user, role: "admin" } }
+          }
+
+          return { data: user }
+        },
+      },
+    },
+  },
+  plugins: [username(), admin(), tanstackStartCookies()],
 })

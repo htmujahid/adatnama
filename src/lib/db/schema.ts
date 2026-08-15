@@ -8,6 +8,10 @@ export interface UserTable {
   updatedAt: string
   username: string | null
   displayUsername: string | null
+  role: string | null
+  banned: number | null
+  banReason: string | null
+  banExpires: string | null
 }
 
 export interface SessionTable {
@@ -19,6 +23,7 @@ export interface SessionTable {
   ipAddress: string | null
   userAgent: string | null
   userId: string
+  impersonatedBy: string | null
 }
 
 export interface AccountTable {

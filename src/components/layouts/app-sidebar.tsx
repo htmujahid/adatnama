@@ -2,31 +2,30 @@
 
 import * as React from "react"
 import { useQueryClient } from "@tanstack/react-query"
-import { useRouter } from "@tanstack/react-router"
+import { Link, useRouter } from "@tanstack/react-router"
 import {
-  AudioLinesIcon,
   BookOpenIcon,
   BotIcon,
   FrameIcon,
-  GalleryVerticalEndIcon,
   LifeBuoy,
   MapIcon,
   PieChartIcon,
   Send,
   Settings2Icon,
-  TerminalIcon,
   TerminalSquareIcon,
 } from "lucide-react"
 
 import { NavMain } from "@/components/layouts/nav-main"
 import { NavProjects } from "@/components/layouts/nav-projects"
 import { NavUser } from "@/components/layouts/nav-user"
-import { TeamSwitcher } from "@/components/layouts/team-switcher"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
 import { useHomeUser } from "@/hooks/use-home-user"
@@ -36,23 +35,6 @@ import { NavSecondary } from "./nav-secondary"
 
 // This is sample data.
 const data = {
-  teams: [
-    {
-      name: "Acme Inc",
-      logo: <GalleryVerticalEndIcon />,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: <AudioLinesIcon />,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: <TerminalIcon />,
-      plan: "Free",
-    },
-  ],
   navMain: [
     {
       title: "Playground",
@@ -185,7 +167,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" render={<Link to="/home" />}>
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sm font-bold text-sidebar-primary-foreground">
+                F
+              </div>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-semibold">Forming</span>
+                <span className="truncate text-xs text-sidebar-foreground/70">
+                  Reactive, local-first forms
+                </span>
+              </div>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />

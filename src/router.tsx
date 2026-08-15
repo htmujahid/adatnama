@@ -4,8 +4,14 @@ import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query
 import { routeTree } from './routeTree.gen'
 
 export function getRouter() {
-  const queryClient = new QueryClient()
-  
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 10_000,
+      },
+    },
+  })
+
   const router = createTanStackRouter({
     routeTree,
     context: { queryClient },

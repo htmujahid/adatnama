@@ -13,15 +13,6 @@ function ProfilePage() {
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-10 px-4 py-16 sm:px-6 lg:px-8">
-      <div className="flex flex-col gap-2">
-        <h1 className="font-heading text-2xl font-semibold tracking-tight">
-          Profile
-        </h1>
-        <p className="text-muted-foreground">
-          Update your name, username, and password.
-        </p>
-      </div>
-
       <section className="flex flex-col gap-6">
         <h2 className="font-heading text-lg font-medium">Account</h2>
         <ProfileForm user={user} />

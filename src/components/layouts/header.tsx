@@ -1,10 +1,10 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { Link, useRouter } from "@tanstack/react-router"
-import { LogOutIcon, MenuIcon } from "lucide-react"
+import { BadgeCheckIcon, HomeIcon, LogOutIcon, MenuIcon } from "lucide-react"
 
 import { BrandMark } from "@/components/layouts/brand-mark"
 import { NAV_LINKS } from "@/components/layouts/nav-links"
-import { ThemeToggle } from "@/components/layouts/theme-toggle"
+import { ThemeMenu } from "@/components/layouts/theme-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -13,6 +13,7 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
@@ -60,19 +61,32 @@ function HeaderAuth() {
           <DropdownMenuLabel className="truncate">
             {session.user.email}
           </DropdownMenuLabel>
-          <DropdownMenuItem
-            onClick={async () => {
-              await authClient.signOut()
-              queryClient.removeQueries({
-                queryKey: sessionQueryOptions().queryKey,
-              })
-              await router.invalidate({ sync: true })
-            }}
-          >
-            <LogOutIcon />
-            Sign out
-          </DropdownMenuItem>
         </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem render={<Link to="/home" />}>
+            <HomeIcon />
+            Home
+          </DropdownMenuItem>
+          <DropdownMenuItem render={<Link to="/home/profile" />}>
+            <BadgeCheckIcon />
+            Profile
+          </DropdownMenuItem>
+          <ThemeMenu />
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={async () => {
+            await authClient.signOut()
+            queryClient.removeQueries({
+              queryKey: sessionQueryOptions().queryKey,
+            })
+            await router.invalidate({ sync: true })
+          }}
+        >
+          <LogOutIcon />
+          Sign out
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )
@@ -99,7 +113,6 @@ export function Header() {
         </nav>
 
         <div className="flex items-center gap-1">
-          <ThemeToggle />
           <HeaderAuth />
 
           <Sheet>

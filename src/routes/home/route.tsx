@@ -1,16 +1,18 @@
-import { useQueryClient } from "@tanstack/react-query"
-import {
-  createFileRoute,
-  Link,
-  Outlet,
-  redirect,
-  useRouter,
-} from "@tanstack/react-router"
+import { createFileRoute, Outlet, redirect, useRouterState } from "@tanstack/react-router"
 
-import { BrandMark } from "@/components/layouts/brand-mark"
-import { Button } from "@/components/ui/button"
-import { authClient } from "@/lib/auth-client"
-import { sessionQueryOptions } from "@/lib/data/auth"
+import { AppSidebar } from "@/components/layouts/app-sidebar"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbList,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb"
+import { Separator } from "@/components/ui/separator"
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
 
 export const Route = createFileRoute("/home")({
   beforeLoad: ({ context }) => {
@@ -28,48 +30,35 @@ const HOME_NAV_LINKS = [
 ] as const
 
 function HomeLayout() {
-  const router = useRouter()
-  const queryClient = useQueryClient()
+  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const activePage =
+    HOME_NAV_LINKS.find((link) => link.to === pathname) ?? HOME_NAV_LINKS[0]
 
   return (
-    <div className="flex min-h-svh flex-col">
-      <header className="border-b border-border">
-        <div className="mx-auto flex h-16 w-full max-w-3xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-          <BrandMark to="/home" />
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <header className="flex h-12 shrink-0 items-center gap-2 border-b border-border transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+          <div className="flex items-center gap-2 px-4">
+            <SidebarTrigger className="-ml-1" />
+            <Separator
+              orientation="vertical"
+              className="mr-2 mt-1.5 data-[orientation=vertical]:h-4"
+            />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem>
+                  <BreadcrumbPage>{activePage.label}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          </div>
+        </header>
 
-          <nav className="flex items-center gap-6">
-            {HOME_NAV_LINKS.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                activeOptions={{ exact: link.to === "/home" }}
-                activeProps={{ className: "text-foreground" }}
-                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={async () => {
-              await authClient.signOut()
-              queryClient.removeQueries({
-                queryKey: sessionQueryOptions().queryKey,
-              })
-              await router.invalidate({ sync: true })
-            }}
-          >
-            Sign out
-          </Button>
-        </div>
-      </header>
-
-      <main className="flex-1">
-        <Outlet />
-      </main>
-    </div>
+        <main className="flex flex-1 flex-col">
+          <Outlet />
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }

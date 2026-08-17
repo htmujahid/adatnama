@@ -44,27 +44,27 @@ const data = {
       items: [
         {
           title: "All habits",
-          url: "#",
+          url: "/home/habits",
         },
         {
           title: "Archived",
-          url: "#",
+          url: "/home/habits/archived",
         },
       ],
     },
     {
       title: "Streaks",
-      url: "#",
+      url: "/home/streaks",
       icon: <FlameIcon />,
     },
     {
       title: "Check-ins",
-      url: "#",
+      url: "/home/checkins",
       icon: <CalendarCheckIcon />,
     },
     {
       title: "Insights",
-      url: "#",
+      url: "/home/insights",
       icon: <TrendingUpIcon />,
     },
   ],

@@ -37,10 +37,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       {
         name: "description",
         content:
-          "Forming is a form-building framework for reactive, local-first applications, built on TanStack Start and deployed to Cloudflare.",
+          "Adatnama is a streak and habit tracker, built on TanStack Start and deployed to Cloudflare.",
       },
       {
-        title: "Forming",
+        title: "Adatnama",
       },
     ],
     links: [

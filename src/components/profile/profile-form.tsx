@@ -41,7 +41,7 @@ export function ProfileForm({
         return
       }
 
-      const newEmail = `${value.username}@forming.local`
+      const newEmail = `${value.username}@adatnama.local`
       if (newEmail !== user.email) {
         const { error: emailError } = await authClient.changeEmail({
           newEmail,

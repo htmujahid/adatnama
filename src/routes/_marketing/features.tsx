@@ -32,21 +32,21 @@ const FIELD_COMPONENTS = [
 const SUBMISSION_POINTS = [
   {
     icon: ServerIcon,
-    title: "Server routes on the form's own file",
+    title: "Server routes next to the UI",
     description:
-      "A POST handler lives next to the component that renders the form, so the endpoint and the UI never drift apart.",
+      "A createServerFn call lives next to the component that uses it, the pattern sign-in and profile updates already follow, and check-ins will too.",
   },
   {
     icon: ShieldCheckIcon,
     title: "Validation at the boundary",
     description:
-      "The same schema that types your fields validates the incoming request, on the server, before anything is stored.",
+      "The same schema that types a form validates the incoming request, on the server, before anything is stored.",
   },
   {
     icon: ZapIcon,
     title: "Isomorphic server functions",
     description:
-      "Need to call form logic from a loader or an event handler? Server functions run the same code from either side.",
+      "Need to call server logic from a loader or an event handler? Server functions run the same code from either side.",
   },
 ]
 
@@ -69,7 +69,7 @@ const DATA_FLOW = [
   {
     title: "The UI stays live",
     description:
-      "Refetch intervals and invalidation keep submission lists current. The status page runs this exact loop.",
+      "Refetch intervals and invalidation keep the data current. The status page on this site runs this exact loop today.",
   },
 ]
 
@@ -85,15 +85,16 @@ function FeaturesPage() {
               Features
             </h1>
             <p className="mt-4 text-lg text-muted-foreground">
-              Everything here is real and working in this codebase, not a
-              mockup.{" "}
+              The architecture below, accounts, edge deployment, and the live
+              data layer, is real and running in this codebase today. Habit
+              tracking is being built on top of it.{" "}
               <Link
                 to="/status"
                 className="text-primary underline underline-offset-4"
               >
                 The status page
               </Link>{" "}
-              runs the same data layer your forms will use.
+              shows what's live right now.
             </p>
           </div>
         </div>
@@ -103,13 +104,13 @@ function FeaturesPage() {
         <div className="mx-auto grid w-full max-w-7xl gap-12 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8">
           <div className="flex flex-col items-start gap-4">
             <h2 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
-              The form layer
+              The component layer
             </h2>
             <p className="text-muted-foreground">
               A complete set of accessible field components, built on base-ui
-              primitives and styled with semantic design tokens. Compose them
-              into any form, from a contact page to a multi-step wizard, and
-              keep full control of the markup.
+              primitives and styled with semantic design tokens. They power
+              sign-in and profile settings today, and every habit you add
+              next.
             </p>
             <p className="text-muted-foreground">
               Every component ships in this repo under{" "}
@@ -134,15 +135,15 @@ function FeaturesPage() {
         <div className="mx-auto grid w-full max-w-7xl gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[1fr_1.5fr] lg:gap-16 lg:px-8">
           <div className="flex flex-col items-start gap-4">
             <h2 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
-              Submissions without a backend
+              Check-ins without a backend to run
             </h2>
             <p className="text-muted-foreground">
-              Handling a form usually means standing up an API. In Forming, the
-              endpoint is part of the route file, written with{" "}
+              Logging a check-in won't need a separate API. Like sign-in and
+              profile updates today, it will be a route handler written with{" "}
               <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-sm">
                 @tanstack/react-start
               </code>{" "}
-              server handlers.
+              server functions, deployed with the rest of the app.
             </p>
           </div>
 
@@ -170,8 +171,8 @@ function FeaturesPage() {
             </h2>
             <p className="text-muted-foreground">
               The exact path a request takes, from the server to a reactive
-              client cache. This is the loop that keeps submission lists and
-              dashboards live.
+              client cache. This is the loop that will keep every streak live
+              the moment you check in.
             </p>
             <Button
               variant="outline"
@@ -211,12 +212,12 @@ function FeaturesPage() {
               Deploy to Cloudflare
             </h2>
             <p className="text-muted-foreground">
-              One command builds the app and publishes it to Cloudflare Workers.
-              Add a binding in{" "}
+              One command builds the app and publishes it to Cloudflare
+              Workers. Add a binding in{" "}
               <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-sm">
                 wrangler.jsonc
               </code>{" "}
-              and your forms have edge storage.
+              and your habits have edge storage.
             </p>
             <div className="flex flex-wrap gap-2">
               {CLOUDFLARE_BINDINGS.map((binding) => (
@@ -238,11 +239,12 @@ function FeaturesPage() {
             <p className="text-muted-foreground">
               shadcn/ui on Tailwind CSS v4, themed with semantic tokens in
               OKLCH. Light, dark, and auto modes persist to localStorage and
-              apply before first paint, so there is no flash of the wrong theme.
+              apply before first paint, so there is no flash of the wrong
+              theme.
             </p>
             <p className="text-muted-foreground">
-              Try the toggle in the header. Every page, including the code panel
-              on the home page, adapts.
+              Try the toggle in the header. Every page, including the streak
+              card on the home page, adapts.
             </p>
           </div>
         </div>
@@ -255,8 +257,8 @@ function FeaturesPage() {
               See it running
             </h2>
             <p className="mt-2 max-w-xl text-muted-foreground">
-              The status page is a real server route and a real reactive query,
-              refreshing live.
+              The status page is a real server route and a real reactive
+              query, refreshing live.
             </p>
           </div>
           <Button nativeButton={false} render={<Link to="/status" />}>

@@ -102,7 +102,7 @@ function StatusPage() {
         <div>
           <h1 className="font-heading text-2xl font-semibold">System Status</h1>
           <p className="text-sm text-muted-foreground">
-            Live status of Forming's services, refreshed automatically every
+            Live status of Adatnama's services, refreshed automatically every
             30s.
           </p>
         </div>

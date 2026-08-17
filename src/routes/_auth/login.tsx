@@ -12,7 +12,7 @@ function LoginPage() {
           Sign in
         </h1>
         <p className="text-sm text-muted-foreground">
-          Welcome back. Sign in to your Forming account.
+          Welcome back. Sign in to your Adatnama account.
         </p>
       </div>
 

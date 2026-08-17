@@ -8,14 +8,14 @@ export const Route = createFileRoute("/_marketing/about")({
 
 const PRINCIPLES = [
   {
-    title: "The route file is the contract",
+    title: "Checking in is instant",
     description:
-      "A form, its validation, and its endpoint live in one file. When they can't drift apart, a whole class of bugs disappears.",
+      "A check-in updates your streak the moment you tap it. No page reload, no waiting for the count to catch up.",
   },
   {
     title: "Type-safe end to end",
     description:
-      "Routes, params, loaders, and queries are all inferred. The type of a submission comes from the same schema that renders the fields.",
+      "Routes, params, loaders, and queries are all inferred. The same schema that defines a habit types every check-in against it.",
   },
   {
     title: "Server-first, then reactive",
@@ -25,7 +25,7 @@ const PRINCIPLES = [
   {
     title: "Edge-native by default",
     description:
-      "The whole app deploys to Cloudflare Workers, so forms and their storage run close to the people filling them in.",
+      "The whole app deploys to Cloudflare Workers, so your habits and their streaks are tracked close to wherever you check in from.",
   },
 ]
 
@@ -36,20 +36,20 @@ function AboutPage() {
         <div className="mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
             <h1 className="font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
-              About Forming
+              About Adatnama
             </h1>
             <p className="mt-4 text-lg text-muted-foreground">
-              Forming is a form-building framework for reactive, local-first
-              applications, built on TanStack Start and deployed to Cloudflare.
-              You define a form and its schema. Forming turns that into a typed
-              route, accessible fields, server-side validation, a submission
-              endpoint, and a live view of the responses.
+              Adatnama is a streak and habit tracker built on TanStack Start
+              and deployed to Cloudflare. Add a habit, check in daily, and
+              Adatnama turns that into a running streak: a current count, a
+              longest count, and a freeze you can spend when a day slips.
             </p>
             <p className="mt-4 text-lg text-muted-foreground">
-              Forms are where most apps actually meet their users, and where the
-              frontend, the backend, and the database usually meet each other.
-              Forming exists to make that seam one file instead of three
-              services.
+              Streaks work because the feedback is immediate: you do the
+              thing, the count goes up, and losing it feels like something
+              worth protecting. Adatnama exists to keep that loop tight, so a
+              check-in updates your streak instantly, with no gap between
+              doing the habit and seeing it counted.
             </p>
           </div>
         </div>

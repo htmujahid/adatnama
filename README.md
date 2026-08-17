@@ -1,6 +1,16 @@
-# Forming
+# Adatnama
 
-Forming is a form-building framework for reactive, local-first applications, built on TanStack Start and deployed to Cloudflare. Define a form and its schema, and Forming gives you a typed route, accessible shadcn/ui fields, server-side validation, a submission endpoint, and a live view of the responses. The whole app ships to Cloudflare Workers, with KV, D1, R2, and Durable Objects available as edge storage for your forms.
+Adatnama is a streak and habit tracker, built on TanStack Start and deployed to Cloudflare. Users check in daily on the habits they're building, and Adatnama keeps score: current streak, longest streak, and a history of every day logged. The whole app ships to Cloudflare Workers, with D1 as the database and KV, R2, and Durable Objects available as additional edge storage.
+
+## Status
+
+The account system is built: sign up, sign in, session management, role-based access (admin/user), and account/password self-service. The habit-tracking domain itself is still being built out. The target functionality is:
+
+- **Daily check-ins & streak counts** — log a habit for the day; Adatnama tracks current and longest streak.
+- **Multiple habits per user** — track several habits at once (e.g. "Exercise", "Read"), each with its own streak.
+- **Streak freezes / grace periods** — forgive an occasional missed day instead of resetting the streak to zero.
+
+None of the above has database tables or routes yet — `migrations/` currently only defines the Better Auth schema (`user`, `session`, `account`, `verification`). Habit and check-in tables will be added as this is built out.
 
 # Getting Started
 
@@ -21,16 +31,7 @@ npm run build
 
 ## Styling
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
-
-### Removing Tailwind CSS
-
-If you prefer not to use Tailwind CSS:
-
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Remove `@tailwindcss/vite` and `tailwindcss` from `package.json`
+This project uses [Tailwind CSS](https://tailwindcss.com/) and [shadcn/ui](https://ui.shadcn.com/) for styling and components.
 
 ## Linting & Formatting
 
@@ -44,7 +45,7 @@ npm run check
 
 ## Database (Cloudflare D1)
 
-The app uses a D1 database (binding `DB`, database `forming-db` in `wrangler.jsonc`) queried through [Kysely](https://kysely.dev) (`src/lib/db`). Migrations are plain SQL files in `migrations/`, numbered and tracked by Wrangler:
+The app uses a D1 database (binding `DB`, database `forming-db` in `wrangler.jsonc`) queried through [Kysely](https://kysely.dev) (`src/lib/db`). The database keeps its original `forming-db` name from before the app was renamed to Adatnama; renaming a live D1 database is a separate, deliberate step (see note below), not just an app-branding change. Migrations are plain SQL files in `migrations/`, numbered and tracked by Wrangler:
 
 ```bash
 npm run db:migration:create <name>  # create the next numbered migration file
@@ -65,6 +66,17 @@ Auth is handled by [Better Auth](https://www.better-auth.com), signing in with a
 
 Local setup: copy `.dev.vars.example` to `.dev.vars` and fill in `BETTER_AUTH_SECRET` (generate with `openssl rand -base64 32`).
 
+## Project Structure
+
+Routes live in `src/routes` and are grouped by layout:
+
+- `_auth/` — login page, no marketing chrome (`src/routes/_auth/route.tsx`)
+- `_marketing/` — public marketing pages (home, about, features, status)
+- `home/` — the authenticated app (sidebar layout, `beforeLoad` redirects to `/login` when there's no session); currently just account/password settings at `/home/profile`
+- `api/` — server routes, including Better Auth's catch-all handler
+
+Server-side data fetching follows a `queryOptions` convention in `src/lib/data/*.ts` (e.g. `sessionQueryOptions`), consumed via `queryClient.ensureQueryData` in route `beforeLoad`/`loader`. Mutations that need to run on the server live in `src/actions/*.ts` as `createServerFn` calls.
+
 ## Deploy to Cloudflare Workers
 
 This project uses the Cloudflare Vite plugin (configured in `vite.config.ts`) and `wrangler.jsonc`:
@@ -77,152 +89,6 @@ This project uses the Cloudflare Vite plugin (configured in `vite.config.ts`) an
 6. Deploy: `npx wrangler deploy`
 
 Public (non-secret) vars go in `wrangler.jsonc` under `vars`; secrets are set with `wrangler secret put`. KV, D1, R2, and Durable Object bindings are configured in `wrangler.jsonc`. See https://developers.cloudflare.com/workers/wrangler/configuration/.
-
-## Routing
-
-This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router"
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you render `{children}` in the `shellComponent`.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router"
-
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "My App" },
-    ],
-  }),
-  shellComponent: ({ children }) => (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <header>
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-          </nav>
-        </header>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  ),
-})
-```
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-## Server Functions
-
-TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
-
-```tsx
-import { createServerFn } from "@tanstack/react-start"
-
-const getServerTime = createServerFn({
-  method: "GET",
-}).handler(async () => {
-  return new Date().toISOString()
-})
-
-// Use in a component
-function MyComponent() {
-  const [time, setTime] = useState("")
-
-  useEffect(() => {
-    getServerTime().then(setTime)
-  }, [])
-
-  return <div>Server time: {time}</div>
-}
-```
-
-## API Routes
-
-You can create API routes by using the `server` property in your route definitions:
-
-```tsx
-import { createFileRoute } from "@tanstack/react-router"
-import { json } from "@tanstack/react-start"
-
-export const Route = createFileRoute("/api/hello")({
-  server: {
-    handlers: {
-      GET: () => json({ message: "Hello, World!" }),
-    },
-  },
-})
-```
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-import { createFileRoute } from "@tanstack/react-router"
-
-export const Route = createFileRoute("/people")({
-  loader: async () => {
-    const response = await fetch("https://swapi.dev/api/people")
-    return response.json()
-  },
-  component: PeopleComponent,
-})
-
-function PeopleComponent() {
-  const data = Route.useLoaderData()
-  return (
-    <ul>
-      {data.results.map((person) => (
-        <li key={person.name}>{person.name}</li>
-      ))}
-    </ul>
-  )
-}
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
 
 # Learn More
 

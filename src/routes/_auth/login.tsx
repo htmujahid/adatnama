@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
+import { FlameIcon } from "lucide-react"
 
 import { LoginForm } from "@/components/auth/login-form"
 
@@ -14,9 +15,9 @@ function LoginPage() {
         >
           <div
             aria-hidden="true"
-            className="flex size-8 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground"
+            className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground"
           >
-            A
+            <FlameIcon className="size-4" />
           </div>
           <span className="sr-only">Adatnama</span>
         </Link>

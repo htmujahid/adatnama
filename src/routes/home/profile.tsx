@@ -1,7 +1,9 @@
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 
 import { PasswordForm } from "@/components/profile/password-form"
 import { ProfileForm } from "@/components/profile/profile-form"
+import { SetPasswordForm } from "@/components/profile/set-password-form"
 import {
   Card,
   CardContent,
@@ -9,13 +11,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { accountsQueryOptions } from "@/lib/data/auth"
 
 export const Route = createFileRoute("/home/profile")({
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData(accountsQueryOptions())
+  },
   component: ProfilePage,
 })
 
 function ProfilePage() {
   const { user } = Route.useRouteContext()
+  const { data: accounts } = useSuspenseQuery(accountsQueryOptions())
+  const hasPassword = accounts.some(
+    (account) => account.providerId === "credential",
+  )
 
   return (
     <div className="flex w-full max-w-3xl flex-col gap-4">
@@ -31,12 +41,14 @@ function ProfilePage() {
       <Card size="sm">
         <CardHeader>
           <CardTitle>Password</CardTitle>
-          <CardDescription>
-            Enter your current password to set a new one.
-          </CardDescription>
+          {hasPassword && (
+            <CardDescription>
+              Enter your current password to set a new one.
+            </CardDescription>
+          )}
         </CardHeader>
         <CardContent>
-          <PasswordForm />
+          {hasPassword ? <PasswordForm /> : <SetPasswordForm />}
         </CardContent>
       </Card>
     </div>

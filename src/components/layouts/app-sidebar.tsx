@@ -26,7 +26,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
 } from "@/components/ui/sidebar"
 import { useHomeUser } from "@/hooks/use-home-user"
 import { authClient } from "@/lib/auth-client"
@@ -191,7 +190,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navSecondary} />
         <NavUser user={user} onSignOut={handleSignOut} />
       </SidebarFooter>
-      <SidebarRail />
     </Sidebar>
   )
 }

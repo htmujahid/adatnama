@@ -1,10 +1,16 @@
 import { queryOptions } from "@tanstack/react-query"
 
-import { getSession } from "@/actions/auth"
+import { getSession, listAccounts } from "@/actions/auth"
 
 export const sessionQueryOptions = () =>
   queryOptions({
     queryKey: ["session"],
     queryFn: () => getSession(),
     staleTime: 0,
+  })
+
+export const accountsQueryOptions = () =>
+  queryOptions({
+    queryKey: ["accounts"],
+    queryFn: () => listAccounts(),
   })

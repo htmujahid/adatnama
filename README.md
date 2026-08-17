@@ -4,7 +4,7 @@ Adatnama is a streak and habit tracker, built on TanStack Start and deployed to 
 
 ## Status
 
-The account system is built: sign up, sign in, session management, role-based access (admin/user), and account/password self-service. The habit-tracking domain itself is still being built out. The target functionality is:
+The account system is built: sign up, sign in (username/password and Google), session management, and account/password self-service. The habit-tracking domain itself is still being built out. The target functionality is:
 
 - **Daily check-ins & streak counts** — log a habit for the day; Adatnama tracks current and longest streak.
 - **Multiple habits per user** — track several habits at once (e.g. "Exercise", "Read"), each with its own streak.

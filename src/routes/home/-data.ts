@@ -1,3 +1,14 @@
+import {
+  FlagIcon,
+  FlameIcon,
+  GemIcon,
+  SparklesIcon,
+  SunriseIcon,
+  TargetIcon,
+  TrophyIcon,
+  UsersIcon,
+} from "lucide-react"
+
 export type DayState = "done" | "missed" | "today"
 export type HistoryState = "done" | "missed" | "frozen" | "today"
 
@@ -288,4 +299,112 @@ export const HEATMAP_LEVEL_COLORS = [
   "color-mix(in oklch, var(--primary) 60%, var(--muted))",
   "color-mix(in oklch, var(--primary) 80%, var(--muted))",
   "var(--primary)",
+] as const
+
+const bestStreak = Math.max(...HABITS.map((habit) => habit.longestStreak))
+const weeklyDoneCount = HABITS.reduce(
+  (sum, habit) => sum + habit.week.filter((day) => day === "done").length,
+  0,
+)
+
+function reminderMinutes(time: string) {
+  const match = /^(\d+):(\d+)\s?(AM|PM)$/i.exec(time)
+  if (!match) return Number.POSITIVE_INFINITY
+  const hours =
+    (Number(match[1]) % 12) + (match[3].toUpperCase() === "PM" ? 12 : 0)
+  return hours * 60 + Number(match[2])
+}
+
+const hasEarlyCheckIn = HABITS.some(
+  (habit) =>
+    habit.done &&
+    habit.reminderTime !== null &&
+    reminderMinutes(habit.reminderTime) < reminderMinutes("7:00 AM"),
+)
+
+// Progress/target are always populated so locked achievements can render a
+// progress bar; unlockedDaysAgo is only meaningful once `unlocked` is true.
+export const ACHIEVEMENTS = [
+  {
+    id: "first-step",
+    name: "First step",
+    description: "Complete your first check-in",
+    icon: FlagIcon,
+    unlocked: doneToday > 0,
+    progress: Math.min(doneToday, 1),
+    target: 1,
+    unlockedDaysAgo: 90,
+  },
+  {
+    id: "week-warrior",
+    name: "Week warrior",
+    description: "Hit a 7-day streak",
+    icon: FlameIcon,
+    unlocked: bestStreak >= 7,
+    progress: Math.min(bestStreak, 7),
+    target: 7,
+    unlockedDaysAgo: 77,
+  },
+  {
+    id: "consistent",
+    name: "Consistent",
+    description: "Score 80%+ completion in a week",
+    icon: TargetIcon,
+    // A historical best, not derived from the current week's rate — an
+    // achievement earned once should stay earned even if this week dips.
+    unlocked: true,
+    progress: 1,
+    target: 1,
+    unlockedDaysAgo: 45,
+  },
+  {
+    id: "team-player",
+    name: "Team player",
+    description: "Join a circle",
+    icon: UsersIcon,
+    unlocked: true,
+    progress: 1,
+    target: 1,
+    unlockedDaysAgo: 60,
+  },
+  {
+    id: "early-riser",
+    name: "Early riser",
+    description: "Complete a habit with a reminder before 7 AM",
+    icon: SunriseIcon,
+    unlocked: hasEarlyCheckIn,
+    progress: hasEarlyCheckIn ? 1 : 0,
+    target: 1,
+    unlockedDaysAgo: 64,
+  },
+  {
+    id: "month-master",
+    name: "Month master",
+    description: "Hit a 30-day streak",
+    icon: TrophyIcon,
+    unlocked: bestStreak >= 30,
+    progress: Math.min(bestStreak, 30),
+    target: 30,
+    unlockedDaysAgo: null,
+  },
+  {
+    id: "century-club",
+    name: "Century club",
+    description: "Hit a 100-day streak",
+    icon: GemIcon,
+    unlocked: bestStreak >= 100,
+    progress: Math.min(bestStreak, 100),
+    target: 100,
+    unlockedDaysAgo: null,
+  },
+  {
+    id: "perfect-week",
+    name: "Perfect week",
+    description: "Every habit, every day for a week",
+    icon: SparklesIcon,
+    unlocked: weeklyDoneCount >= 7 * HABITS.length,
+    progress: weeklyDoneCount,
+    target: 7 * HABITS.length,
+    unlockedDaysAgo: null,
+  },
 ] as const

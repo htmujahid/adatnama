@@ -1,14 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import {
   CalendarCheckIcon,
-  FlagIcon,
   FlameIcon,
   LockIcon,
-  SparklesIcon,
-  TargetIcon,
   TrendingUpIcon,
-  TrophyIcon,
-  UsersIcon,
   ZapIcon,
 } from "lucide-react"
 
@@ -37,7 +32,7 @@ import { useHomeUser } from "@/hooks/use-home-user"
 import { cn } from "@/lib/utils"
 
 import type { DayState } from "./-data"
-import { doneToday, HABITS } from "./-data"
+import { ACHIEVEMENTS, doneToday, HABITS } from "./-data"
 
 export const Route = createFileRoute("/home/")({ component: HomePage })
 
@@ -45,45 +40,6 @@ const CIRCLES = [
   { name: "Family", members: ["A", "M", "S", "Y"], checkedIn: 3 },
   { name: "Friends", members: ["J", "K", "L", "P"], checkedIn: 2 },
   { name: "Accountability Partners", members: ["N", "Q"], checkedIn: 1 },
-] as const
-
-const ACHIEVEMENTS = [
-  {
-    name: "First step",
-    description: "Complete your first check-in",
-    icon: FlagIcon,
-    unlocked: true,
-  },
-  {
-    name: "Week warrior",
-    description: "Hit a 7-day streak",
-    icon: FlameIcon,
-    unlocked: true,
-  },
-  {
-    name: "Consistent",
-    description: "80%+ completion in a week",
-    icon: TargetIcon,
-    unlocked: true,
-  },
-  {
-    name: "Team player",
-    description: "Join a circle",
-    icon: UsersIcon,
-    unlocked: true,
-  },
-  {
-    name: "Month master",
-    description: "Hit a 30-day streak",
-    icon: TrophyIcon,
-    unlocked: false,
-  },
-  {
-    name: "Perfect week",
-    description: "Every habit, every day",
-    icon: SparklesIcon,
-    unlocked: false,
-  },
 ] as const
 
 const strongestHabit = [...HABITS].sort((a, b) => b.streak - a.streak)[0]
@@ -275,37 +231,47 @@ function HomePage() {
               }{" "}
               of {ACHIEVEMENTS.length} unlocked
             </CardDescription>
+            <CardAction>
+              <Link
+                to="/home/achievements"
+                className="text-xs font-medium text-primary hover:underline"
+              >
+                View all
+              </Link>
+            </CardAction>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
-              {ACHIEVEMENTS.map((achievement) => (
-                <div
-                  key={achievement.name}
-                  title={achievement.description}
-                  className={cn(
-                    "flex flex-col items-center gap-2 rounded-lg border border-border p-3 text-center",
-                    !achievement.unlocked && "opacity-50",
-                  )}
-                >
+            <div className="min-w-0 overflow-x-auto">
+              <div className="flex gap-3 pb-1">
+                {ACHIEVEMENTS.map((achievement) => (
                   <div
+                    key={achievement.id}
+                    title={achievement.description}
                     className={cn(
-                      "flex size-10 items-center justify-center rounded-full",
-                      achievement.unlocked
-                        ? "bg-primary/10 text-primary"
-                        : "bg-muted text-muted-foreground",
+                      "flex w-24 shrink-0 flex-col items-center gap-2 rounded-lg border border-border p-3 text-center",
+                      !achievement.unlocked && "opacity-50",
                     )}
                   >
-                    {achievement.unlocked ? (
-                      <achievement.icon className="size-5" />
-                    ) : (
-                      <LockIcon className="size-4" />
-                    )}
+                    <div
+                      className={cn(
+                        "flex size-10 items-center justify-center rounded-full",
+                        achievement.unlocked
+                          ? "bg-primary/10 text-primary"
+                          : "bg-muted text-muted-foreground",
+                      )}
+                    >
+                      {achievement.unlocked ? (
+                        <achievement.icon className="size-5" />
+                      ) : (
+                        <LockIcon className="size-4" />
+                      )}
+                    </div>
+                    <span className="text-xs font-medium">
+                      {achievement.name}
+                    </span>
                   </div>
-                  <span className="text-xs font-medium">
-                    {achievement.name}
-                  </span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </CardContent>
         </Card>

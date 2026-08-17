@@ -4,6 +4,7 @@ import * as React from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Link, useRouter } from "@tanstack/react-router"
 import {
+  AwardIcon,
   CalendarCheckIcon,
   FlameIcon,
   HandshakeIcon,
@@ -56,6 +57,11 @@ const data = {
       title: "Streaks",
       url: "/home/streaks",
       icon: <FlameIcon />,
+    },
+    {
+      title: "Achievements",
+      url: "/home/achievements",
+      icon: <AwardIcon />,
     },
     {
       title: "Check-ins",

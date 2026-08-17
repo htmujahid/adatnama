@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router"
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/_auth")({
   beforeLoad: ({ context }) => {
@@ -13,15 +13,6 @@ function AuthLayout() {
   return (
     <div className="flex min-h-svh flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
-        <Link
-          to="/"
-          className="mb-8 flex items-center justify-center gap-2 text-base font-semibold tracking-tight"
-        >
-          <span className="flex size-7 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
-            A
-          </span>
-          Adatnama
-        </Link>
         <Outlet />
       </div>
     </div>

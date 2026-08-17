@@ -13,7 +13,6 @@ import { Route as AuthRouteRouteImport } from './routes/_auth/route'
 import { Route as MarketingRouteRouteImport } from './routes/_marketing/route'
 import { Route as HomeRouteRouteImport } from './routes/home/route'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
-import { Route as AuthSetupRouteImport } from './routes/_auth/setup'
 import { Route as MarketingIndexRouteImport } from './routes/_marketing/index'
 import { Route as MarketingAboutRouteImport } from './routes/_marketing/about'
 import { Route as MarketingFeaturesRouteImport } from './routes/_marketing/features'
@@ -22,9 +21,6 @@ import { Route as ApiStatusRouteImport } from './routes/api/status'
 import { Route as HomeIndexRouteImport } from './routes/home/index'
 import { Route as HomeProfileRouteImport } from './routes/home/profile'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as HomeUsersIndexRouteImport } from './routes/home/users/index'
-import { Route as HomeUsersCreateRouteImport } from './routes/home/users/create'
-import { Route as HomeUsersUserIdEditRouteImport } from './routes/home/users/$userId.edit'
 
 const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/_auth',
@@ -42,11 +38,6 @@ const HomeRouteRoute = HomeRouteRouteImport.update({
 const AuthLoginRoute = AuthLoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => AuthRouteRoute,
-} as any)
-const AuthSetupRoute = AuthSetupRouteImport.update({
-  id: '/setup',
-  path: '/setup',
   getParentRoute: () => AuthRouteRoute,
 } as any)
 const MarketingIndexRoute = MarketingIndexRouteImport.update({
@@ -89,27 +80,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
-const HomeUsersIndexRoute = HomeUsersIndexRouteImport.update({
-  id: '/users/',
-  path: '/users/',
-  getParentRoute: () => HomeRouteRoute,
-} as any)
-const HomeUsersCreateRoute = HomeUsersCreateRouteImport.update({
-  id: '/users/create',
-  path: '/users/create',
-  getParentRoute: () => HomeRouteRoute,
-} as any)
-const HomeUsersUserIdEditRoute = HomeUsersUserIdEditRouteImport.update({
-  id: '/users/$userId/edit',
-  path: '/users/$userId/edit',
-  getParentRoute: () => HomeRouteRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof MarketingIndexRoute
   '/home': typeof HomeRouteRouteWithChildren
   '/login': typeof AuthLoginRoute
-  '/setup': typeof AuthSetupRoute
   '/about': typeof MarketingAboutRoute
   '/features': typeof MarketingFeaturesRoute
   '/status': typeof MarketingStatusRoute
@@ -117,14 +92,10 @@ export interface FileRoutesByFullPath {
   '/home/profile': typeof HomeProfileRoute
   '/home/': typeof HomeIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/home/users/create': typeof HomeUsersCreateRoute
-  '/home/users/': typeof HomeUsersIndexRoute
-  '/home/users/$userId/edit': typeof HomeUsersUserIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof MarketingIndexRoute
   '/login': typeof AuthLoginRoute
-  '/setup': typeof AuthSetupRoute
   '/about': typeof MarketingAboutRoute
   '/features': typeof MarketingFeaturesRoute
   '/status': typeof MarketingStatusRoute
@@ -132,9 +103,6 @@ export interface FileRoutesByTo {
   '/home/profile': typeof HomeProfileRoute
   '/home': typeof HomeIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/home/users/create': typeof HomeUsersCreateRoute
-  '/home/users': typeof HomeUsersIndexRoute
-  '/home/users/$userId/edit': typeof HomeUsersUserIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -142,7 +110,6 @@ export interface FileRoutesById {
   '/_marketing': typeof MarketingRouteRouteWithChildren
   '/home': typeof HomeRouteRouteWithChildren
   '/_auth/login': typeof AuthLoginRoute
-  '/_auth/setup': typeof AuthSetupRoute
   '/_marketing/about': typeof MarketingAboutRoute
   '/_marketing/features': typeof MarketingFeaturesRoute
   '/_marketing/status': typeof MarketingStatusRoute
@@ -151,9 +118,6 @@ export interface FileRoutesById {
   '/_marketing/': typeof MarketingIndexRoute
   '/home/': typeof HomeIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/home/users/create': typeof HomeUsersCreateRoute
-  '/home/users/': typeof HomeUsersIndexRoute
-  '/home/users/$userId/edit': typeof HomeUsersUserIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -161,7 +125,6 @@ export interface FileRouteTypes {
     | '/'
     | '/home'
     | '/login'
-    | '/setup'
     | '/about'
     | '/features'
     | '/status'
@@ -169,14 +132,10 @@ export interface FileRouteTypes {
     | '/home/profile'
     | '/home/'
     | '/api/auth/$'
-    | '/home/users/create'
-    | '/home/users/'
-    | '/home/users/$userId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
-    | '/setup'
     | '/about'
     | '/features'
     | '/status'
@@ -184,16 +143,12 @@ export interface FileRouteTypes {
     | '/home/profile'
     | '/home'
     | '/api/auth/$'
-    | '/home/users/create'
-    | '/home/users'
-    | '/home/users/$userId/edit'
   id:
     | '__root__'
     | '/_auth'
     | '/_marketing'
     | '/home'
     | '/_auth/login'
-    | '/_auth/setup'
     | '/_marketing/about'
     | '/_marketing/features'
     | '/_marketing/status'
@@ -202,9 +157,6 @@ export interface FileRouteTypes {
     | '/_marketing/'
     | '/home/'
     | '/api/auth/$'
-    | '/home/users/create'
-    | '/home/users/'
-    | '/home/users/$userId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -243,13 +195,6 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof AuthLoginRouteImport
-      parentRoute: typeof AuthRouteRoute
-    }
-    '/_auth/setup': {
-      id: '/_auth/setup'
-      path: '/setup'
-      fullPath: '/setup'
-      preLoaderRoute: typeof AuthSetupRouteImport
       parentRoute: typeof AuthRouteRoute
     }
     '/_marketing/': {
@@ -308,38 +253,15 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/home/users/': {
-      id: '/home/users/'
-      path: '/users'
-      fullPath: '/home/users/'
-      preLoaderRoute: typeof HomeUsersIndexRouteImport
-      parentRoute: typeof HomeRouteRoute
-    }
-    '/home/users/create': {
-      id: '/home/users/create'
-      path: '/users/create'
-      fullPath: '/home/users/create'
-      preLoaderRoute: typeof HomeUsersCreateRouteImport
-      parentRoute: typeof HomeRouteRoute
-    }
-    '/home/users/$userId/edit': {
-      id: '/home/users/$userId/edit'
-      path: '/users/$userId/edit'
-      fullPath: '/home/users/$userId/edit'
-      preLoaderRoute: typeof HomeUsersUserIdEditRouteImport
-      parentRoute: typeof HomeRouteRoute
-    }
   }
 }
 
 interface AuthRouteRouteChildren {
   AuthLoginRoute: typeof AuthLoginRoute
-  AuthSetupRoute: typeof AuthSetupRoute
 }
 
 const AuthRouteRouteChildren: AuthRouteRouteChildren = {
   AuthLoginRoute: AuthLoginRoute,
-  AuthSetupRoute: AuthSetupRoute,
 }
 
 const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
@@ -367,17 +289,11 @@ const MarketingRouteRouteWithChildren = MarketingRouteRoute._addFileChildren(
 interface HomeRouteRouteChildren {
   HomeProfileRoute: typeof HomeProfileRoute
   HomeIndexRoute: typeof HomeIndexRoute
-  HomeUsersCreateRoute: typeof HomeUsersCreateRoute
-  HomeUsersIndexRoute: typeof HomeUsersIndexRoute
-  HomeUsersUserIdEditRoute: typeof HomeUsersUserIdEditRoute
 }
 
 const HomeRouteRouteChildren: HomeRouteRouteChildren = {
   HomeProfileRoute: HomeProfileRoute,
   HomeIndexRoute: HomeIndexRoute,
-  HomeUsersCreateRoute: HomeUsersCreateRoute,
-  HomeUsersIndexRoute: HomeUsersIndexRoute,
-  HomeUsersUserIdEditRoute: HomeUsersUserIdEditRoute,
 }
 
 const HomeRouteRouteWithChildren = HomeRouteRoute._addFileChildren(

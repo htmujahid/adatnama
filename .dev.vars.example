@@ -6,3 +6,8 @@ BETTER_AUTH_SECRET=
 
 # The origin the app runs on locally.
 BETTER_AUTH_URL=http://localhost:3000
+
+# Google OAuth credentials: https://console.cloud.google.com/apis/credentials
+# Authorized redirect URI: <BETTER_AUTH_URL>/api/auth/callback/google
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=

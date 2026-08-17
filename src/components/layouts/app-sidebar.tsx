@@ -13,7 +13,6 @@ import {
   Send,
   Settings2Icon,
   TerminalSquareIcon,
-  UsersIcon,
 } from "lucide-react"
 
 import { NavMain } from "@/components/layouts/nav-main"
@@ -42,7 +41,6 @@ const data = {
       url: "#",
       icon: <TerminalSquareIcon />,
       isActive: true,
-      roles: ["admin", "user"],
       items: [
         {
           title: "History",
@@ -62,7 +60,6 @@ const data = {
       title: "Models",
       url: "#",
       icon: <BotIcon />,
-      roles: ["admin", "user"],
       items: [
         {
           title: "Genesis",
@@ -82,7 +79,6 @@ const data = {
       title: "Documentation",
       url: "#",
       icon: <BookOpenIcon />,
-      roles: ["admin", "user"],
       items: [
         {
           title: "Introduction",
@@ -106,7 +102,6 @@ const data = {
       title: "Settings",
       url: "#",
       icon: <Settings2Icon />,
-      roles: ["admin"],
       items: [
         {
           title: "General",
@@ -129,22 +124,14 @@ const data = {
   ],
   navSecondary: [
     {
-      title: "Users",
-      url: "/home/users",
-      icon: UsersIcon,
-      roles: ["admin"],
-    },
-    {
       title: "Support",
       url: "#",
       icon: LifeBuoy,
-      roles: ["admin", "user"],
     },
     {
       title: "Feedback",
       url: "#",
       icon: Send,
-      roles: ["admin", "user"],
     },
   ],
   projects: [
@@ -152,19 +139,16 @@ const data = {
       name: "Design Engineering",
       url: "#",
       icon: <FrameIcon />,
-      roles: ["admin", "user"],
     },
     {
       name: "Sales & Marketing",
       url: "#",
       icon: <PieChartIcon />,
-      roles: ["admin", "user"],
     },
     {
       name: "Travel",
       url: "#",
       icon: <MapIcon />,
-      roles: ["admin", "user"],
     },
   ],
 }
@@ -173,13 +157,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useHomeUser()
   const router = useRouter()
   const queryClient = useQueryClient()
-
-  const role = user.role ?? "user"
-  const navMain = data.navMain.filter((item) => item.roles.includes(role))
-  const navSecondary = data.navSecondary.filter((item) =>
-    item.roles.includes(role),
-  )
-  const projects = data.projects.filter((item) => item.roles.includes(role))
 
   const handleSignOut = async () => {
     await authClient.signOut()
@@ -207,11 +184,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navMain} />
-        <NavProjects projects={projects} />
+        <NavMain items={data.navMain} />
+        <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
-        <NavSecondary items={navSecondary} />
+        <NavSecondary items={data.navSecondary} />
         <NavUser user={user} onSignOut={handleSignOut} />
       </SidebarFooter>
       <SidebarRail />

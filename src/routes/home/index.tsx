@@ -1,14 +1,12 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import {
   CalendarCheckIcon,
-  ChevronRightIcon,
   FlagIcon,
   FlameIcon,
   LockIcon,
-  MedalIcon,
   SparklesIcon,
   TargetIcon,
-  TriangleAlertIcon,
+  TrendingUpIcon,
   TrophyIcon,
   UsersIcon,
   ZapIcon,
@@ -47,27 +45,6 @@ const CIRCLES = [
   { name: "Family", members: ["A", "M", "S", "Y"], checkedIn: 3 },
   { name: "Friends", members: ["J", "K", "L", "P"], checkedIn: 2 },
   { name: "Accountability Partners", members: ["N", "Q"], checkedIn: 1 },
-] as const
-
-const STATS = [
-  {
-    label: "Current streak",
-    value: "12 days",
-    badge: "Morning run",
-    icon: FlameIcon,
-  },
-  {
-    label: "Today",
-    value: "4 of 5 habits",
-    badge: "1 left",
-    icon: CalendarCheckIcon,
-  },
-  {
-    label: "Level",
-    value: "4",
-    badge: "320 XP",
-    icon: ZapIcon,
-  },
 ] as const
 
 const ACHIEVEMENTS = [
@@ -109,40 +86,57 @@ const ACHIEVEMENTS = [
   },
 ] as const
 
-const MILESTONES = [7, 30, 100] as const
-
 const strongestHabit = [...HABITS].sort((a, b) => b.streak - a.streak)[0]
-const attentionHabit = [...HABITS].sort((a, b) => a.streak - b.streak)[0]
 
-const milestoneProgress = HABITS.map((habit) => {
-  const next = MILESTONES.find((milestone) => milestone > habit.streak)
-  return next ? { habit, next, daysLeft: next - habit.streak } : null
-}).filter((entry) => entry !== null)
-const closestMilestone = [...milestoneProgress].sort(
-  (a, b) => a.daysLeft - b.daysLeft,
-)[0]
+// Same 7-day window as -data.ts's `week` (index 0 = 6 days ago ... index 6 =
+// today), so this always agrees with Today's habits and the Streaks page.
+const WEEK_DATES = [
+  "Aug 11",
+  "Aug 12",
+  "Aug 13",
+  "Aug 14",
+  "Aug 15",
+  "Aug 16",
+  "Aug 17",
+]
 
-const HIGHLIGHTS = [
+const WEEKLY_DAILY_COUNTS = WEEK_DATES.map((date, index) => ({
+  date,
+  count: HABITS.filter((habit) => habit.week[index] === "done").length,
+}))
+
+const weeklyCheckins = WEEKLY_DAILY_COUNTS.reduce(
+  (sum, day) => sum + day.count,
+  0,
+)
+const weeklyRate = Math.round(
+  (weeklyCheckins / (WEEK_DATES.length * HABITS.length)) * 100,
+)
+
+const STATS = [
   {
-    title: "Strongest streak",
-    description: `${strongestHabit.name} · ${strongestHabit.streak} days`,
+    label: "Current streak",
+    value: `${strongestHabit.streak} days`,
+    badge: strongestHabit.name,
     icon: FlameIcon,
-    habitId: strongestHabit.id,
   },
   {
-    title: "Next milestone",
-    description: `${closestMilestone.habit.name} · ${closestMilestone.daysLeft} day${closestMilestone.daysLeft === 1 ? "" : "s"} to ${closestMilestone.next}`,
-    icon: MedalIcon,
-    habitId: closestMilestone.habit.id,
+    label: "Today",
+    value: `${doneToday} of ${HABITS.length} habits`,
+    badge: `${HABITS.length - doneToday} left`,
+    icon: CalendarCheckIcon,
   },
   {
-    title: "Needs attention",
-    description:
-      attentionHabit.streak === 0
-        ? `${attentionHabit.name} · streak reset`
-        : `${attentionHabit.name} · ${attentionHabit.streak} day streak`,
-    icon: TriangleAlertIcon,
-    habitId: attentionHabit.id,
+    label: "This week",
+    value: `${weeklyRate}%`,
+    badge: `${weeklyCheckins} check-ins`,
+    icon: TrendingUpIcon,
+  },
+  {
+    label: "Level",
+    value: "4",
+    badge: "320 XP",
+    icon: ZapIcon,
   },
 ] as const
 
@@ -179,7 +173,7 @@ function HomePage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {STATS.map((stat) => (
           <Card key={stat.label} size="sm">
             <CardHeader>
@@ -270,7 +264,7 @@ function HomePage() {
         </Card>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid items-start gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Achievements</CardTitle>
@@ -318,38 +312,46 @@ function HomePage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Highlights</CardTitle>
-            <CardDescription>What's happening this week</CardDescription>
+            <CardTitle>Your week</CardTitle>
+            <CardDescription>
+              {weeklyCheckins} check-ins · {weeklyRate}% completion
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <ItemGroup>
-              {HIGHLIGHTS.map((highlight) => (
-                <Item
-                  key={highlight.title}
-                  variant="outline"
-                  size="sm"
-                  render={
-                    <Link
-                      to="/home/habits/$habitId"
-                      params={{ habitId: highlight.habitId }}
-                    />
-                  }
-                >
-                  <ItemMedia>
-                    <span className="flex size-8 items-center justify-center rounded-full bg-primary/10 text-primary">
-                      <highlight.icon className="size-4" />
+            <div className="flex h-24 items-end justify-between gap-1.5">
+              {WEEKLY_DAILY_COUNTS.map((day, index) => {
+                const isToday = index === WEEKLY_DAILY_COUNTS.length - 1
+                return (
+                  <div
+                    key={day.date}
+                    className="flex flex-1 flex-col items-center gap-1.5"
+                  >
+                    <div className="flex h-20 w-full items-end">
+                      <div
+                        title={`${day.date}: ${day.count} of ${HABITS.length} habits`}
+                        className={cn(
+                          "w-full rounded-t-sm",
+                          isToday ? "bg-primary" : "bg-primary/60",
+                        )}
+                        style={{
+                          height: `${(day.count / HABITS.length) * 100}%`,
+                        }}
+                      />
+                    </div>
+                    <span
+                      className={cn(
+                        "text-xs",
+                        isToday
+                          ? "font-semibold text-foreground"
+                          : "text-muted-foreground",
+                      )}
+                    >
+                      {day.date.split(" ")[1]}
                     </span>
-                  </ItemMedia>
-                  <ItemContent>
-                    <ItemTitle>{highlight.title}</ItemTitle>
-                    <ItemDescription>{highlight.description}</ItemDescription>
-                  </ItemContent>
-                  <ItemActions>
-                    <ChevronRightIcon className="size-4 text-muted-foreground" />
-                  </ItemActions>
-                </Item>
-              ))}
-            </ItemGroup>
+                  </div>
+                )
+              })}
+            </div>
           </CardContent>
         </Card>
       </div>

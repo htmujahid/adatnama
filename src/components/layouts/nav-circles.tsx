@@ -2,10 +2,10 @@
 
 import { Link } from "@tanstack/react-router"
 import {
-  ArrowRightIcon,
-  FolderIcon,
+  LogOutIcon,
   MoreHorizontalIcon,
-  Trash2Icon,
+  Share2Icon,
+  UserPlusIcon,
 } from "lucide-react"
 
 import {
@@ -25,10 +25,10 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
-export function NavProjects({
-  projects,
+export function NavCircles({
+  circles,
 }: {
-  projects: {
+  circles: {
     name: string
     url: string
     icon: React.ReactNode
@@ -37,9 +37,9 @@ export function NavProjects({
   const { isMobile } = useSidebar()
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Projects</SidebarGroupLabel>
+      <SidebarGroupLabel>Circles</SidebarGroupLabel>
       <SidebarMenu>
-        {projects.map((item) => (
+        {circles.map((item) => (
           <SidebarMenuItem key={item.name}>
             <SidebarMenuButton render={<Link to={item.url} />}>
               {item.icon}
@@ -63,17 +63,17 @@ export function NavProjects({
                 align={isMobile ? "end" : "start"}
               >
                 <DropdownMenuItem>
-                  <FolderIcon />
-                  <span>View Project</span>
+                  <UserPlusIcon />
+                  <span>Invite members</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <ArrowRightIcon />
-                  <span>Share Project</span>
+                  <Share2Icon />
+                  <span>Share invite link</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem variant="destructive">
-                  <Trash2Icon />
-                  <span>Delete Project</span>
+                  <LogOutIcon />
+                  <span>Leave circle</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

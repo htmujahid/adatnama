@@ -4,20 +4,20 @@ import * as React from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Link, useRouter } from "@tanstack/react-router"
 import {
-  BookOpenIcon,
-  BotIcon,
+  CalendarCheckIcon,
   FlameIcon,
-  FrameIcon,
+  HandshakeIcon,
+  HeartHandshakeIcon,
   LifeBuoy,
-  MapIcon,
-  PieChartIcon,
+  ListChecksIcon,
   Send,
   Settings2Icon,
-  TerminalSquareIcon,
+  TrendingUpIcon,
+  UsersIcon,
 } from "lucide-react"
 
+import { NavCircles } from "@/components/layouts/nav-circles"
 import { NavMain } from "@/components/layouts/nav-main"
-import { NavProjects } from "@/components/layouts/nav-projects"
 import { NavUser } from "@/components/layouts/nav-user"
 import {
   Sidebar,
@@ -37,92 +37,43 @@ import { NavSecondary } from "./nav-secondary"
 const data = {
   navMain: [
     {
-      title: "Playground",
+      title: "Habits",
       url: "#",
-      icon: <TerminalSquareIcon />,
+      icon: <ListChecksIcon />,
       isActive: true,
       items: [
         {
-          title: "History",
+          title: "All habits",
           url: "#",
         },
         {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
+          title: "Archived",
           url: "#",
         },
       ],
     },
     {
-      title: "Models",
+      title: "Streaks",
       url: "#",
-      icon: <BotIcon />,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
+      icon: <FlameIcon />,
     },
     {
-      title: "Documentation",
+      title: "Check-ins",
       url: "#",
-      icon: <BookOpenIcon />,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
+      icon: <CalendarCheckIcon />,
     },
     {
-      title: "Settings",
+      title: "Insights",
       url: "#",
-      icon: <Settings2Icon />,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
+      icon: <TrendingUpIcon />,
     },
   ],
   navSecondary: [
+    {
+      title: "Settings",
+      url: "#",
+      icon: Settings2Icon,
+    },
     {
       title: "Support",
       url: "#",
@@ -134,21 +85,21 @@ const data = {
       icon: Send,
     },
   ],
-  projects: [
+  circles: [
     {
-      name: "Design Engineering",
+      name: "Family",
       url: "#",
-      icon: <FrameIcon />,
+      icon: <UsersIcon />,
     },
     {
-      name: "Sales & Marketing",
+      name: "Friends",
       url: "#",
-      icon: <PieChartIcon />,
+      icon: <HeartHandshakeIcon />,
     },
     {
-      name: "Travel",
+      name: "Accountability Partners",
       url: "#",
-      icon: <MapIcon />,
+      icon: <HandshakeIcon />,
     },
   ],
 }
@@ -185,7 +136,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
+        <NavCircles circles={data.circles} />
       </SidebarContent>
       <SidebarFooter>
         <NavSecondary items={data.navSecondary} />

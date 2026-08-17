@@ -11,9 +11,9 @@
     "format": "prettier --write . && eslint --fix",
     "check": "prettier --check .",
     "cf-typegen": "wrangler types",
-    "db:migration:create": "wrangler d1 migrations create forming-db",
-    "db:migrate": "wrangler d1 migrations apply forming-db --local",
-    "db:migrate:remote": "wrangler d1 migrations apply forming-db --remote",
+    "db:migration:create": "wrangler d1 migrations create adatnama-db",
+    "db:migrate": "wrangler d1 migrations apply adatnama-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply adatnama-db --remote",
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {

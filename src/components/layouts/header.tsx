@@ -11,7 +11,7 @@ import {
 import { BrandMark } from "@/components/layouts/brand-mark"
 import { NAV_LINKS } from "@/components/layouts/nav-links"
 import { ThemeMenu } from "@/components/layouts/theme-menu"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -62,6 +62,10 @@ function HeaderAuth() {
         }
       >
         <Avatar className="size-7">
+          <AvatarImage
+            src={session.user.image ?? undefined}
+            alt={session.user.name}
+          />
           <AvatarFallback>{initial}</AvatarFallback>
         </Avatar>
         <span className="hidden text-sm font-medium sm:inline">
@@ -74,6 +78,10 @@ function HeaderAuth() {
           <DropdownMenuLabel className="p-0 font-normal">
             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
               <Avatar>
+                <AvatarImage
+                  src={session.user.image ?? undefined}
+                  alt={session.user.name}
+                />
                 <AvatarFallback>{initial}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">

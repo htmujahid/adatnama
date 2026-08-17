@@ -1,6 +1,7 @@
 import { useSuspenseQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 
+import { AvatarForm } from "@/components/profile/avatar-form"
 import { PasswordForm } from "@/components/profile/password-form"
 import { ProfileForm } from "@/components/profile/profile-form"
 import { SetPasswordForm } from "@/components/profile/set-password-form"
@@ -29,6 +30,15 @@ function ProfilePage() {
 
   return (
     <div className="flex w-full max-w-3xl flex-col gap-4">
+      <Card size="sm">
+        <CardHeader>
+          <CardTitle>Profile picture</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <AvatarForm user={user} />
+        </CardContent>
+      </Card>
+
       <Card size="sm">
         <CardHeader>
           <CardTitle>Account</CardTitle>

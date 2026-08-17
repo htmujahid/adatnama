@@ -7,9 +7,16 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "forming-db",
-      "database_id": "f9afccd7-b65f-4252-9186-89be83994479",
+      "database_name": "adatnama-db",
+      "database_id": "dfbed4a5-3c3c-4e56-b7f2-9f4294ecae33",
       "migrations_dir": "migrations",
+    },
+  ],
+  "r2_buckets": [
+    {
+      "binding": "AVATARS_BUCKET",
+      "bucket_name": "adatnama-avatars",
+      "remote": true,
     },
   ],
 }

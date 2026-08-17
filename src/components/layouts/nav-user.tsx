@@ -7,7 +7,7 @@ import {
 } from "lucide-react"
 
 import { ThemeMenu } from "@/components/layouts/theme-menu"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +31,7 @@ export function NavUser({
   user: {
     name: string
     email: string
+    image?: string | null
   }
   onSignOut: () => void
 }) {
@@ -47,6 +48,7 @@ export function NavUser({
             }
           >
             <Avatar>
+              <AvatarImage src={user.image ?? undefined} alt={user.name} />
               <AvatarFallback>{initial}</AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">

@@ -11,3 +11,9 @@ BETTER_AUTH_URL=http://localhost:3000
 # Authorized redirect URI: <BETTER_AUTH_URL>/api/auth/callback/google
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
+
+# Public base URL for the "adatnama-avatars" R2 bucket (its r2.dev URL, or a
+# custom domain mapped to the bucket). Create the bucket with:
+#   wrangler r2 bucket create adatnama-avatars
+#   wrangler r2 bucket dev-url enable adatnama-avatars
+R2_PUBLIC_URL=

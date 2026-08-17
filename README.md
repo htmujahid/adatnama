@@ -45,7 +45,7 @@ npm run check
 
 ## Database (Cloudflare D1)
 
-The app uses a D1 database (binding `DB`, database `forming-db` in `wrangler.jsonc`) queried through [Kysely](https://kysely.dev) (`src/lib/db`). The database keeps its original `forming-db` name from before the app was renamed to Adatnama; renaming a live D1 database is a separate, deliberate step (see note below), not just an app-branding change. Migrations are plain SQL files in `migrations/`, numbered and tracked by Wrangler:
+The app uses a D1 database (binding `DB`, database `adatnama-db` in `wrangler.jsonc`) queried through [Kysely](https://kysely.dev) (`src/lib/db`). Migrations are plain SQL files in `migrations/`, numbered and tracked by Wrangler:
 
 ```bash
 npm run db:migration:create <name>  # create the next numbered migration file
@@ -66,6 +66,25 @@ Auth is handled by [Better Auth](https://www.better-auth.com), signing in with a
 
 Local setup: copy `.dev.vars.example` to `.dev.vars` and fill in `BETTER_AUTH_SECRET` (generate with `openssl rand -base64 32`).
 
+## Avatar uploads (Cloudflare R2)
+
+Profile pictures are stored in an R2 bucket (binding `AVATARS_BUCKET`, bucket `adatnama-avatars` in `wrangler.jsonc`), served from its public r2.dev URL:
+
+- Upload/remove logic: `src/actions/avatar.ts` (`createServerFn`s that validate the file, write/delete R2 objects via `src/lib/storage.ts`, then update `user.image` through `auth.api.updateUser`)
+- Shared constraints (accepted types, max size): `src/lib/avatar.ts`
+- UI: `src/components/profile/avatar-form.tsx`, using `src/hooks/use-file-upload.ts` for drag/drop and validation, rendered on its own card on `/home/profile`
+
+Local setup: the bucket and its public URL already exist for this project (`adatnama-avatars`); `R2_PUBLIC_URL` is set in `.dev.vars`. The `r2_buckets` entry in `wrangler.jsonc` has `"remote": true`, so `npm run dev` connects to the real bucket instead of a local simulation — this is required because uploads must actually be reachable at the public r2.dev URL. That means local-dev uploads write to the real bucket (not an isolated sandbox); clean up test uploads with `wrangler r2 object delete adatnama-avatars/<key> --remote`.
+
+To set up a bucket for a new environment:
+
+```bash
+wrangler r2 bucket create <bucket-name>
+wrangler r2 bucket dev-url enable <bucket-name>   # gives you the public r2.dev URL
+```
+
+Then set `binding`/`bucket_name` in `wrangler.jsonc` under `r2_buckets` (with `"remote": true`), and `R2_PUBLIC_URL` in `.dev.vars` (local) / `vars` in `wrangler.jsonc` (deployed) to the printed r2.dev URL. Rerun `npm run cf-typegen` after changing `wrangler.jsonc`.
+
 ## Project Structure
 
 Routes live in `src/routes` and are grouped by layout:
@@ -85,7 +104,7 @@ This project uses the Cloudflare Vite plugin (configured in `vite.config.ts`) an
 2. Authenticate: `wrangler login`
 3. Apply migrations: `npm run db:migrate:remote`
 4. Set secrets: `wrangler secret put BETTER_AUTH_SECRET`
-5. Add `BETTER_AUTH_URL` (your deployed origin) under `vars` in `wrangler.jsonc`
+5. Add `BETTER_AUTH_URL` (your deployed origin) and `R2_PUBLIC_URL` (the `adatnama-avatars` bucket's r2.dev URL) under `vars` in `wrangler.jsonc`
 6. Deploy: `npx wrangler deploy`
 
 Public (non-secret) vars go in `wrangler.jsonc` under `vars`; secrets are set with `wrangler secret put`. KV, D1, R2, and Durable Object bindings are configured in `wrangler.jsonc`. See https://developers.cloudflare.com/workers/wrangler/configuration/.

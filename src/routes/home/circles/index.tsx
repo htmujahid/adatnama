@@ -174,7 +174,9 @@ function CirclesPage() {
                     <CircleColorDot color={circle.color} className="size-3" />
                     <CardTitle>{circle.name}</CardTitle>
                   </div>
-                  <CardDescription>{circle.description}</CardDescription>
+                  <CardDescription className="line-clamp-1">
+                    {circle.description}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-3">
                   <AvatarGroup>

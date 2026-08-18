@@ -191,19 +191,6 @@ function HabitDetailPage() {
         </div>
         <div className="flex items-center gap-2">
           <Button
-            variant={done ? "outline" : "default"}
-            size="sm"
-            onClick={() => toggleHabitCheckIn(habit)}
-          >
-            {done ? <CircleXIcon /> : <CircleCheckIcon />}
-            {done ? "Undo today's check-in" : "Mark today done"}
-          </Button>
-          <HabitNoteButton
-            habitId={habit.id}
-            habitName={habit.name}
-            className="border border-input"
-          />
-          <Button
             variant="outline"
             size="sm"
             nativeButton={false}
@@ -322,6 +309,9 @@ function HabitDetailPage() {
           <CardHeader>
             <CardTitle>This week</CardTitle>
             <CardDescription>Day by day</CardDescription>
+            <CardAction>
+              <HabitNoteButton habitId={habit.id} habitName={habit.name} />
+            </CardAction>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between gap-2">
@@ -341,13 +331,13 @@ function HabitDetailPage() {
                           done ? "Mark today as not done" : "Mark today as done"
                         }
                         className={cn(
-                          "flex size-8 cursor-pointer items-center justify-center rounded-full transition-colors",
+                          "flex size-10 cursor-pointer items-center justify-center rounded-full transition-all hover:scale-105 active:scale-95",
                           done
-                            ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                            ? "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
                             : "bg-muted text-muted-foreground ring-2 ring-primary/40 hover:bg-muted/70",
                         )}
                       >
-                        {done && <CircleCheckIcon className="size-4" />}
+                        {done && <CircleCheckIcon className="size-5" />}
                       </button>
                     ) : (
                       <span

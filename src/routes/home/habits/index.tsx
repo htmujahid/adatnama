@@ -9,7 +9,6 @@ import {
   PlusIcon,
   RepeatIcon,
   SearchIcon,
-  TagIcon,
   TargetIcon,
 } from "lucide-react"
 
@@ -100,15 +99,6 @@ function HabitsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            nativeButton={false}
-            render={<Link to="/home/categories" />}
-          >
-            <TagIcon />
-            Categories
-          </Button>
           <Button
             variant="outline"
             size="sm"

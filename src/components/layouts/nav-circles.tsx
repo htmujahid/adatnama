@@ -1,13 +1,16 @@
 "use client"
 
+import { useState } from "react"
 import { Link } from "@tanstack/react-router"
 import {
+  ArrowRightIcon,
   LogOutIcon,
   MoreHorizontalIcon,
   Share2Icon,
   UserPlusIcon,
 } from "lucide-react"
 
+import { CircleColorDot } from "@/components/circles/circle-color-dot"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import {
   SidebarGroup,
+  SidebarGroupAction,
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuAction,
@@ -24,25 +28,36 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { leaveCircle } from "@/hooks/use-circles"
 
 export function NavCircles({
   circles,
 }: {
   circles: {
+    id: string
     name: string
     url: string
-    icon: React.ReactNode
+    color: string
+    inviteLink: string
   }[]
 }) {
   const { isMobile } = useSidebar()
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Circles</SidebarGroupLabel>
+      <SidebarGroupAction
+        render={<Link to="/home/circles" title="All circles" />}
+      >
+        <ArrowRightIcon />
+        <span className="sr-only">All circles</span>
+      </SidebarGroupAction>
       <SidebarMenu>
         {circles.map((item) => (
-          <SidebarMenuItem key={item.name}>
+          <SidebarMenuItem key={item.id}>
             <SidebarMenuButton render={<Link to={item.url} />}>
-              {item.icon}
+              <CircleColorDot color={item.color} />
               <span>{item.name}</span>
             </SidebarMenuButton>
             <DropdownMenu>
@@ -62,16 +77,27 @@ export function NavCircles({
                 side={isMobile ? "bottom" : "right"}
                 align={isMobile ? "end" : "start"}
               >
-                <DropdownMenuItem>
+                <DropdownMenuItem render={<Link to={item.url} />}>
                   <UserPlusIcon />
                   <span>Invite members</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    void navigator.clipboard.writeText(item.inviteLink)
+                    setCopiedId(item.id)
+                    setTimeout(() => setCopiedId(null), 1500)
+                  }}
+                >
                   <Share2Icon />
-                  <span>Share invite link</span>
+                  <span>
+                    {copiedId === item.id ? "Copied!" : "Share invite link"}
+                  </span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive">
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => leaveCircle(item.id)}
+                >
                   <LogOutIcon />
                   <span>Leave circle</span>
                 </DropdownMenuItem>

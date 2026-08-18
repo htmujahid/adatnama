@@ -25,10 +25,16 @@ import { Route as HomeInsightsRouteImport } from './routes/home/insights'
 import { Route as HomeProfileRouteImport } from './routes/home/profile'
 import { Route as HomeStreaksRouteImport } from './routes/home/streaks'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as HomeCirclesIndexRouteImport } from './routes/home/circles/index'
+import { Route as HomeCirclesCircleIdRouteRouteImport } from './routes/home/circles/$circleId/route'
+import { Route as HomeCirclesNewRouteImport } from './routes/home/circles/new'
 import { Route as HomeHabitsIndexRouteImport } from './routes/home/habits/index'
 import { Route as HomeHabitsHabitIdRouteRouteImport } from './routes/home/habits/$habitId/route'
 import { Route as HomeHabitsArchivedRouteImport } from './routes/home/habits/archived'
 import { Route as HomeHabitsNewRouteImport } from './routes/home/habits/new'
+import { Route as HomeCirclesCircleIdIndexRouteImport } from './routes/home/circles/$circleId/index'
+import { Route as HomeCirclesCircleIdEditRouteImport } from './routes/home/circles/$circleId/edit'
+import { Route as HomeCirclesJoinCodeRouteImport } from './routes/home/circles/join.$code'
 import { Route as HomeHabitsHabitIdIndexRouteImport } from './routes/home/habits/$habitId/index'
 import { Route as HomeHabitsHabitIdEditRouteImport } from './routes/home/habits/$habitId/edit'
 
@@ -110,6 +116,22 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HomeCirclesIndexRoute = HomeCirclesIndexRouteImport.update({
+  id: '/circles/',
+  path: '/circles/',
+  getParentRoute: () => HomeRouteRoute,
+} as any)
+const HomeCirclesCircleIdRouteRoute =
+  HomeCirclesCircleIdRouteRouteImport.update({
+    id: '/circles/$circleId',
+    path: '/circles/$circleId',
+    getParentRoute: () => HomeRouteRoute,
+  } as any)
+const HomeCirclesNewRoute = HomeCirclesNewRouteImport.update({
+  id: '/circles/new',
+  path: '/circles/new',
+  getParentRoute: () => HomeRouteRoute,
+} as any)
 const HomeHabitsIndexRoute = HomeHabitsIndexRouteImport.update({
   id: '/habits/',
   path: '/habits/',
@@ -128,6 +150,22 @@ const HomeHabitsArchivedRoute = HomeHabitsArchivedRouteImport.update({
 const HomeHabitsNewRoute = HomeHabitsNewRouteImport.update({
   id: '/habits/new',
   path: '/habits/new',
+  getParentRoute: () => HomeRouteRoute,
+} as any)
+const HomeCirclesCircleIdIndexRoute =
+  HomeCirclesCircleIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => HomeCirclesCircleIdRouteRoute,
+  } as any)
+const HomeCirclesCircleIdEditRoute = HomeCirclesCircleIdEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => HomeCirclesCircleIdRouteRoute,
+} as any)
+const HomeCirclesJoinCodeRoute = HomeCirclesJoinCodeRouteImport.update({
+  id: '/circles/join/$code',
+  path: '/circles/join/$code',
   getParentRoute: () => HomeRouteRoute,
 } as any)
 const HomeHabitsHabitIdIndexRoute = HomeHabitsHabitIdIndexRouteImport.update({
@@ -155,12 +193,18 @@ export interface FileRoutesByFullPath {
   '/home/profile': typeof HomeProfileRoute
   '/home/streaks': typeof HomeStreaksRoute
   '/home/': typeof HomeIndexRoute
+  '/home/circles/$circleId': typeof HomeCirclesCircleIdRouteRouteWithChildren
   '/home/habits/$habitId': typeof HomeHabitsHabitIdRouteRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/home/circles/new': typeof HomeCirclesNewRoute
   '/home/habits/archived': typeof HomeHabitsArchivedRoute
   '/home/habits/new': typeof HomeHabitsNewRoute
+  '/home/circles/': typeof HomeCirclesIndexRoute
   '/home/habits/': typeof HomeHabitsIndexRoute
+  '/home/circles/$circleId/edit': typeof HomeCirclesCircleIdEditRoute
+  '/home/circles/join/$code': typeof HomeCirclesJoinCodeRoute
   '/home/habits/$habitId/edit': typeof HomeHabitsHabitIdEditRoute
+  '/home/circles/$circleId/': typeof HomeCirclesCircleIdIndexRoute
   '/home/habits/$habitId/': typeof HomeHabitsHabitIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -177,10 +221,15 @@ export interface FileRoutesByTo {
   '/home/streaks': typeof HomeStreaksRoute
   '/home': typeof HomeIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/home/circles/new': typeof HomeCirclesNewRoute
   '/home/habits/archived': typeof HomeHabitsArchivedRoute
   '/home/habits/new': typeof HomeHabitsNewRoute
+  '/home/circles': typeof HomeCirclesIndexRoute
   '/home/habits': typeof HomeHabitsIndexRoute
+  '/home/circles/$circleId/edit': typeof HomeCirclesCircleIdEditRoute
+  '/home/circles/join/$code': typeof HomeCirclesJoinCodeRoute
   '/home/habits/$habitId/edit': typeof HomeHabitsHabitIdEditRoute
+  '/home/circles/$circleId': typeof HomeCirclesCircleIdIndexRoute
   '/home/habits/$habitId': typeof HomeHabitsHabitIdIndexRoute
 }
 export interface FileRoutesById {
@@ -200,12 +249,18 @@ export interface FileRoutesById {
   '/home/streaks': typeof HomeStreaksRoute
   '/_marketing/': typeof MarketingIndexRoute
   '/home/': typeof HomeIndexRoute
+  '/home/circles/$circleId': typeof HomeCirclesCircleIdRouteRouteWithChildren
   '/home/habits/$habitId': typeof HomeHabitsHabitIdRouteRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/home/circles/new': typeof HomeCirclesNewRoute
   '/home/habits/archived': typeof HomeHabitsArchivedRoute
   '/home/habits/new': typeof HomeHabitsNewRoute
+  '/home/circles/': typeof HomeCirclesIndexRoute
   '/home/habits/': typeof HomeHabitsIndexRoute
+  '/home/circles/$circleId/edit': typeof HomeCirclesCircleIdEditRoute
+  '/home/circles/join/$code': typeof HomeCirclesJoinCodeRoute
   '/home/habits/$habitId/edit': typeof HomeHabitsHabitIdEditRoute
+  '/home/circles/$circleId/': typeof HomeCirclesCircleIdIndexRoute
   '/home/habits/$habitId/': typeof HomeHabitsHabitIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -224,12 +279,18 @@ export interface FileRouteTypes {
     | '/home/profile'
     | '/home/streaks'
     | '/home/'
+    | '/home/circles/$circleId'
     | '/home/habits/$habitId'
     | '/api/auth/$'
+    | '/home/circles/new'
     | '/home/habits/archived'
     | '/home/habits/new'
+    | '/home/circles/'
     | '/home/habits/'
+    | '/home/circles/$circleId/edit'
+    | '/home/circles/join/$code'
     | '/home/habits/$habitId/edit'
+    | '/home/circles/$circleId/'
     | '/home/habits/$habitId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -246,10 +307,15 @@ export interface FileRouteTypes {
     | '/home/streaks'
     | '/home'
     | '/api/auth/$'
+    | '/home/circles/new'
     | '/home/habits/archived'
     | '/home/habits/new'
+    | '/home/circles'
     | '/home/habits'
+    | '/home/circles/$circleId/edit'
+    | '/home/circles/join/$code'
     | '/home/habits/$habitId/edit'
+    | '/home/circles/$circleId'
     | '/home/habits/$habitId'
   id:
     | '__root__'
@@ -268,12 +334,18 @@ export interface FileRouteTypes {
     | '/home/streaks'
     | '/_marketing/'
     | '/home/'
+    | '/home/circles/$circleId'
     | '/home/habits/$habitId'
     | '/api/auth/$'
+    | '/home/circles/new'
     | '/home/habits/archived'
     | '/home/habits/new'
+    | '/home/circles/'
     | '/home/habits/'
+    | '/home/circles/$circleId/edit'
+    | '/home/circles/join/$code'
     | '/home/habits/$habitId/edit'
+    | '/home/circles/$circleId/'
     | '/home/habits/$habitId/'
   fileRoutesById: FileRoutesById
 }
@@ -399,6 +471,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/home/circles/': {
+      id: '/home/circles/'
+      path: '/circles'
+      fullPath: '/home/circles/'
+      preLoaderRoute: typeof HomeCirclesIndexRouteImport
+      parentRoute: typeof HomeRouteRoute
+    }
+    '/home/circles/$circleId': {
+      id: '/home/circles/$circleId'
+      path: '/circles/$circleId'
+      fullPath: '/home/circles/$circleId'
+      preLoaderRoute: typeof HomeCirclesCircleIdRouteRouteImport
+      parentRoute: typeof HomeRouteRoute
+    }
+    '/home/circles/new': {
+      id: '/home/circles/new'
+      path: '/circles/new'
+      fullPath: '/home/circles/new'
+      preLoaderRoute: typeof HomeCirclesNewRouteImport
+      parentRoute: typeof HomeRouteRoute
+    }
     '/home/habits/': {
       id: '/home/habits/'
       path: '/habits'
@@ -425,6 +518,27 @@ declare module '@tanstack/react-router' {
       path: '/habits/new'
       fullPath: '/home/habits/new'
       preLoaderRoute: typeof HomeHabitsNewRouteImport
+      parentRoute: typeof HomeRouteRoute
+    }
+    '/home/circles/$circleId/': {
+      id: '/home/circles/$circleId/'
+      path: '/'
+      fullPath: '/home/circles/$circleId/'
+      preLoaderRoute: typeof HomeCirclesCircleIdIndexRouteImport
+      parentRoute: typeof HomeCirclesCircleIdRouteRoute
+    }
+    '/home/circles/$circleId/edit': {
+      id: '/home/circles/$circleId/edit'
+      path: '/edit'
+      fullPath: '/home/circles/$circleId/edit'
+      preLoaderRoute: typeof HomeCirclesCircleIdEditRouteImport
+      parentRoute: typeof HomeCirclesCircleIdRouteRoute
+    }
+    '/home/circles/join/$code': {
+      id: '/home/circles/join/$code'
+      path: '/circles/join/$code'
+      fullPath: '/home/circles/join/$code'
+      preLoaderRoute: typeof HomeCirclesJoinCodeRouteImport
       parentRoute: typeof HomeRouteRoute
     }
     '/home/habits/$habitId/': {
@@ -474,6 +588,22 @@ const MarketingRouteRouteWithChildren = MarketingRouteRoute._addFileChildren(
   MarketingRouteRouteChildren,
 )
 
+interface HomeCirclesCircleIdRouteRouteChildren {
+  HomeCirclesCircleIdEditRoute: typeof HomeCirclesCircleIdEditRoute
+  HomeCirclesCircleIdIndexRoute: typeof HomeCirclesCircleIdIndexRoute
+}
+
+const HomeCirclesCircleIdRouteRouteChildren: HomeCirclesCircleIdRouteRouteChildren =
+  {
+    HomeCirclesCircleIdEditRoute: HomeCirclesCircleIdEditRoute,
+    HomeCirclesCircleIdIndexRoute: HomeCirclesCircleIdIndexRoute,
+  }
+
+const HomeCirclesCircleIdRouteRouteWithChildren =
+  HomeCirclesCircleIdRouteRoute._addFileChildren(
+    HomeCirclesCircleIdRouteRouteChildren,
+  )
+
 interface HomeHabitsHabitIdRouteRouteChildren {
   HomeHabitsHabitIdEditRoute: typeof HomeHabitsHabitIdEditRoute
   HomeHabitsHabitIdIndexRoute: typeof HomeHabitsHabitIdIndexRoute
@@ -497,10 +627,14 @@ interface HomeRouteRouteChildren {
   HomeProfileRoute: typeof HomeProfileRoute
   HomeStreaksRoute: typeof HomeStreaksRoute
   HomeIndexRoute: typeof HomeIndexRoute
+  HomeCirclesCircleIdRouteRoute: typeof HomeCirclesCircleIdRouteRouteWithChildren
   HomeHabitsHabitIdRouteRoute: typeof HomeHabitsHabitIdRouteRouteWithChildren
+  HomeCirclesNewRoute: typeof HomeCirclesNewRoute
   HomeHabitsArchivedRoute: typeof HomeHabitsArchivedRoute
   HomeHabitsNewRoute: typeof HomeHabitsNewRoute
+  HomeCirclesIndexRoute: typeof HomeCirclesIndexRoute
   HomeHabitsIndexRoute: typeof HomeHabitsIndexRoute
+  HomeCirclesJoinCodeRoute: typeof HomeCirclesJoinCodeRoute
 }
 
 const HomeRouteRouteChildren: HomeRouteRouteChildren = {
@@ -510,10 +644,14 @@ const HomeRouteRouteChildren: HomeRouteRouteChildren = {
   HomeProfileRoute: HomeProfileRoute,
   HomeStreaksRoute: HomeStreaksRoute,
   HomeIndexRoute: HomeIndexRoute,
+  HomeCirclesCircleIdRouteRoute: HomeCirclesCircleIdRouteRouteWithChildren,
   HomeHabitsHabitIdRouteRoute: HomeHabitsHabitIdRouteRouteWithChildren,
+  HomeCirclesNewRoute: HomeCirclesNewRoute,
   HomeHabitsArchivedRoute: HomeHabitsArchivedRoute,
   HomeHabitsNewRoute: HomeHabitsNewRoute,
+  HomeCirclesIndexRoute: HomeCirclesIndexRoute,
   HomeHabitsIndexRoute: HomeHabitsIndexRoute,
+  HomeCirclesJoinCodeRoute: HomeCirclesJoinCodeRoute,
 }
 
 const HomeRouteRouteWithChildren = HomeRouteRoute._addFileChildren(

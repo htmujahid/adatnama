@@ -7,14 +7,11 @@ import {
   AwardIcon,
   CalendarCheckIcon,
   FlameIcon,
-  HandshakeIcon,
-  HeartHandshakeIcon,
   LifeBuoy,
   ListChecksIcon,
   Send,
   Settings2Icon,
   TrendingUpIcon,
-  UsersIcon,
 } from "lucide-react"
 
 import { NavCircles } from "@/components/layouts/nav-circles"
@@ -29,6 +26,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { inviteLinkFor, useCircles } from "@/hooks/use-circles"
 import { useHomeUser } from "@/hooks/use-home-user"
 import { authClient } from "@/lib/auth-client"
 import { sessionQueryOptions } from "@/lib/data/auth"
@@ -91,29 +89,20 @@ const data = {
       icon: Send,
     },
   ],
-  circles: [
-    {
-      name: "Family",
-      url: "#",
-      icon: <UsersIcon />,
-    },
-    {
-      name: "Friends",
-      url: "#",
-      icon: <HeartHandshakeIcon />,
-    },
-    {
-      name: "Accountability Partners",
-      url: "#",
-      icon: <HandshakeIcon />,
-    },
-  ],
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useHomeUser()
   const router = useRouter()
   const queryClient = useQueryClient()
+  const circles = useCircles()
+  const circleNavItems = circles.map((circle) => ({
+    id: circle.id,
+    name: circle.name,
+    url: `/home/circles/${circle.id}`,
+    color: circle.color,
+    inviteLink: inviteLinkFor(circle),
+  }))
 
   const handleSignOut = async () => {
     await authClient.signOut()
@@ -142,7 +131,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavCircles circles={data.circles} />
+        <NavCircles circles={circleNavItems} />
       </SidebarContent>
       <SidebarFooter>
         <NavSecondary items={data.navSecondary} />

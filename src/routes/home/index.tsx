@@ -7,6 +7,7 @@ import {
   ZapIcon,
 } from "lucide-react"
 
+import { CircleColorDot } from "@/components/circles/circle-color-dot"
 import { Avatar, AvatarFallback, AvatarGroup } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -28,24 +29,19 @@ import {
   ItemTitle,
 } from "@/components/ui/item"
 import { Progress } from "@/components/ui/progress"
-import { useHomeUser } from "@/hooks/use-home-user"
+import { useCircles } from "@/hooks/use-circles"
 import {
   isHabitDone,
   toggleHabitCheckIn,
   useHabitCheckInOverrides,
 } from "@/hooks/use-habit-checkins"
+import { useHomeUser } from "@/hooks/use-home-user"
 import { cn } from "@/lib/utils"
 
 import type { DayState } from "./-data"
 import { ACHIEVEMENTS, doneToday, HABITS } from "./-data"
 
 export const Route = createFileRoute("/home/")({ component: HomePage })
-
-const CIRCLES = [
-  { name: "Family", members: ["A", "M", "S", "Y"], checkedIn: 3 },
-  { name: "Friends", members: ["J", "K", "L", "P"], checkedIn: 2 },
-  { name: "Accountability Partners", members: ["N", "Q"], checkedIn: 1 },
-] as const
 
 const strongestHabit = [...HABITS].sort((a, b) => b.streak - a.streak)[0]
 
@@ -123,6 +119,7 @@ function HomePage() {
   const user = useHomeUser()
   const firstName = user.name.split(" ")[0]
   const overrides = useHabitCheckInOverrides()
+  const circles = useCircles()
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
@@ -210,33 +207,58 @@ function HomePage() {
           <CardHeader>
             <CardTitle>Circles</CardTitle>
             <CardDescription>Shared streaks with your people</CardDescription>
+            <CardAction>
+              <Link
+                to="/home/circles"
+                className="text-xs font-medium text-primary hover:underline"
+              >
+                View all
+              </Link>
+            </CardAction>
           </CardHeader>
           <CardContent>
             <ItemGroup>
-              {CIRCLES.map((circle) => (
-                <Item key={circle.name} variant="outline" size="sm">
-                  <ItemMedia>
-                    <AvatarGroup>
-                      {circle.members.map((initial) => (
-                        <Avatar key={initial} size="sm">
-                          <AvatarFallback>{initial}</AvatarFallback>
-                        </Avatar>
-                      ))}
-                    </AvatarGroup>
-                  </ItemMedia>
-                  <ItemContent>
-                    <ItemTitle>{circle.name}</ItemTitle>
-                    <ItemDescription>
-                      {circle.checkedIn} of {circle.members.length} checked in
-                      today
-                    </ItemDescription>
-                    <Progress
-                      value={(circle.checkedIn / circle.members.length) * 100}
-                      className="mt-1"
-                    />
-                  </ItemContent>
-                </Item>
-              ))}
+              {circles.map((circle) => {
+                const checkedIn = circle.members.filter((member) =>
+                  member.habits.some((habit) => habit.done),
+                ).length
+                return (
+                  <Item key={circle.id} variant="outline" size="sm">
+                    <ItemMedia>
+                      <AvatarGroup>
+                        {circle.members.map((member) => (
+                          <Avatar key={member.id} size="sm">
+                            <AvatarFallback>
+                              {member.name
+                                .split(" ")
+                                .map((part) => part[0])
+                                .join("")
+                                .toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                        ))}
+                      </AvatarGroup>
+                    </ItemMedia>
+                    <ItemContent>
+                      <ItemTitle>
+                        <CircleColorDot color={circle.color} />
+                        {circle.name}
+                      </ItemTitle>
+                      <ItemDescription>
+                        {circle.members.length === 0
+                          ? "No members yet"
+                          : `${checkedIn} of ${circle.members.length} checked in today`}
+                      </ItemDescription>
+                      {circle.members.length > 0 && (
+                        <Progress
+                          value={(checkedIn / circle.members.length) * 100}
+                          className="mt-1"
+                        />
+                      )}
+                    </ItemContent>
+                  </Item>
+                )
+              })}
             </ItemGroup>
           </CardContent>
         </Card>

@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query"
+import { useLiveQuery } from "@tanstack/react-db"
+import { useQueryClient } from "@tanstack/react-query"
 import { Link, useRouter } from "@tanstack/react-router"
 import {
   AwardIcon,
@@ -28,7 +29,8 @@ import {
 import { useHomeUser } from "@/hooks/use-home-user"
 import { authClient } from "@/lib/auth-client"
 import { sessionQueryOptions } from "@/lib/data/auth"
-import { circlesQueryOptions } from "@/lib/data/circles"
+import { getCirclesCollection } from "@/lib/data/circles"
+import { useCollection } from "@/lib/data/collection"
 
 import { NavSecondary } from "./nav-secondary"
 
@@ -93,7 +95,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useHomeUser()
   const router = useRouter()
   const queryClient = useQueryClient()
-  const { data: circles } = useSuspenseQuery(circlesQueryOptions())
+  const circlesCollection = useCollection(getCirclesCollection)
+  const { data: circles = [] } = useLiveQuery((q) => {
+    if (!circlesCollection) return undefined
+    return q.from({ circle: circlesCollection })
+  })
   const origin = typeof window !== "undefined" ? window.location.origin : ""
   const circleNavItems = circles.map((circle) => ({
     id: circle.slug,

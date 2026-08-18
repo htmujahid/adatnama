@@ -4,6 +4,7 @@ import { startOfflineExecutor } from "@tanstack/offline-transactions"
 import type { QueryClient } from "@tanstack/query-core"
 import { useQueryClient } from "@tanstack/react-query"
 
+import { circleMutationFns, getCirclesCollection } from "@/lib/data/circles"
 import { categoryMutationFns, getCategoriesCollection } from "@/lib/data/habit"
 
 let executorPromise: Promise<OfflineExecutor> | null = null
@@ -11,11 +12,14 @@ let executorPromise: Promise<OfflineExecutor> | null = null
 async function createOfflineExecutor(
   queryClient: QueryClient,
 ): Promise<OfflineExecutor> {
-  const categories = await getCategoriesCollection(queryClient)
+  const [categories, circles] = await Promise.all([
+    getCategoriesCollection(queryClient),
+    getCirclesCollection(queryClient),
+  ])
 
   const executor = startOfflineExecutor({
-    collections: { categories },
-    mutationFns: { ...categoryMutationFns },
+    collections: { categories, circles },
+    mutationFns: { ...categoryMutationFns, ...circleMutationFns },
   })
   await executor.waitForInit()
   return executor

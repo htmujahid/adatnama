@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from "@tanstack/react-query"
+import { useLiveQuery } from "@tanstack/react-db"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import {
   CalendarCheckIcon,
@@ -36,7 +36,8 @@ import {
   useHabitCheckInOverrides,
 } from "@/hooks/use-habit-checkins"
 import { useHomeUser } from "@/hooks/use-home-user"
-import { circlesQueryOptions } from "@/lib/data/circles"
+import { getCirclesCollection } from "@/lib/data/circles"
+import { useCollection } from "@/lib/data/collection"
 import { cn } from "@/lib/utils"
 
 import type { DayState, Habit } from "./-data"
@@ -158,7 +159,11 @@ function HomePage() {
   const user = useHomeUser()
   const firstName = user.name.split(" ")[0]
   const overrides = useHabitCheckInOverrides()
-  const { data: circles } = useSuspenseQuery(circlesQueryOptions())
+  const circlesCollection = useCollection(getCirclesCollection)
+  const { data: circles = [] } = useLiveQuery((q) => {
+    if (!circlesCollection) return undefined
+    return q.from({ circle: circlesCollection })
+  })
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
@@ -239,9 +244,9 @@ function HomePage() {
                         {circle.name}
                       </ItemTitle>
                       <ItemDescription>
-                        {circle.memberCount === 1
+                        {circle.members.length === 1
                           ? "1 member"
-                          : `${circle.memberCount} members`}
+                          : `${circle.members.length} members`}
                       </ItemDescription>
                     </ItemContent>
                   </Item>

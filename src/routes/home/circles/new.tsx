@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { UsersIcon } from "lucide-react"
 
@@ -8,7 +7,8 @@ import { CircleForm } from "@/components/circles/circle-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { PRESET_COLORS } from "@/lib/colors"
-import { circlesQueryOptions } from "@/lib/data/circles"
+import { getCirclesCollection } from "@/lib/data/circles"
+import { useCollection } from "@/lib/data/collection"
 
 export const Route = createFileRoute("/home/circles/new")({
   component: NewCirclePage,
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/home/circles/new")({
 
 function NewCirclePage() {
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
+  const collection = useCollection(getCirclesCollection)
   const [error, setError] = useState<string | null>(null)
 
   return (
@@ -70,9 +70,7 @@ function NewCirclePage() {
                 setError(createError.message)
                 return
               }
-              await queryClient.invalidateQueries({
-                queryKey: circlesQueryOptions().queryKey,
-              })
+              await collection?.utils.refetch()
               await navigate({
                 to: "/home/circles/$circleId",
                 params: { circleId: circle.slug },

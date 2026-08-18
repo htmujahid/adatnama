@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react"
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query"
+import type { Collection } from "@tanstack/db"
+import type { OfflineExecutor } from "@tanstack/offline-transactions"
+import { eq, useLiveQuery } from "@tanstack/react-db"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import {
   CheckIcon,
@@ -11,13 +13,7 @@ import {
   UsersIcon,
 } from "lucide-react"
 
-import {
-  leaveCircle,
-  memberRoles,
-  regenerateJoinCode,
-  removeMember,
-  updateMemberRole,
-} from "@/actions/circles"
+import { memberRoles, regenerateJoinCode } from "@/actions/circles"
 import { CircleColorDot } from "@/components/circles/circle-color-dot"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -39,12 +35,18 @@ import {
 import { FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Item, ItemActions, ItemContent, ItemTitle } from "@/components/ui/item"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useHomeUser } from "@/hooks/use-home-user"
-import { circleQueryOptions, circlesQueryOptions } from "@/lib/data/circles"
+import type { CircleRecord } from "@/lib/data/circles"
+import { getCirclesCollection } from "@/lib/data/circles"
+import { useCollection } from "@/lib/data/collection"
+import { useOfflineExecutor } from "@/lib/db/offline"
 
 export const Route = createFileRoute("/home/circles/$circleId/")({
   component: CircleDetailPage,
 })
+
+type CirclesCollectionType = Collection<CircleRecord, string>
 
 function initialsFor(name: string) {
   return name
@@ -55,17 +57,16 @@ function initialsFor(name: string) {
 }
 
 function InviteCard({
+  collection,
   organizationId,
-  circleId,
   joinCode,
   canRegenerate,
 }: {
+  collection: CirclesCollectionType | undefined
   organizationId: string
-  circleId: string
   joinCode: string
   canRegenerate: boolean
 }) {
-  const queryClient = useQueryClient()
   const [copied, setCopied] = useState(false)
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -121,9 +122,7 @@ function InviteCard({
                     setError(regenerateError.message)
                     return
                   }
-                  await queryClient.invalidateQueries({
-                    queryKey: circleQueryOptions(circleId).queryKey,
-                  })
+                  await collection?.utils.refetch()
                 }}
               >
                 <RefreshCwIcon />
@@ -139,60 +138,57 @@ function InviteCard({
 }
 
 function MemberRow({
+  collection,
+  executor,
   organizationId,
-  circleId,
   memberId,
   name,
   role,
   canManage,
   isSelf,
 }: {
+  collection: CirclesCollectionType
+  executor: OfflineExecutor | undefined
   organizationId: string
-  circleId: string
   memberId: string
   name: string
   role: string
   canManage: boolean
   isSelf: boolean
 }) {
-  const queryClient = useQueryClient()
-  const [pending, setPending] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const roles = memberRoles(role)
   const isOwner = roles.includes("owner")
   const isAdmin = roles.includes("admin")
 
-  const refresh = () =>
-    queryClient.invalidateQueries({
-      queryKey: circleQueryOptions(circleId).queryKey,
-    })
-
-  const handleRoleChange = async (nextRole: "admin" | "member") => {
-    setPending(true)
-    setError(null)
-    const { error: roleError } = await updateMemberRole({
-      data: { organizationId, memberId, role: nextRole },
-    })
-    setPending(false)
-    if (roleError) {
-      setError(roleError.message)
-      return
-    }
-    await refresh()
+  const handleRoleChange = (nextRole: "admin" | "member") => {
+    if (!executor) return
+    executor
+      .createOfflineTransaction({ mutationFnName: "circles.updateMemberRole" })
+      .mutate(() => {
+        collection.update(
+          organizationId,
+          { metadata: { memberId, role: nextRole } },
+          (draft) => {
+            const member = draft.members.find((m) => m.id === memberId)
+            if (member) member.role = nextRole
+          },
+        )
+      })
   }
 
-  const handleRemove = async () => {
-    setPending(true)
-    setError(null)
-    const { error: removeError } = await removeMember({
-      data: { organizationId, memberId },
-    })
-    setPending(false)
-    if (removeError) {
-      setError(removeError.message)
-      return
-    }
-    await refresh()
+  const handleRemove = () => {
+    if (!executor) return
+    executor
+      .createOfflineTransaction({ mutationFnName: "circles.removeMember" })
+      .mutate(() => {
+        collection.update(
+          organizationId,
+          { metadata: { memberId } },
+          (draft) => {
+            draft.members = draft.members.filter((m) => m.id !== memberId)
+          },
+        )
+      })
   }
 
   return (
@@ -206,36 +202,28 @@ function MemberRow({
           {isOwner && <Badge variant="secondary">Owner</Badge>}
           {!isOwner && isAdmin && <Badge variant="secondary">Admin</Badge>}
         </div>
-        <FieldError>{error}</FieldError>
       </ItemContent>
       {canManage && !isOwner && !isSelf && (
         <ItemActions>
           <DropdownMenu>
             <DropdownMenuTrigger
-              render={<Button variant="ghost" size="icon" disabled={pending} />}
+              render={<Button variant="ghost" size="icon" />}
             >
               <MoreHorizontalIcon />
               <span className="sr-only">Manage member</span>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {isAdmin ? (
-                <DropdownMenuItem
-                  onClick={() => void handleRoleChange("member")}
-                >
+                <DropdownMenuItem onClick={() => handleRoleChange("member")}>
                   Make member
                 </DropdownMenuItem>
               ) : (
-                <DropdownMenuItem
-                  onClick={() => void handleRoleChange("admin")}
-                >
+                <DropdownMenuItem onClick={() => handleRoleChange("admin")}>
                   Make admin
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={() => void handleRemove()}
-              >
+              <DropdownMenuItem variant="destructive" onClick={handleRemove}>
                 Remove from circle
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -249,44 +237,36 @@ function MemberRow({
 function CircleDetailPage() {
   const { circleId } = Route.useParams()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
+  const collection = useCollection(getCirclesCollection)
+  const executor = useOfflineExecutor()
   const user = useHomeUser()
-  const { data } = useSuspenseQuery(circleQueryOptions(circleId))
-  const [leaveError, setLeaveError] = useState<string | null>(null)
-  const [leavePending, setLeavePending] = useState(false)
+  const { data: matches = [], isLoading: circleLoading } = useLiveQuery((q) => {
+    if (!collection) return undefined
+    return q
+      .from({ circle: collection })
+      .where(({ circle }) => eq(circle.slug, circleId))
+  })
+  const circle = matches.at(0)
 
-  if (data.notMember) {
+  if (!collection || circleLoading) {
     return (
-      <div className="mx-auto flex w-full max-w-md flex-col items-center gap-3 py-24 text-center">
-        <h1 className="font-heading text-xl font-semibold tracking-tight">
-          You're not a member of this circle
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Ask an owner or admin for the circle's invite link to join.
-        </p>
-        <Button
-          variant="outline"
-          size="sm"
-          nativeButton={false}
-          render={<Link to="/home/circles" />}
-        >
-          <UsersIcon />
-          All circles
-        </Button>
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-40 w-full" />
       </div>
     )
   }
-
-  const circle = data.circle
 
   if (!circle) {
     return (
-      <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-3 py-24 text-center">
+      <div className="mx-auto flex w-full max-w-md flex-col items-center gap-3 py-24 text-center">
         <h1 className="font-heading text-xl font-semibold tracking-tight">
-          Circle not found
+          You don't have access to this circle
         </h1>
         <p className="text-sm text-muted-foreground">
-          This circle doesn't exist or may have been removed.
+          It may not exist, or you may not be a member. Ask an owner or admin
+          for the circle's invite link to join.
         </p>
         <Button
           variant="outline"
@@ -301,9 +281,8 @@ function CircleDetailPage() {
     )
   }
 
-  const currentMember = circle.members.find(
-    (member) => member.userId === user.id,
-  )
+  const members = circle.members
+  const currentMember = members.find((member) => member.userId === user.id)
   const currentRoles = currentMember ? memberRoles(currentMember.role) : []
   const canManage =
     currentRoles.includes("owner") || currentRoles.includes("admin")
@@ -341,21 +320,14 @@ function CircleDetailPage() {
             <Button
               variant="destructive"
               size="sm"
-              disabled={leavePending}
+              disabled={!executor}
               onClick={async () => {
-                setLeavePending(true)
-                setLeaveError(null)
-                const { error } = await leaveCircle({
-                  data: { organizationId: circle.id },
-                })
-                setLeavePending(false)
-                if (error) {
-                  setLeaveError(error.message)
-                  return
-                }
-                await queryClient.invalidateQueries({
-                  queryKey: circlesQueryOptions().queryKey,
-                })
+                if (!executor) return
+                executor
+                  .createOfflineTransaction({ mutationFnName: "circles.leave" })
+                  .mutate(() => {
+                    collection.delete(circle.id)
+                  })
                 await navigate({ to: "/home/circles" })
               }}
             >
@@ -372,13 +344,12 @@ function CircleDetailPage() {
               All circles
             </Button>
           </div>
-          <FieldError>{leaveError}</FieldError>
         </div>
       </div>
 
       <InviteCard
+        collection={collection}
         organizationId={circle.id}
-        circleId={circleId}
         joinCode={circle.joinCode}
         canRegenerate={canManage}
       />
@@ -387,19 +358,18 @@ function CircleDetailPage() {
         <CardHeader>
           <CardTitle>Members</CardTitle>
           <CardDescription>
-            {circle.members.length === 1
-              ? "1 member"
-              : `${circle.members.length} members`}
+            {members.length === 1 ? "1 member" : `${members.length} members`}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
-          {circle.members.map((member) => (
+          {members.map((member) => (
             <MemberRow
               key={member.id}
+              collection={collection}
+              executor={executor}
               organizationId={circle.id}
-              circleId={circleId}
               memberId={member.id}
-              name={member.user.name}
+              name={member.name}
               role={member.role}
               canManage={canManage}
               isSelf={member.userId === user.id}

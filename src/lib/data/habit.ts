@@ -1,3 +1,4 @@
+import { NonRetriableError } from "@tanstack/offline-transactions"
 import type { OfflineConfig } from "@tanstack/offline-transactions"
 import type { QueryClient } from "@tanstack/query-core"
 
@@ -37,7 +38,10 @@ export const categoryMutationFns: OfflineConfig["mutationFns"] = {
     const result = await createCategory({
       data: mutation.modified as unknown as CategoryRecord,
     })
-    if (result.category) collection.utils.writeInsert(result.category)
+    if (result.error) {
+      throw new NonRetriableError(result.error.message)
+    }
+    collection.utils.writeInsert(result.category)
   },
   "categories.update": async ({ transaction }) => {
     const mutation = transaction.mutations[0]
@@ -50,12 +54,20 @@ export const categoryMutationFns: OfflineConfig["mutationFns"] = {
         color: modified.color,
       },
     })
-    if (result.category) collection.utils.writeUpdate(result.category)
+    if (result.error) {
+      throw new NonRetriableError(result.error.message)
+    }
+    collection.utils.writeUpdate(result.category)
   },
   "categories.delete": async ({ transaction }) => {
     const mutation = transaction.mutations[0]
     const collection = mutation.collection as unknown as CategoriesCollection
-    await deleteCategory({ data: { id: String(mutation.key) } })
+    const result = await deleteCategory({
+      data: { id: String(mutation.key) },
+    })
+    if (result.error) {
+      throw new NonRetriableError(result.error.message)
+    }
     collection.utils.writeDelete(String(mutation.key))
   },
 }

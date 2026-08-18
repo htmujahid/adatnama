@@ -19,7 +19,6 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { circlesQueryOptions } from "@/lib/data/circles"
 
 export const Route = createFileRoute("/home")({
   beforeLoad: ({ context }) => {
@@ -27,9 +26,6 @@ export const Route = createFileRoute("/home")({
       throw redirect({ to: "/login" })
     }
     return { user: context.session.user }
-  },
-  loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(circlesQueryOptions())
   },
   component: HomeLayout,
 })

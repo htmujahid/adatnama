@@ -1,9 +1,17 @@
 import { createServerFn } from "@tanstack/react-start"
 import { getRequestHeaders } from "@tanstack/react-start/server"
 import { APIError } from "better-auth/api"
+import { sql } from "kysely"
 
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
+
+export type CircleMember = {
+  id: string
+  userId: string
+  role: string
+  name: string
+}
 
 export type CircleInput = {
   name: string
@@ -53,17 +61,12 @@ export const listCircles = createServerFn({ method: "GET" }).handler(
     const session = await auth.api.getSession({ headers })
     if (!session) return []
 
-    return db
+    const rows = await db
       .selectFrom("organization")
       .innerJoin("member as selfMember", (join) =>
         join
           .onRef("selfMember.organizationId", "=", "organization.id")
           .on("selfMember.userId", "=", session.user.id),
-      )
-      .leftJoin(
-        "member as allMembers",
-        "allMembers.organizationId",
-        "organization.id",
       )
       .select([
         "organization.id",
@@ -73,34 +76,28 @@ export const listCircles = createServerFn({ method: "GET" }).handler(
         "organization.color",
         "organization.joinCode",
       ])
-      .select((eb) =>
-        eb.fn.count<number>("allMembers.id").as("memberCount"),
+      .select(
+        sql<string>`(
+          select coalesce(json_group_array(json_object(
+            'id', "member"."id",
+            'userId', "member"."userId",
+            'role', "member"."role",
+            'name', "user"."name"
+          )), '[]')
+          from "member"
+          inner join "user" on "user"."id" = "member"."userId"
+          where "member"."organizationId" = "organization"."id"
+          order by "member"."createdAt"
+        )`.as("members"),
       )
-      .groupBy("organization.id")
       .execute()
+
+    return rows.map((row) => ({
+      ...row,
+      members: JSON.parse(row.members) as Array<CircleMember>,
+    }))
   },
 )
-
-export const getCircle = createServerFn({ method: "GET" })
-  .validator((data: { slug: string }) => data)
-  .handler(async ({ data }) => {
-    const headers = getRequestHeaders()
-    try {
-      const organization = await auth.api.getFullOrganization({
-        query: { organizationSlug: data.slug },
-        headers,
-      })
-      return { circle: organization, notMember: false }
-    } catch (error) {
-      if (error instanceof APIError) {
-        if (error.message === "User is not a member of the organization") {
-          return { circle: null, notMember: true }
-        }
-        return { circle: null, notMember: false }
-      }
-      throw error
-    }
-  })
 
 export const createCircle = createServerFn({ method: "POST" })
   .validator((data: CircleInput) => data)

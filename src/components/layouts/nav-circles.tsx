@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useQueryClient } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
 import {
   ArrowRightIcon,
@@ -11,7 +10,6 @@ import {
   UserPlusIcon,
 } from "lucide-react"
 
-import { leaveCircle } from "@/actions/circles"
 import { CircleColorDot } from "@/components/circles/circle-color-dot"
 import {
   DropdownMenu,
@@ -30,7 +28,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { circlesQueryOptions } from "@/lib/data/circles"
+import { getCirclesCollection } from "@/lib/data/circles"
+import { useCollection } from "@/lib/data/collection"
+import { useOfflineExecutor } from "@/lib/db/offline"
 
 export function NavCircles({
   circles,
@@ -45,23 +45,17 @@ export function NavCircles({
   }[]
 }) {
   const { isMobile } = useSidebar()
-  const queryClient = useQueryClient()
+  const collection = useCollection(getCirclesCollection)
+  const executor = useOfflineExecutor()
   const [copiedId, setCopiedId] = useState<string | null>(null)
-  const [leaveError, setLeaveError] = useState<{
-    id: string
-    message: string
-  } | null>(null)
 
-  const handleLeave = async (id: string, organizationId: string) => {
-    setLeaveError(null)
-    const { error } = await leaveCircle({ data: { organizationId } })
-    if (error) {
-      setLeaveError({ id, message: error.message })
-      return
-    }
-    await queryClient.invalidateQueries({
-      queryKey: circlesQueryOptions().queryKey,
-    })
+  const handleLeave = (organizationId: string) => {
+    if (!executor) return
+    executor
+      .createOfflineTransaction({ mutationFnName: "circles.leave" })
+      .mutate(() => {
+        collection?.delete(organizationId)
+      })
   }
 
   return (
@@ -116,18 +110,13 @@ export function NavCircles({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   variant="destructive"
-                  onClick={() => void handleLeave(item.id, item.organizationId)}
+                  onClick={() => handleLeave(item.organizationId)}
                 >
                   <LogOutIcon />
                   <span>Leave circle</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            {leaveError?.id === item.id && (
-              <p className="px-2 pb-1 text-xs text-destructive">
-                {leaveError.message}
-              </p>
-            )}
           </SidebarMenuItem>
         ))}
       </SidebarMenu>

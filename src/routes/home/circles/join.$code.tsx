@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query"
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { UsersIcon } from "lucide-react"
 
@@ -11,8 +11,9 @@ import { FieldError } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 import {
   circlePreviewQueryOptions,
-  circlesQueryOptions,
+  getCirclesCollection,
 } from "@/lib/data/circles"
+import { useCollection } from "@/lib/data/collection"
 
 export const Route = createFileRoute("/home/circles/join/$code")({
   loader: async ({ context, params }) => {
@@ -26,7 +27,7 @@ export const Route = createFileRoute("/home/circles/join/$code")({
 function JoinCirclePage() {
   const { code } = Route.useParams()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
+  const collection = useCollection(getCirclesCollection)
   const { data } = useSuspenseQuery(circlePreviewQueryOptions(code))
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -90,9 +91,7 @@ function JoinCirclePage() {
                   setError(joinError?.message ?? "Unable to join circle.")
                   return
                 }
-                await queryClient.invalidateQueries({
-                  queryKey: circlesQueryOptions().queryKey,
-                })
+                await collection?.utils.refetch()
                 await navigate({
                   to: "/home/circles/$circleId",
                   params: { circleId: slug },

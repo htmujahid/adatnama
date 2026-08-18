@@ -1,13 +1,14 @@
-import { useState } from "react"
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query"
+import { eq, useLiveQuery } from "@tanstack/react-db"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { UsersIcon } from "lucide-react"
 
-import { updateCircle } from "@/actions/circles"
 import { CircleForm } from "@/components/circles/circle-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { circleQueryOptions, circlesQueryOptions } from "@/lib/data/circles"
+import { Skeleton } from "@/components/ui/skeleton"
+import { getCirclesCollection } from "@/lib/data/circles"
+import { useCollection } from "@/lib/data/collection"
+import { useOfflineExecutor } from "@/lib/db/offline"
 
 export const Route = createFileRoute("/home/circles/$circleId/edit")({
   component: EditCirclePage,
@@ -16,10 +17,30 @@ export const Route = createFileRoute("/home/circles/$circleId/edit")({
 function EditCirclePage() {
   const { circleId } = Route.useParams()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const { data } = useSuspenseQuery(circleQueryOptions(circleId))
-  const [error, setError] = useState<string | null>(null)
-  const circle = data.circle
+  const collection = useCollection(getCirclesCollection)
+  const executor = useOfflineExecutor()
+  const { data: matches = [], isLoading } = useLiveQuery((q) => {
+    if (!collection) return undefined
+    return q
+      .from({ circle: collection })
+      .where(({ circle }) => eq(circle.slug, circleId))
+  })
+  const circle = matches.at(0)
+
+  if (!collection || isLoading) {
+    return (
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+        <Skeleton className="h-8 w-64" />
+        <Card>
+          <CardContent className="flex flex-col gap-4">
+            <Skeleton className="h-9 w-full" />
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-9 w-40" />
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   if (!circle) {
     return (
@@ -74,7 +95,6 @@ function EditCirclePage() {
               color: circle.color,
             }}
             submitLabel="Save changes"
-            error={error}
             cancel={
               <Button
                 type="button"
@@ -88,20 +108,16 @@ function EditCirclePage() {
               </Button>
             }
             onSubmit={async (input) => {
-              setError(null)
-              const { error: updateError } = await updateCircle({
-                data: { organizationId: circle.id, ...input },
-              })
-              if (updateError) {
-                setError(updateError.message)
-                return
-              }
-              await queryClient.invalidateQueries({
-                queryKey: circleQueryOptions(circleId).queryKey,
-              })
-              await queryClient.invalidateQueries({
-                queryKey: circlesQueryOptions().queryKey,
-              })
+              if (!executor) return
+              executor
+                .createOfflineTransaction({ mutationFnName: "circles.update" })
+                .mutate(() => {
+                  collection.update(circle.id, (draft) => {
+                    draft.name = input.name
+                    draft.description = input.description
+                    draft.color = input.color
+                  })
+                })
               await navigate({
                 to: "/home/circles/$circleId",
                 params: { circleId },

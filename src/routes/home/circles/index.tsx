@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query"
+import { useLiveQuery } from "@tanstack/react-db"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { PlusIcon, UserPlusIcon } from "lucide-react"
 
@@ -30,19 +30,20 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
-import { circlesQueryOptions } from "@/lib/data/circles"
+import { getCirclesCollection } from "@/lib/data/circles"
+import { useCollection } from "@/lib/data/collection"
 
 export const Route = createFileRoute("/home/circles/")({
-  loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(circlesQueryOptions())
-  },
   component: CirclesPage,
 })
 
-function JoinCircleDialog() {
-  const navigate = useNavigate()
-  const queryClient = useQueryClient()
+function JoinCircleDialog({
+  onJoined,
+}: {
+  onJoined: (slug: string) => void | Promise<void>
+}) {
   const [code, setCode] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
@@ -76,14 +77,8 @@ function JoinCircleDialog() {
               setError(joinError?.message ?? "No circle found for that code.")
               return
             }
-            await queryClient.invalidateQueries({
-              queryKey: circlesQueryOptions().queryKey,
-            })
             setOpen(false)
-            await navigate({
-              to: "/home/circles/$circleId",
-              params: { circleId: slug },
-            })
+            await onJoined(slug)
           }}
         >
           <DialogHeader>
@@ -124,7 +119,21 @@ function JoinCircleDialog() {
 }
 
 function CirclesPage() {
-  const { data: circles } = useSuspenseQuery(circlesQueryOptions())
+  const navigate = useNavigate()
+  const collection = useCollection(getCirclesCollection)
+  const { data: circles = [], isLoading } = useLiveQuery((q) => {
+    if (!collection) return undefined
+    return q.from({ circle: collection })
+  })
+  const circlesLoading = !collection || isLoading
+
+  async function handleJoined(slug: string) {
+    await collection?.utils.refetch()
+    await navigate({
+      to: "/home/circles/$circleId",
+      params: { circleId: slug },
+    })
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
@@ -138,7 +147,7 @@ function CirclesPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <JoinCircleDialog />
+          <JoinCircleDialog onJoined={handleJoined} />
           <Button
             size="sm"
             nativeButton={false}
@@ -150,7 +159,24 @@ function CirclesPage() {
         </div>
       </div>
 
-      {circles.length === 0 ? (
+      {circlesLoading ? (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 3 }, (_, index) => (
+            <Card key={index}>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Skeleton className="size-3 rounded-full" />
+                  <Skeleton className="h-5 w-24" />
+                </div>
+                <Skeleton className="mt-1.5 h-4 w-32" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-3 w-16" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : circles.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center gap-1 py-10 text-center">
             <p className="text-sm font-medium">
@@ -176,9 +202,9 @@ function CirclesPage() {
               </CardHeader>
               <CardContent className="flex flex-col gap-3">
                 <span className="text-xs text-muted-foreground">
-                  {circle.memberCount === 1
+                  {circle.members.length === 1
                     ? "1 member"
-                    : `${circle.memberCount} members`}
+                    : `${circle.members.length} members`}
                 </span>
 
                 <Link

@@ -15,6 +15,7 @@ import {
   TrophyIcon,
 } from "lucide-react"
 
+import { HabitNoteButton } from "@/components/habits/habit-note-button"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -29,6 +30,7 @@ import { useHabit } from "@/hooks/use-habit-catalog"
 import {
   isHabitDone,
   toggleHabitCheckIn,
+  useHabitCheckInNote,
   useHabitCheckInOverrides,
 } from "@/hooks/use-habit-checkins"
 import { cn } from "@/lib/utils"
@@ -110,6 +112,7 @@ function HabitDetailPage() {
   const { habitId } = Route.useParams()
   const overrides = useHabitCheckInOverrides()
   const habit = useHabit(habitId)
+  const note = useHabitCheckInNote(habitId)
 
   if (!habit) {
     return (
@@ -179,6 +182,11 @@ function HabitDetailPage() {
             </Badge>
           </div>
           <p className="text-sm text-muted-foreground">{habit.category}</p>
+          {note && (
+            <p className="mt-1 text-sm text-muted-foreground italic">
+              "{note}"
+            </p>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -189,6 +197,11 @@ function HabitDetailPage() {
             {done ? <CircleXIcon /> : <CircleCheckIcon />}
             {done ? "Undo today's check-in" : "Mark today done"}
           </Button>
+          <HabitNoteButton
+            habitId={habit.id}
+            habitName={habit.name}
+            className="border border-input"
+          />
           <Button
             variant="outline"
             size="sm"
@@ -314,10 +327,7 @@ function HabitDetailPage() {
               {habit.week.map((state, index) => {
                 const isToday = index === habit.week.length - 1
                 return (
-                  <div
-                    key={index}
-                    className="flex flex-col items-center gap-2"
-                  >
+                  <div key={index} className="flex flex-col items-center gap-2">
                     <span className="text-xs text-muted-foreground">
                       {WEEK_DATES[index]}
                     </span>
@@ -327,9 +337,7 @@ function HabitDetailPage() {
                         onClick={() => toggleHabitCheckIn(habit)}
                         aria-pressed={done}
                         aria-label={
-                          done
-                            ? "Mark today as not done"
-                            : "Mark today as done"
+                          done ? "Mark today as not done" : "Mark today as done"
                         }
                         className={cn(
                           "flex size-8 cursor-pointer items-center justify-center rounded-full transition-colors",

@@ -8,6 +8,7 @@ import {
 } from "lucide-react"
 
 import { CircleColorDot } from "@/components/circles/circle-color-dot"
+import { HabitNoteButton } from "@/components/habits/habit-note-button"
 import { Avatar, AvatarFallback, AvatarGroup } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -33,12 +34,13 @@ import { useCircles } from "@/hooks/use-circles"
 import {
   isHabitDone,
   toggleHabitCheckIn,
+  useHabitCheckInNote,
   useHabitCheckInOverrides,
 } from "@/hooks/use-habit-checkins"
 import { useHomeUser } from "@/hooks/use-home-user"
 import { cn } from "@/lib/utils"
 
-import type { DayState } from "./-data"
+import type { DayState, Habit } from "./-data"
 import { ACHIEVEMENTS, doneToday, HABITS } from "./-data"
 
 export const Route = createFileRoute("/home/")({ component: HomePage })
@@ -115,6 +117,47 @@ function WeekDots({ week }: { week: ReadonlyArray<DayState> }) {
   )
 }
 
+function TodayHabitItem({ habit, done }: { habit: Habit; done: boolean }) {
+  const note = useHabitCheckInNote(habit.id)
+
+  return (
+    <Item
+      variant="outline"
+      onClick={() => toggleHabitCheckIn(habit)}
+      className="cursor-pointer select-none transition-colors hover:bg-muted/60 active:bg-muted"
+    >
+      <ItemMedia>
+        <Checkbox
+          checked={done}
+          onCheckedChange={() => toggleHabitCheckIn(habit)}
+          onClick={(event) => {
+            // The row already toggles on click; avoid double-firing.
+            event.stopPropagation()
+          }}
+          aria-label={`Mark ${habit.name} as ${done ? "not done" : "done"} for today`}
+        />
+      </ItemMedia>
+      <ItemContent>
+        <ItemTitle>{habit.name}</ItemTitle>
+        <ItemDescription>
+          {habit.freezes > 0
+            ? `${habit.freezes} freeze${habit.freezes > 1 ? "s" : ""} left`
+            : "No freezes left"}
+        </ItemDescription>
+        {note && <ItemDescription className="italic">"{note}"</ItemDescription>}
+      </ItemContent>
+      <ItemActions>
+        <WeekDots week={habit.week} />
+        <HabitNoteButton habitId={habit.id} habitName={habit.name} />
+        <Badge variant={habit.done ? "secondary" : "outline"}>
+          <FlameIcon />
+          {habit.streak}
+        </Badge>
+      </ItemActions>
+    </Item>
+  )
+}
+
 function HomePage() {
   const user = useHomeUser()
   const firstName = user.name.split(" ")[0]
@@ -161,44 +204,13 @@ function HomePage() {
           </CardHeader>
           <CardContent>
             <ItemGroup>
-              {HABITS.map((habit) => {
-                const done = isHabitDone(habit, overrides)
-                return (
-                  <Item
-                    key={habit.id}
-                    variant="outline"
-                    onClick={() => toggleHabitCheckIn(habit)}
-                    className="cursor-pointer select-none transition-colors hover:bg-muted/60 active:bg-muted"
-                  >
-                    <ItemMedia>
-                      <Checkbox
-                        checked={done}
-                        onCheckedChange={() => toggleHabitCheckIn(habit)}
-                        onClick={(event) => {
-                          // The row already toggles on click; avoid double-firing.
-                          event.stopPropagation()
-                        }}
-                        aria-label={`Mark ${habit.name} as ${done ? "not done" : "done"} for today`}
-                      />
-                    </ItemMedia>
-                    <ItemContent>
-                      <ItemTitle>{habit.name}</ItemTitle>
-                      <ItemDescription>
-                        {habit.freezes > 0
-                          ? `${habit.freezes} freeze${habit.freezes > 1 ? "s" : ""} left`
-                          : "No freezes left"}
-                      </ItemDescription>
-                    </ItemContent>
-                    <ItemActions>
-                      <WeekDots week={habit.week} />
-                      <Badge variant={habit.done ? "secondary" : "outline"}>
-                        <FlameIcon />
-                        {habit.streak}
-                      </Badge>
-                    </ItemActions>
-                  </Item>
-                )
-              })}
+              {HABITS.map((habit) => (
+                <TodayHabitItem
+                  key={habit.id}
+                  habit={habit}
+                  done={isHabitDone(habit, overrides)}
+                />
+              ))}
             </ItemGroup>
           </CardContent>
         </Card>

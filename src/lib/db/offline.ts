@@ -1,54 +1,31 @@
 import { useEffect, useState } from "react"
 import type { OfflineExecutor } from "@tanstack/offline-transactions"
 import { startOfflineExecutor } from "@tanstack/offline-transactions"
-import type { QueryClient } from "@tanstack/query-core"
-import { useQueryClient } from "@tanstack/react-query"
 
-import {
-  achievementMutationFns,
-  getAchievementUnlocksCollection,
-} from "@/lib/data/achievements"
-import {
-  categoryMutationFns,
-  getCategoriesCollection,
-} from "@/lib/data/categories"
-import { checkinMutationFns, getCheckinsCollection } from "@/lib/data/checkins"
-import { circleMutationFns, getCirclesCollection } from "@/lib/data/circles"
-import { getHabitsCollection, habitMutationFns } from "@/lib/data/habits"
-import {
-  getPreferencesCollection,
-  preferencesMutationFns,
-} from "@/lib/data/preferences"
+import { achievementUnlocksCollection } from "@/lib/collection/achievements"
+import { categoriesCollection } from "@/lib/collection/categories"
+import { checkinsCollection } from "@/lib/collection/checkins"
+import { circlesCollection } from "@/lib/collection/circles"
+import { habitsCollection } from "@/lib/collection/habits"
+import { preferencesCollection } from "@/lib/collection/preferences"
+import { achievementMutationFns } from "@/lib/mutations/achievements"
+import { categoryMutationFns } from "@/lib/mutations/categories"
+import { checkinMutationFns } from "@/lib/mutations/checkins"
+import { circleMutationFns } from "@/lib/mutations/circles"
+import { habitMutationFns } from "@/lib/mutations/habits"
+import { preferencesMutationFns } from "@/lib/mutations/preferences"
 
 let executorPromise: Promise<OfflineExecutor> | null = null
 
-async function createOfflineExecutor(
-  queryClient: QueryClient,
-): Promise<OfflineExecutor> {
-  const [
-    categories,
-    circles,
-    habits,
-    checkins,
-    achievementUnlocks,
-    preferences,
-  ] = await Promise.all([
-    getCategoriesCollection(queryClient),
-    getCirclesCollection(queryClient),
-    getHabitsCollection(queryClient),
-    getCheckinsCollection(queryClient),
-    getAchievementUnlocksCollection(queryClient),
-    getPreferencesCollection(queryClient),
-  ])
-
+async function createOfflineExecutor(): Promise<OfflineExecutor> {
   const executor = startOfflineExecutor({
     collections: {
-      categories,
-      circles,
-      habits,
-      checkins,
-      achievementUnlocks,
-      preferences,
+      categories: categoriesCollection,
+      circles: circlesCollection,
+      habits: habitsCollection,
+      checkins: checkinsCollection,
+      achievementUnlocks: achievementUnlocksCollection,
+      preferences: preferencesCollection,
     },
     mutationFns: {
       ...categoryMutationFns,
@@ -63,31 +40,28 @@ async function createOfflineExecutor(
   return executor
 }
 
-export function getOfflineExecutor(
-  queryClient: QueryClient,
-): Promise<OfflineExecutor> {
+export function getOfflineExecutor(): Promise<OfflineExecutor> {
   if (typeof window === "undefined") {
     throw new Error("Offline transactions are only available in the browser.")
   }
   if (!executorPromise) {
-    executorPromise = createOfflineExecutor(queryClient)
+    executorPromise = createOfflineExecutor()
   }
   return executorPromise
 }
 
 export function useOfflineExecutor(): OfflineExecutor | undefined {
-  const queryClient = useQueryClient()
   const [executor, setExecutor] = useState<OfflineExecutor>()
 
   useEffect(() => {
     let cancelled = false
-    getOfflineExecutor(queryClient).then((next) => {
+    getOfflineExecutor().then((next) => {
       if (!cancelled) setExecutor(next)
     })
     return () => {
       cancelled = true
     }
-  }, [queryClient])
+  }, [])
 
   return executor
 }

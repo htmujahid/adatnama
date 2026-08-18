@@ -31,9 +31,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { useHomeUser } from "@/hooks/use-home-user"
 import { authClient } from "@/lib/auth-client"
-import { sessionQueryOptions } from "@/lib/data/auth"
-import { getCirclesCollection } from "@/lib/data/circles"
-import { useCollection } from "@/lib/data/collection"
+import { circlesCollection } from "@/lib/collection/circles"
+import { sessionQueryOptions } from "@/lib/query/auth"
 
 import { NavSecondary } from "./nav-secondary"
 
@@ -110,11 +109,9 @@ function CirclesNavSkeleton() {
 }
 
 function CirclesNavSection() {
-  const circlesCollection = useCollection(getCirclesCollection)
-  const { data: circles = [] } = useLiveQuery((q) => {
-    if (!circlesCollection) return undefined
-    return q.from({ circle: circlesCollection })
-  })
+  const { data: circles = [], isLoading } = useLiveQuery((q) =>
+    q.from({ circle: circlesCollection }),
+  )
   const origin = typeof window !== "undefined" ? window.location.origin : ""
   const circleNavItems = circles.map((circle) => ({
     id: circle.slug,
@@ -125,7 +122,7 @@ function CirclesNavSection() {
     inviteLink: `${origin}/home/circles/join/${circle.joinCode}`,
   }))
 
-  if (!circlesCollection) {
+  if (isLoading) {
     return <CirclesNavSkeleton />
   }
 

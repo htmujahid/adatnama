@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react"
-import type { Collection } from "@tanstack/db"
 import type { OfflineExecutor } from "@tanstack/offline-transactions"
 import { eq, useLiveQuery } from "@tanstack/react-db"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
@@ -37,16 +36,12 @@ import { Input } from "@/components/ui/input"
 import { Item, ItemActions, ItemContent, ItemTitle } from "@/components/ui/item"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useHomeUser } from "@/hooks/use-home-user"
-import type { CircleRecord } from "@/lib/data/circles"
-import { getCirclesCollection } from "@/lib/data/circles"
-import { useCollection } from "@/lib/data/collection"
+import { circlesCollection } from "@/lib/collection/circles"
 import { useOfflineExecutor } from "@/lib/db/offline"
 
 export const Route = createFileRoute("/home/circles/$circleId/")({
   component: CircleDetailPage,
 })
-
-type CirclesCollectionType = Collection<CircleRecord, string>
 
 function initialsFor(name: string) {
   return name
@@ -57,12 +52,10 @@ function initialsFor(name: string) {
 }
 
 function InviteCard({
-  collection,
   organizationId,
   joinCode,
   canRegenerate,
 }: {
-  collection: CirclesCollectionType | undefined
   organizationId: string
   joinCode: string
   canRegenerate: boolean
@@ -122,7 +115,7 @@ function InviteCard({
                     setError(regenerateError.message)
                     return
                   }
-                  await collection?.utils.refetch()
+                  await circlesCollection.utils.refetch()
                 }}
               >
                 <RefreshCwIcon />
@@ -138,7 +131,6 @@ function InviteCard({
 }
 
 function MemberRow({
-  collection,
   executor,
   organizationId,
   memberId,
@@ -147,7 +139,6 @@ function MemberRow({
   canManage,
   isSelf,
 }: {
-  collection: CirclesCollectionType
   executor: OfflineExecutor | undefined
   organizationId: string
   memberId: string
@@ -165,7 +156,7 @@ function MemberRow({
     executor
       .createOfflineTransaction({ mutationFnName: "circles.updateMemberRole" })
       .mutate(() => {
-        collection.update(
+        circlesCollection.update(
           organizationId,
           { metadata: { memberId, role: nextRole } },
           (draft) => {
@@ -181,7 +172,7 @@ function MemberRow({
     executor
       .createOfflineTransaction({ mutationFnName: "circles.removeMember" })
       .mutate(() => {
-        collection.update(
+        circlesCollection.update(
           organizationId,
           { metadata: { memberId } },
           (draft) => {
@@ -247,21 +238,18 @@ function CircleDetailSkeleton() {
 function CircleDetailPage() {
   const { circleId } = Route.useParams()
   const navigate = useNavigate()
-  const collection = useCollection(getCirclesCollection)
   const executor = useOfflineExecutor()
   const user = useHomeUser()
   const { data: matches = [], isLoading: circleLoading } = useLiveQuery(
-    (q) => {
-      if (!collection) return undefined
-      return q
-        .from({ circle: collection })
-        .where(({ circle }) => eq(circle.slug, circleId))
-    },
-    [collection, circleId],
+    (q) =>
+      q
+        .from({ circle: circlesCollection })
+        .where(({ circle }) => eq(circle.slug, circleId)),
+    [circleId],
   )
   const circle = matches.at(0)
 
-  if (!collection || circleLoading) {
+  if (circleLoading) {
     return <CircleDetailSkeleton />
   }
 
@@ -333,7 +321,7 @@ function CircleDetailPage() {
                 executor
                   .createOfflineTransaction({ mutationFnName: "circles.leave" })
                   .mutate(() => {
-                    collection.delete(circle.id)
+                    circlesCollection.delete(circle.id)
                   })
                 await navigate({ to: "/home/circles" })
               }}
@@ -355,7 +343,6 @@ function CircleDetailPage() {
       </div>
 
       <InviteCard
-        collection={collection}
         organizationId={circle.id}
         joinCode={circle.joinCode}
         canRegenerate={canManage}
@@ -372,7 +359,6 @@ function CircleDetailPage() {
           {members.map((member) => (
             <MemberRow
               key={member.id}
-              collection={collection}
               executor={executor}
               organizationId={circle.id}
               memberId={member.id}

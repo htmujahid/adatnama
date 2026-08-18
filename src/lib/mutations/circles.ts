@@ -1,44 +1,16 @@
 import { NonRetriableError } from "@tanstack/offline-transactions"
 import type { OfflineConfig } from "@tanstack/offline-transactions"
-import type { QueryClient } from "@tanstack/query-core"
-import { queryOptions } from "@tanstack/react-query"
 
 import {
   createCircle,
   leaveCircle,
-  listCircles,
-  previewCircleByCode,
   removeMember,
   updateCircle,
   updateMemberRole,
 } from "@/actions/circles"
-import type { CircleMember } from "@/actions/circles"
-import { getPersistedCollection } from "@/lib/data/collection"
+import type { CircleRecord, circlesCollection  } from "@/lib/collection/circles"
 
-export type { CircleMember } from "@/actions/circles"
-
-export type CircleRecord = {
-  id: string
-  name: string
-  slug: string
-  description: string
-  color: string
-  joinCode: string
-  members: Array<CircleMember>
-}
-
-export function getCirclesCollection(queryClient: QueryClient) {
-  return getPersistedCollection<CircleRecord, string>({
-    id: "circles",
-    schemaVersion: 2,
-    queryKey: ["circles"],
-    queryClient,
-    getKey: (circle) => circle.id,
-    queryFn: () => listCircles(),
-  })
-}
-
-type CirclesCollection = Awaited<ReturnType<typeof getCirclesCollection>>
+type CirclesCollection = typeof circlesCollection
 
 export const circleMutationFns: OfflineConfig["mutationFns"] = {
   "circles.create": async ({ transaction }) => {
@@ -135,9 +107,3 @@ export const circleMutationFns: OfflineConfig["mutationFns"] = {
     collection.utils.writeUpdate(modified)
   },
 }
-
-export const circlePreviewQueryOptions = (code: string) =>
-  queryOptions({
-    queryKey: ["circles", "preview", code],
-    queryFn: () => previewCircleByCode({ data: { code } }),
-  })

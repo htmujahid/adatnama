@@ -28,8 +28,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { getCirclesCollection } from "@/lib/data/circles"
-import { useCollection } from "@/lib/data/collection"
+import { circlesCollection } from "@/lib/collection/circles"
 import { useOfflineExecutor } from "@/lib/db/offline"
 
 export function NavCircles({
@@ -45,7 +44,6 @@ export function NavCircles({
   }[]
 }) {
   const { isMobile } = useSidebar()
-  const collection = useCollection(getCirclesCollection)
   const executor = useOfflineExecutor()
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const { circleId: activeCircleId } = useParams({ strict: false })
@@ -55,7 +53,7 @@ export function NavCircles({
     executor
       .createOfflineTransaction({ mutationFnName: "circles.leave" })
       .mutate(() => {
-        collection?.delete(organizationId)
+        circlesCollection.delete(organizationId)
       })
   }
 
@@ -70,7 +68,7 @@ export function NavCircles({
       </SidebarGroupAction>
       <SidebarMenu>
         {circles.map((item) => (
-          <SidebarMenuItem key={item.id}>
+          <SidebarMenuItem key={item.organizationId}>
             <SidebarMenuButton
               isActive={item.id === activeCircleId}
               render={<Link to={item.url} />}

@@ -20,8 +20,7 @@ import {
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useHabits } from "@/hooks/use-habits"
-import { useCollection } from "@/lib/data/collection"
-import { getHabitsCollection } from "@/lib/data/habits"
+import { habitsCollection } from "@/lib/collection/habits"
 import { useOfflineExecutor } from "@/lib/db/offline"
 
 export const Route = createFileRoute("/home/habits/archived")({
@@ -30,16 +29,15 @@ export const Route = createFileRoute("/home/habits/archived")({
 
 function ArchivedHabitsPage() {
   const { habits, checkins, isLoading } = useHabits()
-  const collection = useCollection(getHabitsCollection)
   const executor = useOfflineExecutor()
   const archived = habits.filter((habit) => habit.archivedAt !== null)
 
   function restore(habitId: string) {
-    if (!collection || !executor) return
+    if (!executor) return
     executor
       .createOfflineTransaction({ mutationFnName: "habits.restore" })
       .mutate(() => {
-        collection.update(habitId, (draft) => {
+        habitsCollection.update(habitId, (draft) => {
           draft.archivedAt = null
           draft.archivedNote = null
         })
@@ -47,11 +45,11 @@ function ArchivedHabitsPage() {
   }
 
   function remove(habitId: string) {
-    if (!collection || !executor) return
+    if (!executor) return
     executor
       .createOfflineTransaction({ mutationFnName: "habits.delete" })
       .mutate(() => {
-        collection.delete(habitId)
+        habitsCollection.delete(habitId)
       })
   }
 

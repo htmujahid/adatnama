@@ -9,11 +9,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { FieldError } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
-import {
-  circlePreviewQueryOptions,
-  getCirclesCollection,
-} from "@/lib/data/circles"
-import { useCollection } from "@/lib/data/collection"
+import { circlesCollection } from "@/lib/collection/circles"
+import { circlePreviewQueryOptions } from "@/lib/query/circles"
 
 export const Route = createFileRoute("/home/circles/join/$code")({
   loader: async ({ context, params }) => {
@@ -27,7 +24,6 @@ export const Route = createFileRoute("/home/circles/join/$code")({
 function JoinCirclePage() {
   const { code } = Route.useParams()
   const navigate = useNavigate()
-  const collection = useCollection(getCirclesCollection)
   const { data } = useSuspenseQuery(circlePreviewQueryOptions(code))
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -91,7 +87,7 @@ function JoinCirclePage() {
                   setError(joinError?.message ?? "Unable to join circle.")
                   return
                 }
-                await collection?.utils.refetch()
+                await circlesCollection.utils.refetch()
                 await navigate({
                   to: "/home/circles/$circleId",
                   params: { circleId: slug },

@@ -49,8 +49,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useHabitCheckins } from "@/hooks/use-habit-checkins"
 import { useHabit } from "@/hooks/use-habits"
 import type { HabitView } from "@/hooks/use-habits"
-import { useCollection } from "@/lib/data/collection"
-import { getHabitsCollection } from "@/lib/data/habits"
+import { habitsCollection } from "@/lib/collection/habits"
 import { useOfflineExecutor } from "@/lib/db/offline"
 import { formatHabitDays, lastNDays, WEEK_LENGTH } from "@/lib/habits"
 import { cn } from "@/lib/utils"
@@ -116,17 +115,16 @@ function ArchiveHabitDialog({
   onOpenChange: (open: boolean) => void
 }) {
   const navigate = useNavigate()
-  const collection = useCollection(getHabitsCollection)
   const executor = useOfflineExecutor()
   const [note, setNote] = useState("")
 
   async function archive() {
-    if (!collection || !executor) return
+    if (!executor) return
     const trimmed = note.trim()
     executor
       .createOfflineTransaction({ mutationFnName: "habits.archive" })
       .mutate(() => {
-        collection.update(habit.id, (draft) => {
+        habitsCollection.update(habit.id, (draft) => {
           draft.archivedAt = new Date().toISOString()
           draft.archivedNote = trimmed || null
         })

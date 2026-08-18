@@ -10,7 +10,7 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 
 import { RegisterServiceWorker } from "@/components/pwa/register-service-worker"
-import { sessionQueryOptions } from "@/lib/data/auth"
+import { sessionQueryOptions } from "@/lib/query/auth"
 
 import appCss from "../styles.css?url"
 

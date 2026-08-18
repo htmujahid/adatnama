@@ -2,8 +2,7 @@ import { useLiveQuery } from "@tanstack/react-db"
 
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import { getCategoriesCollection } from "@/lib/data/categories"
-import { useCollection } from "@/lib/data/collection"
+import { categoriesCollection } from "@/lib/collection/categories"
 import { cn } from "@/lib/utils"
 
 export function CategoryBadge({
@@ -13,14 +12,12 @@ export function CategoryBadge({
   categoryId: string
   className?: string
 }) {
-  const collection = useCollection(getCategoriesCollection)
-  const { data: categories = [], isLoading } = useLiveQuery((q) => {
-    if (!collection) return undefined
-    return q.from({ category: collection })
-  })
+  const { data: categories = [], isLoading } = useLiveQuery((q) =>
+    q.from({ category: categoriesCollection }),
+  )
   const category = categories.find((c) => c.id === categoryId)
 
-  if (!collection || isLoading) {
+  if (isLoading) {
     return <Skeleton className={cn("h-5 w-16 rounded-full", className)} />
   }
 

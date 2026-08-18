@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { useHomeUser } from "@/hooks/use-home-user"
 import { PRESET_COLORS } from "@/lib/colors"
-import { getCirclesCollection } from "@/lib/data/circles"
-import { useCollection } from "@/lib/data/collection"
+import { circlesCollection } from "@/lib/collection/circles"
 import { useOfflineExecutor } from "@/lib/db/offline"
 import { slugify } from "@/lib/slug"
 
@@ -18,7 +17,6 @@ export const Route = createFileRoute("/home/circles/new")({
 
 function NewCirclePage() {
   const navigate = useNavigate()
-  const collection = useCollection(getCirclesCollection)
   const executor = useOfflineExecutor()
   const user = useHomeUser()
 
@@ -64,13 +62,13 @@ function NewCirclePage() {
               </Button>
             }
             onSubmit={async (input) => {
-              if (!collection || !executor) return
+              if (!executor) return
               const id = safeRandomUUID()
               const slug = slugify(input.name)
               executor
                 .createOfflineTransaction({ mutationFnName: "circles.create" })
                 .mutate(() => {
-                  collection.insert({
+                  circlesCollection.insert({
                     id,
                     name: input.name,
                     description: input.description,

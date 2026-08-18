@@ -26,8 +26,8 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item"
-import { statusQueryOptions } from "@/lib/data/status"
-import type { ComponentStatus } from "@/lib/data/status"
+import { statusQueryOptions } from "@/lib/query/status"
+import type { ComponentStatus } from "@/lib/query/status"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_marketing/status")({

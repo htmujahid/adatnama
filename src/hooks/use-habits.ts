@@ -2,11 +2,10 @@ import { useMemo } from "react"
 import { useLiveQuery } from "@tanstack/react-db"
 import { parseISO } from "date-fns"
 
-import { getCheckinsCollection } from "@/lib/data/checkins"
-import type { CheckinRecord } from "@/lib/data/checkins"
-import { useCollection } from "@/lib/data/collection"
-import { getHabitsCollection } from "@/lib/data/habits"
-import type { HabitRecord } from "@/lib/data/habits"
+import { checkinsCollection } from "@/lib/collection/checkins"
+import type { CheckinRecord } from "@/lib/collection/checkins"
+import { habitsCollection } from "@/lib/collection/habits"
+import type { HabitRecord } from "@/lib/collection/habits"
 import { computeHabitStats, dateKey } from "@/lib/habits"
 import type { HabitStats } from "@/lib/habits"
 
@@ -19,19 +18,11 @@ export function useHabits(): {
   checkins: Array<CheckinRecord>
   isLoading: boolean
 } {
-  const habitsCollection = useCollection(getHabitsCollection)
-  const checkinsCollection = useCollection(getCheckinsCollection)
   const { data: habitRecords = [], isLoading: habitsLoading } = useLiveQuery(
-    (q) => {
-      if (!habitsCollection) return undefined
-      return q.from({ habit: habitsCollection })
-    },
+    (q) => q.from({ habit: habitsCollection }),
   )
   const { data: checkins = [], isLoading: checkinsLoading } = useLiveQuery(
-    (q) => {
-      if (!checkinsCollection) return undefined
-      return q.from({ checkin: checkinsCollection })
-    },
+    (q) => q.from({ checkin: checkinsCollection }),
   )
   const todayKey = dateKey(new Date())
 
@@ -60,11 +51,7 @@ export function useHabits(): {
   return {
     habits,
     checkins,
-    isLoading:
-      !habitsCollection ||
-      !checkinsCollection ||
-      habitsLoading ||
-      checkinsLoading,
+    isLoading: habitsLoading || checkinsLoading,
   }
 }
 

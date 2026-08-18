@@ -1,9 +1,8 @@
 import { useLiveQuery } from "@tanstack/react-db"
 
 import { useHomeUser } from "@/hooks/use-home-user"
-import { useCollection } from "@/lib/data/collection"
-import { getPreferencesCollection } from "@/lib/data/preferences"
-import type { PreferencesRecord } from "@/lib/data/preferences"
+import { preferencesCollection } from "@/lib/collection/preferences"
+import type { PreferencesRecord } from "@/lib/collection/preferences"
 import { useOfflineExecutor } from "@/lib/db/offline"
 import { HABIT_DAY_PRESETS, schedulePresetFor } from "@/lib/habits"
 
@@ -37,12 +36,10 @@ function presetDays(presetId: string): ReadonlyArray<number> {
 
 export function usePreferences() {
   const user = useHomeUser()
-  const collection = useCollection(getPreferencesCollection)
   const executor = useOfflineExecutor()
-  const { data: rows = [], isLoading } = useLiveQuery((q) => {
-    if (!collection) return undefined
-    return q.from({ preferences: collection })
-  })
+  const { data: rows = [], isLoading } = useLiveQuery((q) =>
+    q.from({ preferences: preferencesCollection }),
+  )
   const record = rows.find((row) => row.userId === user.id)
 
   const habitDefaults: HabitDefaults = {
@@ -61,12 +58,12 @@ export function usePreferences() {
   }
 
   function save(changes: Partial<Omit<PreferencesRecord, "userId">>) {
-    if (!collection || !executor) return
+    if (!executor) return
     if (record) {
       executor
         .createOfflineTransaction({ mutationFnName: "preferences.update" })
         .mutate(() => {
-          collection.update(user.id, (draft) => {
+          preferencesCollection.update(user.id, (draft) => {
             Object.assign(draft, changes)
           })
         })
@@ -75,7 +72,7 @@ export function usePreferences() {
     executor
       .createOfflineTransaction({ mutationFnName: "preferences.create" })
       .mutate(() => {
-        collection.insert({
+        preferencesCollection.insert({
           userId: user.id,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           ...FALLBACK,
@@ -108,7 +105,7 @@ export function usePreferences() {
   return {
     habitDefaults,
     notifications,
-    isLoading: !collection || isLoading,
+    isLoading,
     updateHabitDefaults,
     setNotificationPreference,
   }

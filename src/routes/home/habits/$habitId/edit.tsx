@@ -9,8 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useHabit } from "@/hooks/use-habits"
-import { useCollection } from "@/lib/data/collection"
-import { getHabitsCollection } from "@/lib/data/habits"
+import { habitsCollection } from "@/lib/collection/habits"
 import { useOfflineExecutor } from "@/lib/db/offline"
 
 export const Route = createFileRoute("/home/habits/$habitId/edit")({
@@ -21,7 +20,6 @@ function EditHabitPage() {
   const { habitId } = Route.useParams()
   const navigate = useNavigate()
   const { habit, isLoading } = useHabit(habitId)
-  const collection = useCollection(getHabitsCollection)
   const executor = useOfflineExecutor()
 
   if (isLoading && !habit) {
@@ -115,11 +113,11 @@ function EditHabitPage() {
               </Button>
             }
             onSubmit={async (input) => {
-              if (!collection || !executor) return
+              if (!executor) return
               executor
                 .createOfflineTransaction({ mutationFnName: "habits.update" })
                 .mutate(() => {
-                  collection.update(habit.id, (draft) => {
+                  habitsCollection.update(habit.id, (draft) => {
                     draft.categoryId = input.categoryId
                     draft.name = input.name
                     draft.description = input.description

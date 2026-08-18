@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { PRESET_COLORS } from "@/lib/colors"
-import type { CategoryInput, CategoryRecord } from "@/lib/data/categories"
+import type { CategoryInput, CategoryRecord } from "@/lib/collection/categories"
 import { cn } from "@/lib/utils"
 
 export function CreateCategoryDialog({

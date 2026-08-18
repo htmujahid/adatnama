@@ -1,30 +1,10 @@
 import { NonRetriableError } from "@tanstack/offline-transactions"
 import type { OfflineConfig } from "@tanstack/offline-transactions"
-import type { QueryClient } from "@tanstack/query-core"
 
-import {
-  listAchievementUnlocks,
-  unlockAchievement,
-} from "@/actions/achievements"
-import { getPersistedCollection } from "@/lib/data/collection"
-import type { UserAchievementUnlockTable } from "@/lib/db/schema"
+import { unlockAchievement } from "@/actions/achievements"
+import type { AchievementUnlockRecord, achievementUnlocksCollection  } from "@/lib/collection/achievements"
 
-export type AchievementUnlockRecord = UserAchievementUnlockTable
-
-export function getAchievementUnlocksCollection(queryClient: QueryClient) {
-  return getPersistedCollection<AchievementUnlockRecord, string>({
-    id: "achievement-unlocks",
-    schemaVersion: 1,
-    queryKey: ["achievement-unlocks"],
-    queryClient,
-    getKey: (unlock) => unlock.id,
-    queryFn: () => listAchievementUnlocks(),
-  })
-}
-
-type AchievementUnlocksCollection = Awaited<
-  ReturnType<typeof getAchievementUnlocksCollection>
->
+type AchievementUnlocksCollection = typeof achievementUnlocksCollection
 
 export const achievementMutationFns: OfflineConfig["mutationFns"] = {
   "achievements.unlock": async ({ transaction }) => {

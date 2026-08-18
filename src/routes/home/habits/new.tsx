@@ -8,8 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useHomeUser } from "@/hooks/use-home-user"
 import { usePreferences } from "@/hooks/use-preferences"
-import { useCollection } from "@/lib/data/collection"
-import { getHabitsCollection } from "@/lib/data/habits"
+import { habitsCollection } from "@/lib/collection/habits"
 import { useOfflineExecutor } from "@/lib/db/offline"
 
 export const Route = createFileRoute("/home/habits/new")({
@@ -19,7 +18,6 @@ export const Route = createFileRoute("/home/habits/new")({
 function NewHabitPage() {
   const navigate = useNavigate()
   const user = useHomeUser()
-  const collection = useCollection(getHabitsCollection)
   const executor = useOfflineExecutor()
   const { habitDefaults, isLoading } = usePreferences()
 
@@ -77,13 +75,13 @@ function NewHabitPage() {
                 </Button>
               }
               onSubmit={async (input) => {
-                if (!collection || !executor) return
+                if (!executor) return
                 const id = safeRandomUUID()
                 const now = new Date().toISOString()
                 executor
                   .createOfflineTransaction({ mutationFnName: "habits.create" })
                   .mutate(() => {
-                    collection.insert({
+                    habitsCollection.insert({
                       id,
                       userId: user.id,
                       categoryId: input.categoryId,

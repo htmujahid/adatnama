@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
-import { accountsQueryOptions } from "@/lib/data/auth"
+import { accountsQueryOptions } from "@/lib/query/auth"
 
 export function SetPasswordForm() {
   const queryClient = useQueryClient()

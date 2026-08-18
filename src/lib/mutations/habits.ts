@@ -1,42 +1,16 @@
 import { NonRetriableError } from "@tanstack/offline-transactions"
 import type { OfflineConfig } from "@tanstack/offline-transactions"
-import type { QueryClient } from "@tanstack/query-core"
 
 import {
   archiveHabit,
   createHabit,
   deleteHabit,
-  listHabits,
   restoreHabit,
   updateHabit,
 } from "@/actions/habits"
-import type { HabitRow } from "@/actions/habits"
-import { getPersistedCollection } from "@/lib/data/collection"
+import type { HabitRecord, habitsCollection  } from "@/lib/collection/habits"
 
-export type HabitRecord = HabitRow
-
-export type HabitInput = {
-  name: string
-  description: string
-  categoryId: string
-  target: string
-  days: ReadonlyArray<number>
-  reminderTime: string | null
-  freezesTotal: number
-}
-
-export function getHabitsCollection(queryClient: QueryClient) {
-  return getPersistedCollection<HabitRecord, string>({
-    id: "habits",
-    schemaVersion: 1,
-    queryKey: ["habits"],
-    queryClient,
-    getKey: (habit) => habit.id,
-    queryFn: () => listHabits(),
-  })
-}
-
-type HabitsCollection = Awaited<ReturnType<typeof getHabitsCollection>>
+type HabitsCollection = typeof habitsCollection
 
 function habitInputFrom(modified: HabitRecord) {
   return {

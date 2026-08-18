@@ -34,8 +34,7 @@ import {
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useActiveHabits } from "@/hooks/use-habits"
-import { getCategoriesCollection } from "@/lib/data/categories"
-import { useCollection } from "@/lib/data/collection"
+import { categoriesCollection } from "@/lib/collection/categories"
 import { formatHabitDays } from "@/lib/habits"
 
 export const Route = createFileRoute("/home/habits/")({
@@ -46,11 +45,9 @@ function HabitsPage() {
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState<string | null>(null)
   const { habits, isLoading } = useActiveHabits()
-  const categoriesCollection = useCollection(getCategoriesCollection)
-  const { data: categories = [] } = useLiveQuery((q) => {
-    if (!categoriesCollection) return undefined
-    return q.from({ category: categoriesCollection })
-  })
+  const { data: categories = [] } = useLiveQuery((q) =>
+    q.from({ category: categoriesCollection }),
+  )
 
   const usedCategories = Array.from(
     new Set(

@@ -6,8 +6,7 @@ import { CircleForm } from "@/components/circles/circle-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { getCirclesCollection } from "@/lib/data/circles"
-import { useCollection } from "@/lib/data/collection"
+import { circlesCollection } from "@/lib/collection/circles"
 import { useOfflineExecutor } from "@/lib/db/offline"
 
 export const Route = createFileRoute("/home/circles/$circleId/edit")({
@@ -32,20 +31,17 @@ function EditCircleSkeleton() {
 function EditCirclePage() {
   const { circleId } = Route.useParams()
   const navigate = useNavigate()
-  const collection = useCollection(getCirclesCollection)
   const executor = useOfflineExecutor()
   const { data: matches = [], isLoading } = useLiveQuery(
-    (q) => {
-      if (!collection) return undefined
-      return q
-        .from({ circle: collection })
-        .where(({ circle }) => eq(circle.slug, circleId))
-    },
-    [collection, circleId],
+    (q) =>
+      q
+        .from({ circle: circlesCollection })
+        .where(({ circle }) => eq(circle.slug, circleId)),
+    [circleId],
   )
   const circle = matches.at(0)
 
-  if (!collection || isLoading) {
+  if (isLoading) {
     return <EditCircleSkeleton />
   }
 
@@ -119,7 +115,7 @@ function EditCirclePage() {
               executor
                 .createOfflineTransaction({ mutationFnName: "circles.update" })
                 .mutate(() => {
-                  collection.update(circle.id, (draft) => {
+                  circlesCollection.update(circle.id, (draft) => {
                     draft.name = input.name
                     draft.description = input.description
                     draft.color = input.color

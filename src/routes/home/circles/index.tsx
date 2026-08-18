@@ -32,8 +32,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
-import { getCirclesCollection } from "@/lib/data/circles"
-import { useCollection } from "@/lib/data/collection"
+import { circlesCollection } from "@/lib/collection/circles"
 
 export const Route = createFileRoute("/home/circles/")({
   component: CirclesPage,
@@ -153,15 +152,12 @@ function CirclesPageSkeleton() {
 
 function CirclesPage() {
   const navigate = useNavigate()
-  const collection = useCollection(getCirclesCollection)
-  const { data: circles = [], isLoading } = useLiveQuery((q) => {
-    if (!collection) return undefined
-    return q.from({ circle: collection })
-  })
-  const circlesLoading = !collection || isLoading
+  const { data: circles = [], isLoading: circlesLoading } = useLiveQuery((q) =>
+    q.from({ circle: circlesCollection }),
+  )
 
   async function handleJoined(slug: string) {
-    await collection?.utils.refetch()
+    await circlesCollection.utils.refetch()
     await navigate({
       to: "/home/circles/$circleId",
       params: { circleId: slug },

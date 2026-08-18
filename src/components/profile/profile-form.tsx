@@ -14,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { authClient } from "@/lib/auth-client"
-import { sessionQueryOptions } from "@/lib/data/auth"
+import { sessionQueryOptions } from "@/lib/query/auth"
 
 export function ProfileForm({
   user,

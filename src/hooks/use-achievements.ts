@@ -9,9 +9,8 @@ import {
   buildAchievementContext,
 } from "@/lib/achievements"
 import type { AchievementDefinition } from "@/lib/achievements"
-import { getAchievementUnlocksCollection } from "@/lib/data/achievements"
-import { getCirclesCollection } from "@/lib/data/circles"
-import { useCollection } from "@/lib/data/collection"
+import { achievementUnlocksCollection } from "@/lib/collection/achievements"
+import { circlesCollection } from "@/lib/collection/circles"
 import { useOfflineExecutor } from "@/lib/db/offline"
 import { dateKey } from "@/lib/habits"
 
@@ -31,27 +30,14 @@ export function useAchievements(): {
 } {
   const user = useHomeUser()
   const { habits, checkins, isLoading: habitsLoading } = useHabits()
-  const circlesCollection = useCollection(getCirclesCollection)
-  const unlocksCollection = useCollection(getAchievementUnlocksCollection)
   const executor = useOfflineExecutor()
-  const { data: circles = [], isLoading: circlesLoading } = useLiveQuery(
-    (q) => {
-      if (!circlesCollection) return undefined
-      return q.from({ circle: circlesCollection })
-    },
+  const { data: circles = [], isLoading: circlesLoading } = useLiveQuery((q) =>
+    q.from({ circle: circlesCollection }),
   )
-  const { data: unlocks = [], isLoading: unlocksLoading } = useLiveQuery(
-    (q) => {
-      if (!unlocksCollection) return undefined
-      return q.from({ unlock: unlocksCollection })
-    },
+  const { data: unlocks = [], isLoading: unlocksLoading } = useLiveQuery((q) =>
+    q.from({ unlock: achievementUnlocksCollection }),
   )
-  const isLoading =
-    habitsLoading ||
-    !circlesCollection ||
-    circlesLoading ||
-    !unlocksCollection ||
-    unlocksLoading
+  const isLoading = habitsLoading || circlesLoading || unlocksLoading
   const todayKey = dateKey(new Date())
 
   const achievements = useMemo(() => {
@@ -98,7 +84,7 @@ export function useAchievements(): {
       executor
         .createOfflineTransaction({ mutationFnName: "achievements.unlock" })
         .mutate(() => {
-          unlocksCollection.insert({
+          achievementUnlocksCollection.insert({
             id: safeRandomUUID(),
             userId: user.id,
             achievementId: achievement.id,
@@ -106,7 +92,7 @@ export function useAchievements(): {
           })
         })
     }
-  }, [achievements, isLoading, unlocksCollection, executor, user.id])
+  }, [achievements, isLoading, executor, user.id])
 
   return {
     achievements,

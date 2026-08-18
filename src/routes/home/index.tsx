@@ -39,8 +39,7 @@ import { useHabitCheckins } from "@/hooks/use-habit-checkins"
 import { useActiveHabits } from "@/hooks/use-habits"
 import type { HabitView } from "@/hooks/use-habits"
 import { useHomeUser } from "@/hooks/use-home-user"
-import { getCirclesCollection } from "@/lib/data/circles"
-import { useCollection } from "@/lib/data/collection"
+import { circlesCollection } from "@/lib/collection/circles"
 import { isScheduledOn, lastNDays, WEEK_LENGTH } from "@/lib/habits"
 import type { HabitDayState } from "@/lib/habits"
 import { cn } from "@/lib/utils"
@@ -109,11 +108,9 @@ function TodayHabitItem({ habit }: { habit: HabitView }) {
 }
 
 function CirclesSummaryCard() {
-  const circlesCollection = useCollection(getCirclesCollection)
-  const { data: circles = [] } = useLiveQuery((q) => {
-    if (!circlesCollection) return undefined
-    return q.from({ circle: circlesCollection })
-  })
+  const { data: circles = [], isLoading } = useLiveQuery((q) =>
+    q.from({ circle: circlesCollection }),
+  )
 
   return (
     <Card>
@@ -130,7 +127,7 @@ function CirclesSummaryCard() {
         </CardAction>
       </CardHeader>
       <CardContent>
-        {!circlesCollection ? (
+        {isLoading ? (
           <div className="flex flex-col gap-2">
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />

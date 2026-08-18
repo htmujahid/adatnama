@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
-import type { HabitInput } from "@/lib/data/habits"
+import type { HabitInput } from "@/lib/collection/habits"
 import { HABIT_DAY_PRESETS, schedulePresetFor, WEEKDAYS } from "@/lib/habits"
 
 export type HabitFormValues = {

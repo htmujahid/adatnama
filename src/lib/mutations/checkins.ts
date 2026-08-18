@@ -1,28 +1,10 @@
 import { NonRetriableError } from "@tanstack/offline-transactions"
 import type { OfflineConfig } from "@tanstack/offline-transactions"
-import type { QueryClient } from "@tanstack/query-core"
 
-import { deleteCheckin, listCheckins, upsertCheckin } from "@/actions/checkins"
-import type { CheckinStatus } from "@/actions/checkins"
-import { getPersistedCollection } from "@/lib/data/collection"
-import type { HabitCheckinTable } from "@/lib/db/schema"
+import { deleteCheckin, upsertCheckin } from "@/actions/checkins"
+import type { CheckinRecord, checkinsCollection  } from "@/lib/collection/checkins"
 
-export type CheckinRecord = Omit<HabitCheckinTable, "status"> & {
-  status: CheckinStatus
-}
-
-export function getCheckinsCollection(queryClient: QueryClient) {
-  return getPersistedCollection<CheckinRecord, string>({
-    id: "checkins",
-    schemaVersion: 1,
-    queryKey: ["checkins"],
-    queryClient,
-    getKey: (checkin) => checkin.id,
-    queryFn: () => listCheckins() as Promise<Array<CheckinRecord>>,
-  })
-}
-
-type CheckinsCollection = Awaited<ReturnType<typeof getCheckinsCollection>>
+type CheckinsCollection = typeof checkinsCollection
 
 async function upsertFromMutation(mutation: {
   collection: unknown

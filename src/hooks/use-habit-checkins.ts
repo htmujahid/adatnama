@@ -1,19 +1,16 @@
 import { useMemo } from "react"
 import { safeRandomUUID, useLiveQuery } from "@tanstack/react-db"
 
-import { getCheckinsCollection } from "@/lib/data/checkins"
-import type { CheckinRecord } from "@/lib/data/checkins"
-import { useCollection } from "@/lib/data/collection"
+import { checkinsCollection } from "@/lib/collection/checkins"
+import type { CheckinRecord } from "@/lib/collection/checkins"
 import { useOfflineExecutor } from "@/lib/db/offline"
 import { dateKey } from "@/lib/habits"
 
 export function useHabitCheckins() {
-  const collection = useCollection(getCheckinsCollection)
   const executor = useOfflineExecutor()
-  const { data: checkins = [], isLoading } = useLiveQuery((q) => {
-    if (!collection) return undefined
-    return q.from({ checkin: collection })
-  })
+  const { data: checkins = [], isLoading } = useLiveQuery((q) =>
+    q.from({ checkin: checkinsCollection }),
+  )
   const todayKey = dateKey(new Date())
 
   const todayByHabitId = useMemo(() => {
@@ -24,19 +21,17 @@ export function useHabitCheckins() {
     return map
   }, [checkins, todayKey])
 
-  const ready = collection !== undefined && executor !== undefined
-
   function insertToday(
     habitId: string,
     status: "done" | "pending",
     note: string | null,
   ) {
-    if (!collection || !executor) return
+    if (!executor) return
     const now = new Date().toISOString()
     executor
       .createOfflineTransaction({ mutationFnName: "checkins.create" })
       .mutate(() => {
-        collection.insert({
+        checkinsCollection.insert({
           id: safeRandomUUID(),
           habitId,
           date: todayKey,
@@ -52,11 +47,11 @@ export function useHabitCheckins() {
     checkin: CheckinRecord,
     changes: Partial<Pick<CheckinRecord, "status" | "note">>,
   ) {
-    if (!collection || !executor) return
+    if (!executor) return
     executor
       .createOfflineTransaction({ mutationFnName: "checkins.update" })
       .mutate(() => {
-        collection.update(checkin.id, (draft) => {
+        checkinsCollection.update(checkin.id, (draft) => {
           Object.assign(draft, changes, {
             updatedAt: new Date().toISOString(),
           })
@@ -65,11 +60,11 @@ export function useHabitCheckins() {
   }
 
   function deleteCheckin(checkin: CheckinRecord) {
-    if (!collection || !executor) return
+    if (!executor) return
     executor
       .createOfflineTransaction({ mutationFnName: "checkins.delete" })
       .mutate(() => {
-        collection.delete(checkin.id)
+        checkinsCollection.delete(checkin.id)
       })
   }
 
@@ -102,8 +97,7 @@ export function useHabitCheckins() {
 
   return {
     todayByHabitId,
-    isLoading: !collection || isLoading,
-    ready,
+    isLoading,
     toggleCheckin,
     setCheckinNote,
   }

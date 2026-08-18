@@ -1,35 +1,14 @@
 import { NonRetriableError } from "@tanstack/offline-transactions"
 import type { OfflineConfig } from "@tanstack/offline-transactions"
-import type { QueryClient } from "@tanstack/query-core"
 
 import {
   createCategory,
   deleteCategory,
-  listCategories,
   updateCategory,
 } from "@/actions/categories"
-import { getPersistedCollection } from "@/lib/data/collection"
-import type { CategoryTable } from "@/lib/db/schema"
+import type { CategoryRecord, categoriesCollection  } from "@/lib/collection/categories"
 
-export type CategoryRecord = CategoryTable
-
-export type CategoryInput = {
-  name: string
-  color: string
-}
-
-export function getCategoriesCollection(queryClient: QueryClient) {
-  return getPersistedCollection<CategoryRecord, string>({
-    id: "categories",
-    schemaVersion: 1,
-    queryKey: ["categories"],
-    queryClient,
-    getKey: (category) => category.id,
-    queryFn: () => listCategories(),
-  })
-}
-
-type CategoriesCollection = Awaited<ReturnType<typeof getCategoriesCollection>>
+type CategoriesCollection = typeof categoriesCollection
 
 export const categoryMutationFns: OfflineConfig["mutationFns"] = {
   "categories.create": async ({ transaction }) => {

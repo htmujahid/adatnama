@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { accountsQueryOptions } from "@/lib/data/auth"
+import { accountsQueryOptions } from "@/lib/query/auth"
 
 export const Route = createFileRoute("/home/profile")({
   loader: async ({ context }) => {

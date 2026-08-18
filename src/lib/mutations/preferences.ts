@@ -1,27 +1,10 @@
 import { NonRetriableError } from "@tanstack/offline-transactions"
 import type { OfflineConfig } from "@tanstack/offline-transactions"
-import type { QueryClient } from "@tanstack/query-core"
 
-import { listPreferences, upsertPreferences } from "@/actions/preferences"
-import { getPersistedCollection } from "@/lib/data/collection"
-import type { UserPreferencesTable } from "@/lib/db/schema"
+import { upsertPreferences } from "@/actions/preferences"
+import type { PreferencesRecord, preferencesCollection  } from "@/lib/collection/preferences"
 
-export type PreferencesRecord = UserPreferencesTable
-
-export function getPreferencesCollection(queryClient: QueryClient) {
-  return getPersistedCollection<PreferencesRecord, string>({
-    id: "preferences",
-    schemaVersion: 1,
-    queryKey: ["preferences"],
-    queryClient,
-    getKey: (preferences) => preferences.userId,
-    queryFn: () => listPreferences(),
-  })
-}
-
-type PreferencesCollection = Awaited<
-  ReturnType<typeof getPreferencesCollection>
->
+type PreferencesCollection = typeof preferencesCollection
 
 async function upsertFromMutation(mutation: {
   collection: unknown

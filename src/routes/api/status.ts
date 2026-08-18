@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import { computeStatus } from "@/lib/data/status"
+import { computeStatus } from "@/lib/query/status"
 
 export const Route = createFileRoute("/api/status")({
   server: {

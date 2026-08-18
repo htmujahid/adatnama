@@ -49,9 +49,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { useActiveHabits } from "@/hooks/use-habits"
 import type { HabitView } from "@/hooks/use-habits"
-import { getCategoriesCollection } from "@/lib/data/categories"
-import type { CheckinRecord } from "@/lib/data/checkins"
-import { useCollection } from "@/lib/data/collection"
+import { categoriesCollection } from "@/lib/collection/categories"
+import type { CheckinRecord } from "@/lib/collection/checkins"
 import {
   computeHabitStats,
   dateKey,
@@ -169,11 +168,9 @@ function ChartCard({
 
 function InsightsPage() {
   const { habits, checkins, isLoading } = useActiveHabits()
-  const categoriesCollection = useCollection(getCategoriesCollection)
-  const { data: categories = [] } = useLiveQuery((q) => {
-    if (!categoriesCollection) return undefined
-    return q.from({ category: categoriesCollection })
-  })
+  const { data: categories = [] } = useLiveQuery((q) =>
+    q.from({ category: categoriesCollection }),
+  )
   const todayKey = dateKey(new Date())
 
   const data = useMemo(() => {

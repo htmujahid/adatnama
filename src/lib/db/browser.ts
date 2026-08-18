@@ -1,55 +1,34 @@
-import type {
+import { QueryClient } from "@tanstack/react-query"
+
+if (typeof window === "undefined") {
+  throw new Error("src/lib/db/browser.ts is only available in the browser.")
+}
+
+// Dynamic import keeps wa-sqlite out of the server bundle — a static import
+// here previously crashed the Workers runtime with "module is not defined".
+const {
   BrowserCollectionCoordinator,
-  BrowserWASQLiteDatabase,
-} from "@tanstack/browser-db-sqlite-persistence"
-import type { PersistedCollectionPersistence } from "@tanstack/db-sqlite-persistence-core"
+  createBrowserWASQLitePersistence,
+  openBrowserWASQLiteOPFSDatabase,
+} = await import("@tanstack/browser-db-sqlite-persistence")
 
-const DATABASE_NAME = "adatnama.sqlite"
-const COORDINATOR_NAME = "adatnama"
+const database = await openBrowserWASQLiteOPFSDatabase({
+  databaseName: "adatnama.sqlite",
+})
 
-type BrowserDatabase = {
-  persistence: PersistedCollectionPersistence
-  database: BrowserWASQLiteDatabase
-  coordinator: BrowserCollectionCoordinator
-}
+const coordinator = new BrowserCollectionCoordinator({
+  dbName: "adatnama",
+})
 
-let databasePromise: Promise<BrowserDatabase> | null = null
+export const persistence = createBrowserWASQLitePersistence({
+  database,
+  coordinator,
+})
 
-async function openBrowserDatabase(): Promise<BrowserDatabase> {
-  const {
-    BrowserCollectionCoordinator,
-    createBrowserWASQLitePersistence,
-    openBrowserWASQLiteOPFSDatabase,
-  } = await import("@tanstack/browser-db-sqlite-persistence")
-
-  const database = await openBrowserWASQLiteOPFSDatabase({
-    databaseName: DATABASE_NAME,
-  })
-  const coordinator = new BrowserCollectionCoordinator({
-    dbName: COORDINATOR_NAME,
-  })
-  const persistence = createBrowserWASQLitePersistence({
-    database,
-    coordinator,
-  })
-  return { persistence, database, coordinator }
-}
-
-export function getBrowserPersistence(): Promise<PersistedCollectionPersistence> {
-  if (typeof window === "undefined") {
-    throw new Error("Browser persistence is only available in the browser.")
-  }
-  if (!databasePromise) {
-    databasePromise = openBrowserDatabase()
-  }
-  return databasePromise.then(({ persistence }) => persistence)
-}
-
-export async function disposeBrowserPersistence() {
-  const pending = databasePromise
-  databasePromise = null
-  if (!pending) return
-  const { coordinator, database } = await pending
-  coordinator.dispose()
-  await database.close?.()
-}
+/**
+ * Persisted collections never participate in SSR (this module only loads
+ * under the ssr:false /home tree), so they get their own QueryClient instead
+ * of the router's SSR-integrated one — keeps them off its cache/staleTime
+ * defaults, which are tuned for SSR dehydration, not local persistence.
+ */
+export const collectionsQueryClient = new QueryClient()

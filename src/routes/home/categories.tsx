@@ -28,9 +28,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { useHabits } from "@/hooks/use-habits"
 import { useHomeUser } from "@/hooks/use-home-user"
-import type { CategoryInput, CategoryRecord } from "@/lib/data/categories"
-import { getCategoriesCollection } from "@/lib/data/categories"
-import { useCollection } from "@/lib/data/collection"
+import type { CategoryInput, CategoryRecord } from "@/lib/collection/categories"
+import { categoriesCollection } from "@/lib/collection/categories"
 import { useOfflineExecutor } from "@/lib/db/offline"
 
 export const Route = createFileRoute("/home/categories")({
@@ -39,25 +38,22 @@ export const Route = createFileRoute("/home/categories")({
 
 function CategoriesPage() {
   const user = useHomeUser()
-  const collection = useCollection(getCategoriesCollection)
   const executor = useOfflineExecutor()
-  const { data: categories = [], isLoading } = useLiveQuery((q) => {
-    if (!collection) return undefined
-    return q.from({ category: collection })
-  })
-  const categoriesLoading = !collection || isLoading
+  const { data: categories = [], isLoading: categoriesLoading } = useLiveQuery(
+    (q) => q.from({ category: categoriesCollection }),
+  )
   const { habits } = useHabits()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editing, setEditing] = useState<CategoryRecord | undefined>(undefined)
 
   function handleSave(input: CategoryInput) {
-    if (!collection || !executor) return
+    if (!executor) return
     if (editing) {
       const editingId = editing.id
       executor
         .createOfflineTransaction({ mutationFnName: "categories.update" })
         .mutate(() => {
-          collection.update(editingId, (draft) => {
+          categoriesCollection.update(editingId, (draft) => {
             draft.name = input.name
             draft.color = input.color
           })
@@ -68,7 +64,7 @@ function CategoriesPage() {
     executor
       .createOfflineTransaction({ mutationFnName: "categories.create" })
       .mutate(() => {
-        collection.insert({
+        categoriesCollection.insert({
           id: safeRandomUUID(),
           userId: user.id,
           name: input.name,
@@ -84,7 +80,7 @@ function CategoriesPage() {
     executor
       .createOfflineTransaction({ mutationFnName: "categories.delete" })
       .mutate(() => {
-        collection?.delete(categoryId)
+        categoriesCollection.delete(categoryId)
       })
   }
 

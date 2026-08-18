@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/sheet"
 import { useSession } from "@/hooks/use-session"
 import { authClient } from "@/lib/auth-client"
-import { sessionQueryOptions } from "@/lib/data/auth"
+import { sessionQueryOptions } from "@/lib/query/auth"
 
 function HeaderAuth() {
   const router = useRouter()

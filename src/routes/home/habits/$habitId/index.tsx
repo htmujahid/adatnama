@@ -44,8 +44,6 @@ export const Route = createFileRoute("/home/habits/$habitId/")({
 
 const MILESTONES = [7, 30, 100] as const
 
-// Same 7-day window as -data.ts's `week` (and Check-ins' "This week's
-// activity"), so every page agrees on which date is "today".
 const WEEK_DATES = [
   "Aug 11",
   "Aug 12",

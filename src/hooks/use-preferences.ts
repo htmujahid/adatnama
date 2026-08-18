@@ -3,7 +3,6 @@ import { useSyncExternalStore } from "react"
 import { HABIT_FREQUENCIES } from "@/routes/home/-data"
 
 export type HabitDefaults = {
-  // A category id, or null until the user has created one to default to.
   category: string | null
   frequency: string
   freezesTotal: number
@@ -20,8 +19,6 @@ export type Preferences = {
   notifications: NotificationPreferences
 }
 
-// Session-only app preferences. Not persisted anywhere yet — resets on
-// reload, same as the habit catalog and circles stores.
 let state: Preferences = {
   habitDefaults: {
     category: null,

@@ -28,14 +28,10 @@ export type HabitFormValues = {
   description: string
   target: string
   frequency: string
-  // 24-hour "HH:MM", or "" for no reminder — converted to/from the
-  // "6:30 AM"-style strings stored on the habit at the form boundary.
   reminderTime: string
   freezesTotal: number
 }
 
-// Stored habits use a 12-hour "6:30 AM" string; <input type="time"> speaks
-// 24-hour "HH:MM". These two helpers convert at the form boundary only.
 export function reminderTimeToInputValue(reminderTime: string | null) {
   if (!reminderTime) return ""
   const match = /^(\d{1,2}):(\d{2})\s?(AM|PM)$/i.exec(reminderTime)

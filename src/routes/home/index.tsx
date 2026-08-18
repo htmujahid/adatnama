@@ -47,8 +47,6 @@ export const Route = createFileRoute("/home/")({ component: HomePage })
 
 const strongestHabit = [...HABITS].sort((a, b) => b.streak - a.streak)[0]
 
-// Same 7-day window as -data.ts's `week` (index 0 = 6 days ago ... index 6 =
-// today), so this always agrees with Today's habits and the Streaks page.
 const WEEK_DATES = [
   "Aug 11",
   "Aug 12",
@@ -131,7 +129,6 @@ function TodayHabitItem({ habit, done }: { habit: Habit; done: boolean }) {
           checked={done}
           onCheckedChange={() => toggleHabitCheckIn(habit)}
           onClick={(event) => {
-            // The row already toggles on click; avoid double-firing.
             event.stopPropagation()
           }}
           aria-label={`Mark ${habit.name} as ${done ? "not done" : "done"} for today`}

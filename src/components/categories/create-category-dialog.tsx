@@ -34,7 +34,6 @@ export function CreateCategoryDialog({
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
-  /** When set, the dialog edits this category instead of creating a new one. */
   category?: Category
   onSaved: (input: CategoryInput) => void
 }) {
@@ -51,8 +50,6 @@ export function CreateCategoryDialog({
     },
   })
 
-  // Reset the draft every time the dialog opens, so a leftover previous
-  // draft never leaks into a fresh "New category" or a different category.
   useEffect(() => {
     if (open) {
       form.reset({

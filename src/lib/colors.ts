@@ -1,7 +1,5 @@
 export type PresetColor = { id: string; label: string; value: string }
 
-// Shared swatch palette for anything the user can color-tag themselves
-// (circles, categories, ...).
 export const PRESET_COLORS: ReadonlyArray<PresetColor> = [
   { id: "rose", label: "Rose", value: "#f43f5e" },
   { id: "orange", label: "Orange", value: "#f97316" },

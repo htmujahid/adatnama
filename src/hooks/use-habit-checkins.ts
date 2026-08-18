@@ -1,8 +1,5 @@
 import { useSyncExternalStore } from "react"
 
-// Session-only "done today" selection and optional note per habit id,
-// layered on top of the mock data in -data.ts. Not persisted anywhere yet —
-// resets on reload.
 let state: {
   overrides: ReadonlyMap<string, boolean>
   notes: ReadonlyMap<string, string>

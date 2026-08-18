@@ -24,9 +24,6 @@ function applyEdit(
   return { ...category, ...edit }
 }
 
-// Session-only, per-user category list. Every user starts with zero
-// categories — there is no static/default set. Not persisted anywhere yet —
-// resets on reload, same as the rest of the mock data layer.
 let state: {
   created: ReadonlyArray<Category>
   edits: ReadonlyMap<string, CategoryInput>

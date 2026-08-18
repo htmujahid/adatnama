@@ -53,7 +53,6 @@ export const HABITS = [
     startedDaysAgo: 64,
     done: true,
     week: ["done", "done", "done", "done", "done", "done", "done"],
-    // Last 4 weeks, oldest to newest. The last 7 entries match `week` above.
     history: [
       "missed",
       "missed",
@@ -273,8 +272,6 @@ export const HABITS = [
 
 export const doneToday = HABITS.filter((habit) => habit.done).length
 
-// Deterministic pseudo-random hash (no Math.random/Date.now) so generated
-// activity data is identical on the server and after client hydration.
 function pseudoRandom(seed: number) {
   const x = Math.sin(seed * 12.9898) * 43758.5453
   return x - Math.floor(x)
@@ -283,17 +280,11 @@ function pseudoRandom(seed: number) {
 export const HEATMAP_WEEKS = 52
 export const HEATMAP_DAYS = HEATMAP_WEEKS * 7
 
-// dayIndex: 0 = oldest tracked day, HEATMAP_DAYS - 1 = today.
-// Returns how many of the 5 habits were completed that day.
 export function habitCountForDay(dayIndex: number) {
   const daysFromEnd = HEATMAP_DAYS - 1 - dayIndex
-  // The most recent 12 days match the "Current streak" stat: fully active.
   if (daysFromEnd < 12) return 5
-  // The reset just before the current streak began.
   if (daysFromEnd < 14) return 0
 
-  // Activity trends up over the year (building the habit), with
-  // deterministic day-to-day noise layered on top.
   const progress = dayIndex / HEATMAP_DAYS
   const baseline = 0.5 + progress * 0.35
   if (pseudoRandom(dayIndex) > baseline) return 0
@@ -331,8 +322,6 @@ const hasEarlyCheckIn = HABITS.some(
     reminderMinutes(habit.reminderTime) < reminderMinutes("7:00 AM"),
 )
 
-// Progress/target are always populated so locked achievements can render a
-// progress bar; unlockedDaysAgo is only meaningful once `unlocked` is true.
 export const ACHIEVEMENTS = [
   {
     id: "first-step",
@@ -359,8 +348,6 @@ export const ACHIEVEMENTS = [
     name: "Consistent",
     description: "Score 80%+ completion in a week",
     icon: TargetIcon,
-    // A historical best, not derived from the current week's rate — an
-    // achievement earned once should stay earned even if this week dips.
     unlocked: true,
     progress: 1,
     target: 1,

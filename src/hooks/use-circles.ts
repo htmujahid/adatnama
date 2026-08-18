@@ -28,8 +28,6 @@ function generateInviteCode() {
   return crypto.randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase()
 }
 
-// Session-only circle catalog layered on top of the mock data in
-// -circles-data.ts. Not persisted anywhere yet — resets on reload.
 let state: {
   created: ReadonlyArray<Circle>
   edits: ReadonlyMap<string, CircleInput>
@@ -39,8 +37,6 @@ let state: {
 } = {
   created: [],
   edits: new Map(),
-  // Seed: the user hasn't joined this one yet, so the join-by-code/link flow
-  // has something to demo.
   left: new Set(["book-club"]),
   inviteCodes: new Map(),
   duplicated: new Set(),

@@ -78,6 +78,15 @@ export interface InvitationTable {
   inviterId: string
 }
 
+export interface CategoryTable {
+  id: string
+  userId: string
+  name: string
+  color: string
+  createdAt: string
+  updatedAt: string
+}
+
 export interface Database {
   user: UserTable
   session: SessionTable
@@ -86,4 +95,5 @@ export interface Database {
   organization: OrganizationTable
   member: MemberTable
   invitation: InvitationTable
+  category: CategoryTable
 }

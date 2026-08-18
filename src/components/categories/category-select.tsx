@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { safeRandomUUID, useLiveQuery } from "@tanstack/react-db"
 import { PlusIcon, TagIcon } from "lucide-react"
 
 import { CreateCategoryDialog } from "@/components/categories/create-category-dialog"
@@ -11,7 +12,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { createCategory, useCategories } from "@/hooks/use-categories"
+import { useHomeUser } from "@/hooks/use-home-user"
+import { useCollection } from "@/lib/data/collection"
+import type { CategoryInput } from "@/lib/data/habit"
+import { getCategoriesCollection } from "@/lib/data/habit"
 
 const CREATE_VALUE = "__create__"
 
@@ -26,8 +30,28 @@ export function CategorySelect({
   onChange: (value: string) => void
   className?: string
 }) {
-  const categories = useCategories()
+  const user = useHomeUser()
+  const collection = useCollection(getCategoriesCollection)
+  const { data: categories = [] } = useLiveQuery((q) => {
+    if (!collection) return undefined
+    return q.from({ category: collection })
+  })
   const [dialogOpen, setDialogOpen] = useState(false)
+
+  function handleCreate(input: CategoryInput) {
+    if (!collection) return
+    const now = new Date().toISOString()
+    const categoryId = safeRandomUUID()
+    collection.insert({
+      id: categoryId,
+      userId: user.id,
+      name: input.name,
+      color: input.color,
+      createdAt: now,
+      updatedAt: now,
+    })
+    onChange(categoryId)
+  }
 
   if (categories.length === 0) {
     return (
@@ -44,7 +68,7 @@ export function CategorySelect({
         <CreateCategoryDialog
           open={dialogOpen}
           onOpenChange={setDialogOpen}
-          onSaved={(input) => onChange(createCategory(input).id)}
+          onSaved={handleCreate}
         />
       </>
     )
@@ -90,7 +114,7 @@ export function CategorySelect({
       <CreateCategoryDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        onSaved={(input) => onChange(createCategory(input).id)}
+        onSaved={handleCreate}
       />
     </>
   )

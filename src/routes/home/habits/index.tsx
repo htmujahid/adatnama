@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useLiveQuery } from "@tanstack/react-db"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import {
   ArchiveIcon,
@@ -31,8 +32,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useCategories } from "@/hooks/use-categories"
 import { useHabitCatalog } from "@/hooks/use-habit-catalog"
+import { useCollection } from "@/lib/data/collection"
+import { getCategoriesCollection } from "@/lib/data/habit"
 import { formatHabitDays } from "@/routes/home/-data"
 
 export const Route = createFileRoute("/home/habits/")({
@@ -43,7 +45,11 @@ function HabitsPage() {
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState<string | null>(null)
   const HABIT_LIST = useHabitCatalog()
-  const categories = useCategories()
+  const categoriesCollection = useCollection(getCategoriesCollection)
+  const { data: categories = [] } = useLiveQuery((q) => {
+    if (!categoriesCollection) return undefined
+    return q.from({ category: categoriesCollection })
+  })
 
   const CATEGORIES = Array.from(
     new Set(HABIT_LIST.map((habit) => habit.category)),

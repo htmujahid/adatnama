@@ -1,5 +1,8 @@
+import { useLiveQuery } from "@tanstack/react-db"
+
 import { Badge } from "@/components/ui/badge"
-import { useCategories } from "@/hooks/use-categories"
+import { useCollection } from "@/lib/data/collection"
+import { getCategoriesCollection } from "@/lib/data/habit"
 import { cn } from "@/lib/utils"
 
 export function CategoryBadge({
@@ -9,7 +12,11 @@ export function CategoryBadge({
   categoryId: string
   className?: string
 }) {
-  const categories = useCategories()
+  const collection = useCollection(getCategoriesCollection)
+  const { data: categories = [] } = useLiveQuery((q) => {
+    if (!collection) return undefined
+    return q.from({ category: collection })
+  })
   const category = categories.find((c) => c.id === categoryId)
 
   return (

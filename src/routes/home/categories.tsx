@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { safeRandomUUID, useLiveQuery } from "@tanstack/react-db"
 import { createFileRoute } from "@tanstack/react-router"
 import {
   MoreHorizontalIcon,
@@ -24,31 +25,55 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  createCategory,
-  deleteCategory,
-  updateCategory,
-  useCategories,
-} from "@/hooks/use-categories"
+import { useHomeUser } from "@/hooks/use-home-user"
 import { useHabitCatalog } from "@/hooks/use-habit-catalog"
-import type { Category } from "@/routes/home/-categories-data"
+import { useCollection } from "@/lib/data/collection"
+import type { CategoryInput, CategoryRecord } from "@/lib/data/habit"
+import { getCategoriesCollection } from "@/lib/data/habit"
 
 export const Route = createFileRoute("/home/categories")({
   component: CategoriesPage,
 })
 
 function CategoriesPage() {
-  const categories = useCategories()
+  const user = useHomeUser()
+  const collection = useCollection(getCategoriesCollection)
+  const { data: categories = [] } = useLiveQuery((q) => {
+    if (!collection) return undefined
+    return q.from({ category: collection })
+  })
   const habits = useHabitCatalog()
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [editing, setEditing] = useState<Category | undefined>(undefined)
+  const [editing, setEditing] = useState<CategoryRecord | undefined>(
+    undefined,
+  )
+
+  function handleSave(input: CategoryInput) {
+    if (!collection) return
+    if (editing) {
+      collection.update(editing.id, (draft) => {
+        draft.name = input.name
+        draft.color = input.color
+      })
+      return
+    }
+    const now = new Date().toISOString()
+    collection.insert({
+      id: safeRandomUUID(),
+      userId: user.id,
+      name: input.name,
+      color: input.color,
+      createdAt: now,
+      updatedAt: now,
+    })
+  }
 
   function openCreate() {
     setEditing(undefined)
     setDialogOpen(true)
   }
 
-  function openEdit(category: Category) {
+  function openEdit(category: CategoryRecord) {
     setEditing(category)
     setDialogOpen(true)
   }
@@ -126,7 +151,7 @@ function CategoriesPage() {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           variant="destructive"
-                          onClick={() => deleteCategory(category.id)}
+                          onClick={() => collection?.delete(category.id)}
                         >
                           <Trash2Icon />
                           Delete
@@ -145,13 +170,7 @@ function CategoriesPage() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         category={editing}
-        onSaved={(input) => {
-          if (editing) {
-            updateCategory(editing.id, input)
-          } else {
-            createCategory(input)
-          }
-        }}
+        onSaved={handleSave}
       />
     </div>
   )

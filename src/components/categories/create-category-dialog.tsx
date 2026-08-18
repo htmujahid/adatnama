@@ -21,10 +21,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import type { CategoryInput } from "@/hooks/use-categories"
+import type { CategoryInput, CategoryRecord } from "@/lib/data/habit"
 import { PRESET_COLORS } from "@/lib/colors"
 import { cn } from "@/lib/utils"
-import type { Category } from "@/routes/home/-categories-data"
 
 export function CreateCategoryDialog({
   open,
@@ -34,7 +33,7 @@ export function CreateCategoryDialog({
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
-  category?: Category
+  category?: CategoryRecord
   onSaved: (input: CategoryInput) => void
 }) {
   const isEditing = !!category

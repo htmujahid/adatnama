@@ -2,6 +2,7 @@ import { useForm } from "@tanstack/react-form"
 
 import { CategorySelect } from "@/components/categories/category-select"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Field,
   FieldDescription,
@@ -20,16 +21,25 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
 import type { HabitInput } from "@/hooks/use-habit-catalog"
-import { HABIT_FREQUENCIES } from "@/routes/home/-data"
+import { HABIT_DAY_PRESETS, WEEKDAYS } from "@/routes/home/-data"
 
 export type HabitFormValues = {
   name: string
   category: string
   description: string
   target: string
-  frequency: string
+  days: ReadonlyArray<number>
   reminderTime: string
   freezesTotal: number
+}
+
+function scheduleTemplateFor(days: ReadonlyArray<number>): string {
+  const preset = HABIT_DAY_PRESETS.find(
+    (candidate) =>
+      candidate.days.length === days.length &&
+      candidate.days.every((day) => days.includes(day)),
+  )
+  return preset?.id ?? "custom"
 }
 
 export function reminderTimeToInputValue(reminderTime: string | null) {
@@ -69,7 +79,7 @@ export function HabitForm({
         category: value.category,
         description: value.description.trim(),
         target: value.target.trim(),
-        frequency: value.frequency,
+        days: value.days,
         reminderTime: inputValueToReminderTime(value.reminderTime),
         freezesTotal: value.freezesTotal,
       })
@@ -139,54 +149,94 @@ export function HabitForm({
           )}
         </form.Field>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <form.Field
-            name="category"
-            validators={{
-              onChange: ({ value }) =>
-                value.trim() ? undefined : "Category is required",
-            }}
-          >
-            {(field) => (
-              <Field data-invalid={field.state.meta.errors.length > 0}>
-                <FieldLabel htmlFor={field.name}>Category</FieldLabel>
-                <CategorySelect
-                  id={field.name}
-                  value={field.state.value}
-                  onChange={field.handleChange}
-                />
-                <FieldError
-                  errors={field.state.meta.errors.map((fieldError) => ({
-                    message: String(fieldError),
-                  }))}
-                />
-              </Field>
-            )}
-          </form.Field>
+        <form.Field
+          name="category"
+          validators={{
+            onChange: ({ value }) =>
+              value.trim() ? undefined : "Category is required",
+          }}
+        >
+          {(field) => (
+            <Field data-invalid={field.state.meta.errors.length > 0}>
+              <FieldLabel htmlFor={field.name}>Category</FieldLabel>
+              <CategorySelect
+                id={field.name}
+                value={field.state.value}
+                onChange={field.handleChange}
+              />
+              <FieldError
+                errors={field.state.meta.errors.map((fieldError) => ({
+                  message: String(fieldError),
+                }))}
+              />
+            </Field>
+          )}
+        </form.Field>
 
-          <form.Field name="frequency">
-            {(field) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>Frequency</FieldLabel>
-                <Select
-                  value={field.state.value}
-                  onValueChange={(value) => value && field.handleChange(value)}
-                >
-                  <SelectTrigger id={field.name} className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {HABIT_FREQUENCIES.map((frequency) => (
-                      <SelectItem key={frequency} value={frequency}>
-                        {frequency}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </Field>
-            )}
-          </form.Field>
-        </div>
+        <form.Field
+          name="days"
+          validators={{
+            onChange: ({ value }) =>
+              value.length > 0 ? undefined : "Select at least one day",
+          }}
+        >
+          {(field) => (
+            <Field data-invalid={field.state.meta.errors.length > 0}>
+              <FieldLabel>Schedule</FieldLabel>
+              <Select
+                value={scheduleTemplateFor(field.state.value)}
+                onValueChange={(value) => {
+                  const preset = HABIT_DAY_PRESETS.find((p) => p.id === value)
+                  if (preset) field.handleChange(preset.days)
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {HABIT_DAY_PRESETS.map((preset) => (
+                    <SelectItem key={preset.id} value={preset.id}>
+                      {preset.label}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="custom" disabled>
+                    Custom
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="flex items-center gap-3">
+                {WEEKDAYS.map((weekday) => (
+                  <label
+                    key={weekday.value}
+                    className="flex flex-col items-center gap-1.5 text-xs text-muted-foreground"
+                  >
+                    <Checkbox
+                      checked={field.state.value.includes(weekday.value)}
+                      onCheckedChange={(checked) => {
+                        field.handleChange(
+                          checked === true
+                            ? [...field.state.value, weekday.value].sort(
+                                (a, b) => a - b,
+                              )
+                            : field.state.value.filter(
+                                (day) => day !== weekday.value,
+                              ),
+                        )
+                      }}
+                      aria-label={weekday.label}
+                    />
+                    {weekday.short}
+                  </label>
+                ))}
+              </div>
+              <FieldError
+                errors={field.state.meta.errors.map((fieldError) => ({
+                  message: String(fieldError),
+                }))}
+              />
+            </Field>
+          )}
+        </form.Field>
 
         <form.Field
           name="target"

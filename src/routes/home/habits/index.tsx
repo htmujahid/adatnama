@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/select"
 import { useCategories } from "@/hooks/use-categories"
 import { useHabitCatalog } from "@/hooks/use-habit-catalog"
+import { formatHabitDays } from "@/routes/home/-data"
 
 export const Route = createFileRoute("/home/habits/")({
   component: HabitsPage,
@@ -52,7 +53,7 @@ function HabitsPage() {
   }))
 
   const dailyCount = HABIT_LIST.filter(
-    (habit) => habit.frequency === "Daily",
+    (habit) => habit.days.length === 7,
   ).length
   const reminderCount = HABIT_LIST.filter(
     (habit) => habit.reminderTime !== null,
@@ -201,7 +202,7 @@ function HabitsPage() {
                   </span>
                   <span className="flex items-center gap-1.5">
                     <RepeatIcon className="size-3.5" />
-                    {habit.frequency}
+                    {formatHabitDays(habit.days)}
                   </span>
                   <span className="flex items-center gap-1.5">
                     <BellIcon className="size-3.5" />

@@ -44,7 +44,7 @@ function NewHabitPage() {
               name: "",
               description: "",
               category: habitDefaults.category ?? "",
-              frequency: habitDefaults.frequency,
+              days: habitDefaults.days,
               target: "",
               reminderTime: "",
               freezesTotal: habitDefaults.freezesTotal,

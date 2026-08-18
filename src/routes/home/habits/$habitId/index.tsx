@@ -37,6 +37,7 @@ import {
 import { cn } from "@/lib/utils"
 
 import type { HistoryState } from "../../-data"
+import { formatHabitDays } from "../../-data"
 
 export const Route = createFileRoute("/home/habits/$habitId/")({
   component: HabitDetailPage,
@@ -255,7 +256,9 @@ function HabitDetailPage() {
                   <RepeatIcon className="size-3.5" />
                   Frequency
                 </dt>
-                <dd className="mt-1 text-sm font-medium">{habit.frequency}</dd>
+                <dd className="mt-1 text-sm font-medium">
+                  {formatHabitDays(habit.days)}
+                </dd>
               </div>
               <div>
                 <dt className="flex items-center gap-1.5 text-xs text-muted-foreground">

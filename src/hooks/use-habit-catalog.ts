@@ -8,7 +8,7 @@ export type HabitInput = {
   category: string
   description: string
   target: string
-  frequency: string
+  days: ReadonlyArray<number>
   reminderTime: string | null
   freezesTotal: number
 }
@@ -48,7 +48,10 @@ function applyEdit(habit: Habit, edit: HabitInput | undefined): Habit {
 
 // Session-only habit catalog layered on top of the mock data in -data.ts.
 // Not persisted anywhere yet — resets on reload.
-let state: { created: ReadonlyArray<Habit>; edits: ReadonlyMap<string, HabitInput> } = {
+let state: {
+  created: ReadonlyArray<Habit>
+  edits: ReadonlyMap<string, HabitInput>
+} = {
   created: [],
   edits: new Map(),
 }
@@ -101,7 +104,7 @@ export function createHabit(input: HabitInput): Habit {
     category: input.category,
     description: input.description,
     target: input.target,
-    frequency: input.frequency,
+    days: input.days,
     reminderTime: input.reminderTime,
     streak: 0,
     longestStreak: 0,

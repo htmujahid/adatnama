@@ -44,7 +44,7 @@ import { useThemeMode } from "@/hooks/use-theme-mode"
 import type { ThemeMode } from "@/hooks/use-theme-mode"
 import { authClient } from "@/lib/auth-client"
 import { sessionQueryOptions } from "@/lib/data/auth"
-import { HABIT_FREQUENCIES } from "@/routes/home/-data"
+import { HABIT_DAY_PRESETS } from "@/routes/home/-data"
 
 export const Route = createFileRoute("/home/settings")({
   component: SettingsPage,
@@ -145,21 +145,33 @@ function SettingsPage() {
           </Field>
 
           <Field>
-            <FieldLabel htmlFor="default-frequency">Frequency</FieldLabel>
+            <FieldLabel htmlFor="default-frequency">
+              Default schedule
+            </FieldLabel>
             <Select
-              value={habitDefaults.frequency}
-              onValueChange={(value) =>
-                value &&
-                updateHabitDefaults({ ...habitDefaults, frequency: value })
+              value={
+                HABIT_DAY_PRESETS.find(
+                  (preset) =>
+                    preset.days.length === habitDefaults.days.length &&
+                    preset.days.every((day) =>
+                      habitDefaults.days.includes(day),
+                    ),
+                )?.id ?? HABIT_DAY_PRESETS[0].id
               }
+              onValueChange={(value) => {
+                const preset = HABIT_DAY_PRESETS.find((p) => p.id === value)
+                if (preset) {
+                  updateHabitDefaults({ ...habitDefaults, days: preset.days })
+                }
+              }}
             >
               <SelectTrigger id="default-frequency" className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {HABIT_FREQUENCIES.map((frequency) => (
-                  <SelectItem key={frequency} value={frequency}>
-                    {frequency}
+                {HABIT_DAY_PRESETS.map((preset) => (
+                  <SelectItem key={preset.id} value={preset.id}>
+                    {preset.label}
                   </SelectItem>
                 ))}
               </SelectContent>

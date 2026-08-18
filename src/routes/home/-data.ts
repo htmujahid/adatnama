@@ -18,7 +18,7 @@ export type Habit = {
   category: string
   description: string
   target: string
-  frequency: string
+  days: ReadonlyArray<number>
   reminderTime: string | null
   streak: number
   longestStreak: number
@@ -30,12 +30,34 @@ export type Habit = {
   history: ReadonlyArray<HistoryState>
 }
 
-export const HABIT_FREQUENCIES = [
-  "Daily",
-  "Weekdays",
-  "Weekends",
-  "Weekly",
+export const WEEKDAYS = [
+  { value: 0, short: "Sun", label: "Sunday" },
+  { value: 1, short: "Mon", label: "Monday" },
+  { value: 2, short: "Tue", label: "Tuesday" },
+  { value: 3, short: "Wed", label: "Wednesday" },
+  { value: 4, short: "Thu", label: "Thursday" },
+  { value: 5, short: "Fri", label: "Friday" },
+  { value: 6, short: "Sat", label: "Saturday" },
 ] as const
+
+export const HABIT_DAY_PRESETS = [
+  { id: "daily", label: "Every day", days: [0, 1, 2, 3, 4, 5, 6] },
+  { id: "weekdays", label: "Weekdays", days: [1, 2, 3, 4, 5] },
+  { id: "weekends", label: "Weekends", days: [0, 6] },
+] as const
+
+export function formatHabitDays(days: ReadonlyArray<number>): string {
+  const preset = HABIT_DAY_PRESETS.find(
+    (candidate) =>
+      candidate.days.length === days.length &&
+      candidate.days.every((day) => days.includes(day)),
+  )
+  if (preset) return preset.label
+  return days
+    .toSorted((a, b) => a - b)
+    .map((day) => WEEKDAYS[day].short)
+    .join(", ")
+}
 
 export const HABITS = [
   {
@@ -44,7 +66,7 @@ export const HABITS = [
     category: "Fitness",
     description: "Start the day with an easy-paced run around the block.",
     target: "5 km",
-    frequency: "Daily",
+    days: [0, 1, 2, 3, 4, 5, 6],
     reminderTime: "6:30 AM",
     streak: 12,
     longestStreak: 18,
@@ -90,7 +112,7 @@ export const HABITS = [
     category: "Learning",
     description: "Chip away at the reading list before bed.",
     target: "20 pages",
-    frequency: "Daily",
+    days: [0, 1, 2, 3, 4, 5, 6],
     reminderTime: "9:00 PM",
     streak: 8,
     longestStreak: 15,
@@ -136,7 +158,7 @@ export const HABITS = [
     category: "Nutrition",
     description: "Stay hydrated throughout the day.",
     target: "2 liters",
-    frequency: "Daily",
+    days: [0, 1, 2, 3, 4, 5, 6],
     reminderTime: null,
     streak: 21,
     longestStreak: 27,
@@ -182,7 +204,7 @@ export const HABITS = [
     category: "Nutrition",
     description: "Cut added sugar from meals and drinks.",
     target: "0 g added sugar",
-    frequency: "Daily",
+    days: [0, 1, 2, 3, 4, 5, 6],
     reminderTime: null,
     streak: 3,
     longestStreak: 9,
@@ -228,7 +250,7 @@ export const HABITS = [
     category: "Mindful",
     description: "A short breathing session to start the day focused.",
     target: "10 minutes",
-    frequency: "Weekdays",
+    days: [1, 2, 3, 4, 5],
     reminderTime: "7:00 AM",
     streak: 0,
     longestStreak: 5,

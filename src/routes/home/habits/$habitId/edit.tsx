@@ -1,7 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { ListChecksIcon } from "lucide-react"
 
-import { HabitForm, reminderTimeToInputValue } from "@/components/habits/habit-form"
+import {
+  HabitForm,
+  reminderTimeToInputValue,
+} from "@/components/habits/habit-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { updateHabit, useHabit } from "@/hooks/use-habit-catalog"
@@ -68,7 +71,7 @@ function EditHabitPage() {
               name: habit.name,
               description: habit.description,
               category: habit.category,
-              frequency: habit.frequency,
+              days: habit.days,
               target: habit.target,
               reminderTime: reminderTimeToInputValue(habit.reminderTime),
               freezesTotal: habit.freezesTotal,

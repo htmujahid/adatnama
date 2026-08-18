@@ -1,10 +1,10 @@
 import { useSyncExternalStore } from "react"
 
-import { HABIT_FREQUENCIES } from "@/routes/home/-data"
+import { HABIT_DAY_PRESETS } from "@/routes/home/-data"
 
 export type HabitDefaults = {
   category: string | null
-  frequency: string
+  days: ReadonlyArray<number>
   freezesTotal: number
 }
 
@@ -22,7 +22,7 @@ export type Preferences = {
 let state: Preferences = {
   habitDefaults: {
     category: null,
-    frequency: HABIT_FREQUENCIES[0],
+    days: HABIT_DAY_PRESETS[0].days,
     freezesTotal: 2,
   },
   notifications: {

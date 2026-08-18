@@ -23,6 +23,7 @@ import { Route as HomeAchievementsRouteImport } from './routes/home/achievements
 import { Route as HomeCheckinsRouteImport } from './routes/home/checkins'
 import { Route as HomeInsightsRouteImport } from './routes/home/insights'
 import { Route as HomeProfileRouteImport } from './routes/home/profile'
+import { Route as HomeSettingsRouteImport } from './routes/home/settings'
 import { Route as HomeStreaksRouteImport } from './routes/home/streaks'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as HomeCirclesIndexRouteImport } from './routes/home/circles/index'
@@ -104,6 +105,11 @@ const HomeInsightsRoute = HomeInsightsRouteImport.update({
 const HomeProfileRoute = HomeProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => HomeRouteRoute,
+} as any)
+const HomeSettingsRoute = HomeSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => HomeRouteRoute,
 } as any)
 const HomeStreaksRoute = HomeStreaksRouteImport.update({
@@ -191,6 +197,7 @@ export interface FileRoutesByFullPath {
   '/home/checkins': typeof HomeCheckinsRoute
   '/home/insights': typeof HomeInsightsRoute
   '/home/profile': typeof HomeProfileRoute
+  '/home/settings': typeof HomeSettingsRoute
   '/home/streaks': typeof HomeStreaksRoute
   '/home/': typeof HomeIndexRoute
   '/home/circles/$circleId': typeof HomeCirclesCircleIdRouteRouteWithChildren
@@ -218,6 +225,7 @@ export interface FileRoutesByTo {
   '/home/checkins': typeof HomeCheckinsRoute
   '/home/insights': typeof HomeInsightsRoute
   '/home/profile': typeof HomeProfileRoute
+  '/home/settings': typeof HomeSettingsRoute
   '/home/streaks': typeof HomeStreaksRoute
   '/home': typeof HomeIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -246,6 +254,7 @@ export interface FileRoutesById {
   '/home/checkins': typeof HomeCheckinsRoute
   '/home/insights': typeof HomeInsightsRoute
   '/home/profile': typeof HomeProfileRoute
+  '/home/settings': typeof HomeSettingsRoute
   '/home/streaks': typeof HomeStreaksRoute
   '/_marketing/': typeof MarketingIndexRoute
   '/home/': typeof HomeIndexRoute
@@ -277,6 +286,7 @@ export interface FileRouteTypes {
     | '/home/checkins'
     | '/home/insights'
     | '/home/profile'
+    | '/home/settings'
     | '/home/streaks'
     | '/home/'
     | '/home/circles/$circleId'
@@ -304,6 +314,7 @@ export interface FileRouteTypes {
     | '/home/checkins'
     | '/home/insights'
     | '/home/profile'
+    | '/home/settings'
     | '/home/streaks'
     | '/home'
     | '/api/auth/$'
@@ -331,6 +342,7 @@ export interface FileRouteTypes {
     | '/home/checkins'
     | '/home/insights'
     | '/home/profile'
+    | '/home/settings'
     | '/home/streaks'
     | '/_marketing/'
     | '/home/'
@@ -455,6 +467,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/home/profile'
       preLoaderRoute: typeof HomeProfileRouteImport
+      parentRoute: typeof HomeRouteRoute
+    }
+    '/home/settings': {
+      id: '/home/settings'
+      path: '/settings'
+      fullPath: '/home/settings'
+      preLoaderRoute: typeof HomeSettingsRouteImport
       parentRoute: typeof HomeRouteRoute
     }
     '/home/streaks': {
@@ -625,6 +644,7 @@ interface HomeRouteRouteChildren {
   HomeCheckinsRoute: typeof HomeCheckinsRoute
   HomeInsightsRoute: typeof HomeInsightsRoute
   HomeProfileRoute: typeof HomeProfileRoute
+  HomeSettingsRoute: typeof HomeSettingsRoute
   HomeStreaksRoute: typeof HomeStreaksRoute
   HomeIndexRoute: typeof HomeIndexRoute
   HomeCirclesCircleIdRouteRoute: typeof HomeCirclesCircleIdRouteRouteWithChildren
@@ -642,6 +662,7 @@ const HomeRouteRouteChildren: HomeRouteRouteChildren = {
   HomeCheckinsRoute: HomeCheckinsRoute,
   HomeInsightsRoute: HomeInsightsRoute,
   HomeProfileRoute: HomeProfileRoute,
+  HomeSettingsRoute: HomeSettingsRoute,
   HomeStreaksRoute: HomeStreaksRoute,
   HomeIndexRoute: HomeIndexRoute,
   HomeCirclesCircleIdRouteRoute: HomeCirclesCircleIdRouteRouteWithChildren,

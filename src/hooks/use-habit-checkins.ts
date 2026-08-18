@@ -1,12 +1,19 @@
 import { useSyncExternalStore } from "react"
 
-// Session-only "done today" selection per habit id, layered on top of the
-// mock data in -data.ts. Not persisted anywhere yet — resets on reload.
-let overrides = new Map<string, boolean>()
+// Session-only "done today" selection and optional note per habit id,
+// layered on top of the mock data in -data.ts. Not persisted anywhere yet —
+// resets on reload.
+let state: {
+  overrides: ReadonlyMap<string, boolean>
+  notes: ReadonlyMap<string, string>
+} = {
+  overrides: new Map(),
+  notes: new Map(),
+}
 const listeners = new Set<() => void>()
 
-function setOverride(habitId: string, done: boolean) {
-  overrides = new Map(overrides).set(habitId, done)
+function publish(next: typeof state) {
+  state = next
   listeners.forEach((listener) => listener())
 }
 
@@ -16,11 +23,17 @@ function subscribe(listener: () => void) {
 }
 
 function getSnapshot() {
-  return overrides
+  return state
 }
 
 export function useHabitCheckInOverrides() {
-  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
+  const snapshot = useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
+  return snapshot.overrides
+}
+
+export function useHabitCheckInNote(habitId: string): string {
+  const snapshot = useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
+  return snapshot.notes.get(habitId) ?? ""
 }
 
 export function isHabitDone(
@@ -31,6 +44,19 @@ export function isHabitDone(
 }
 
 export function toggleHabitCheckIn(habit: { id: string; done: boolean }) {
-  const current = overrides.get(habit.id) ?? habit.done
-  setOverride(habit.id, !current)
+  const current = state.overrides.get(habit.id) ?? habit.done
+  publish({
+    ...state,
+    overrides: new Map(state.overrides).set(habit.id, !current),
+  })
+}
+
+export function setHabitCheckInNote(habitId: string, note: string) {
+  const notes = new Map(state.notes)
+  if (note) {
+    notes.set(habitId, note)
+  } else {
+    notes.delete(habitId)
+  }
+  publish({ ...state, notes })
 }

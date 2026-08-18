@@ -5,7 +5,7 @@ import { HabitForm } from "@/components/habits/habit-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { createHabit } from "@/hooks/use-habit-catalog"
-import { HABIT_CATEGORIES, HABIT_FREQUENCIES } from "@/routes/home/-data"
+import { usePreferences } from "@/hooks/use-preferences"
 
 export const Route = createFileRoute("/home/habits/new")({
   component: NewHabitPage,
@@ -13,6 +13,7 @@ export const Route = createFileRoute("/home/habits/new")({
 
 function NewHabitPage() {
   const navigate = useNavigate()
+  const { habitDefaults } = usePreferences()
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
@@ -42,11 +43,11 @@ function NewHabitPage() {
             defaultValues={{
               name: "",
               description: "",
-              category: HABIT_CATEGORIES[0],
-              frequency: HABIT_FREQUENCIES[0],
+              category: habitDefaults.category,
+              frequency: habitDefaults.frequency,
               target: "",
               reminderTime: "",
-              freezesTotal: 2,
+              freezesTotal: habitDefaults.freezesTotal,
             }}
             submitLabel="Create habit"
             cancel={

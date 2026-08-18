@@ -9,7 +9,6 @@ import {
   FlameIcon,
   LifeBuoy,
   ListChecksIcon,
-  Send,
   Settings2Icon,
   TrendingUpIcon,
 } from "lucide-react"
@@ -75,18 +74,13 @@ const data = {
   navSecondary: [
     {
       title: "Settings",
-      url: "#",
+      url: "/home/settings",
       icon: Settings2Icon,
     },
     {
       title: "Support",
-      url: "#",
+      url: "mailto:htmujahid@gmail.com",
       icon: LifeBuoy,
-    },
-    {
-      title: "Feedback",
-      url: "#",
-      icon: Send,
     },
   ],
 }

@@ -1,12 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { Link, useRouter } from "@tanstack/react-router"
-import {
-  BadgeCheckIcon,
-  ChevronsUpDownIcon,
-  HomeIcon,
-  LogOutIcon,
-  MenuIcon,
-} from "lucide-react"
+import { BadgeCheckIcon, HomeIcon, LogOutIcon, MenuIcon } from "lucide-react"
 
 import { BrandMark } from "@/components/layouts/brand-mark"
 import { NAV_LINKS } from "@/components/layouts/nav-links"
@@ -57,7 +51,8 @@ function HeaderAuth() {
         render={
           <Button
             variant="ghost"
-            className="h-auto gap-2 px-2 py-1.5 aria-expanded:bg-muted"
+            size="icon"
+            className="rounded-full aria-expanded:bg-muted"
           />
         }
       >
@@ -68,10 +63,6 @@ function HeaderAuth() {
           />
           <AvatarFallback>{initial}</AvatarFallback>
         </Avatar>
-        <span className="hidden text-sm font-medium sm:inline">
-          {session.user.name}
-        </span>
-        <ChevronsUpDownIcon className="hidden size-4 text-muted-foreground sm:inline" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuGroup>

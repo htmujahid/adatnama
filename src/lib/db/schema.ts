@@ -19,6 +19,7 @@ export interface SessionTable {
   ipAddress: string | null
   userAgent: string | null
   userId: string
+  activeOrganizationId: string | null
 }
 
 export interface AccountTable {
@@ -46,9 +47,43 @@ export interface VerificationTable {
   updatedAt: string
 }
 
+export interface OrganizationTable {
+  id: string
+  name: string
+  slug: string
+  logo: string | null
+  createdAt: string
+  metadata: string | null
+  description: string
+  color: string
+  joinCode: string
+}
+
+export interface MemberTable {
+  id: string
+  organizationId: string
+  userId: string
+  role: string
+  createdAt: string
+}
+
+export interface InvitationTable {
+  id: string
+  organizationId: string
+  email: string
+  role: string | null
+  status: string
+  expiresAt: string
+  createdAt: string
+  inviterId: string
+}
+
 export interface Database {
   user: UserTable
   session: SessionTable
   account: AccountTable
   verification: VerificationTable
+  organization: OrganizationTable
+  member: MemberTable
+  invitation: InvitationTable
 }

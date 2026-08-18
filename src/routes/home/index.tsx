@@ -1,3 +1,4 @@
+import { useSuspenseQuery } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import {
   CalendarCheckIcon,
@@ -9,7 +10,6 @@ import {
 
 import { CircleColorDot } from "@/components/circles/circle-color-dot"
 import { HabitNoteButton } from "@/components/habits/habit-note-button"
-import { Avatar, AvatarFallback, AvatarGroup } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
@@ -29,8 +29,6 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item"
-import { Progress } from "@/components/ui/progress"
-import { useCircles } from "@/hooks/use-circles"
 import {
   isHabitDone,
   toggleHabitCheckIn,
@@ -38,6 +36,7 @@ import {
   useHabitCheckInOverrides,
 } from "@/hooks/use-habit-checkins"
 import { useHomeUser } from "@/hooks/use-home-user"
+import { circlesQueryOptions } from "@/lib/data/circles"
 import { cn } from "@/lib/utils"
 
 import type { DayState, Habit } from "./-data"
@@ -159,7 +158,7 @@ function HomePage() {
   const user = useHomeUser()
   const firstName = user.name.split(" ")[0]
   const overrides = useHabitCheckInOverrides()
-  const circles = useCircles()
+  const { data: circles } = useSuspenseQuery(circlesQueryOptions())
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
@@ -226,49 +225,29 @@ function HomePage() {
             </CardAction>
           </CardHeader>
           <CardContent>
-            <ItemGroup>
-              {circles.map((circle) => {
-                const checkedIn = circle.members.filter((member) =>
-                  member.habits.some((habit) => habit.done),
-                ).length
-                return (
+            {circles.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                You haven't joined a circle yet.
+              </p>
+            ) : (
+              <ItemGroup>
+                {circles.map((circle) => (
                   <Item key={circle.id} variant="outline" size="sm">
-                    <ItemMedia>
-                      <AvatarGroup>
-                        {circle.members.map((member) => (
-                          <Avatar key={member.id} size="sm">
-                            <AvatarFallback>
-                              {member.name
-                                .split(" ")
-                                .map((part) => part[0])
-                                .join("")
-                                .toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                        ))}
-                      </AvatarGroup>
-                    </ItemMedia>
                     <ItemContent>
                       <ItemTitle>
                         <CircleColorDot color={circle.color} />
                         {circle.name}
                       </ItemTitle>
                       <ItemDescription>
-                        {circle.members.length === 0
-                          ? "No members yet"
-                          : `${checkedIn} of ${circle.members.length} checked in today`}
+                        {circle.memberCount === 1
+                          ? "1 member"
+                          : `${circle.memberCount} members`}
                       </ItemDescription>
-                      {circle.members.length > 0 && (
-                        <Progress
-                          value={(checkedIn / circle.members.length) * 100}
-                          className="mt-1"
-                        />
-                      )}
                     </ItemContent>
                   </Item>
-                )
-              })}
-            </ItemGroup>
+                ))}
+              </ItemGroup>
+            )}
           </CardContent>
         </Card>
       </div>

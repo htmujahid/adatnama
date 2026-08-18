@@ -1,5 +1,5 @@
 import { betterAuth } from "better-auth"
-import { username } from "better-auth/plugins"
+import { organization, username } from "better-auth/plugins"
 import { tanstackStartCookies } from "better-auth/tanstack-start"
 import { env } from "cloudflare:workers"
 
@@ -24,5 +24,19 @@ export const auth = betterAuth({
       updateEmailWithoutVerification: true,
     },
   },
-  plugins: [username(), tanstackStartCookies()],
+  plugins: [
+    username(),
+    tanstackStartCookies(),
+    organization({
+      schema: {
+        organization: {
+          additionalFields: {
+            description: { type: "string", required: true },
+            color: { type: "string", required: true },
+            joinCode: { type: "string", required: true, unique: true },
+          },
+        },
+      },
+    }),
+  ],
 })

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
 import {
   ArrowRightIcon,
@@ -10,6 +11,7 @@ import {
   UserPlusIcon,
 } from "lucide-react"
 
+import { leaveCircle } from "@/actions/circles"
 import { CircleColorDot } from "@/components/circles/circle-color-dot"
 import {
   DropdownMenu,
@@ -28,13 +30,14 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { leaveCircle } from "@/hooks/use-circles"
+import { circlesQueryOptions } from "@/lib/data/circles"
 
 export function NavCircles({
   circles,
 }: {
   circles: {
     id: string
+    organizationId: string
     name: string
     url: string
     color: string
@@ -42,7 +45,24 @@ export function NavCircles({
   }[]
 }) {
   const { isMobile } = useSidebar()
+  const queryClient = useQueryClient()
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [leaveError, setLeaveError] = useState<{
+    id: string
+    message: string
+  } | null>(null)
+
+  const handleLeave = async (id: string, organizationId: string) => {
+    setLeaveError(null)
+    const { error } = await leaveCircle({ data: { organizationId } })
+    if (error) {
+      setLeaveError({ id, message: error.message })
+      return
+    }
+    await queryClient.invalidateQueries({
+      queryKey: circlesQueryOptions().queryKey,
+    })
+  }
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -96,13 +116,18 @@ export function NavCircles({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   variant="destructive"
-                  onClick={() => leaveCircle(item.id)}
+                  onClick={() => void handleLeave(item.id, item.organizationId)}
                 >
                   <LogOutIcon />
                   <span>Leave circle</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            {leaveError?.id === item.id && (
+              <p className="px-2 pb-1 text-xs text-destructive">
+                {leaveError.message}
+              </p>
+            )}
           </SidebarMenuItem>
         ))}
       </SidebarMenu>

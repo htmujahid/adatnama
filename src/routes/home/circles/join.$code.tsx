@@ -1,19 +1,36 @@
+import { useState } from "react"
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { UsersIcon } from "lucide-react"
 
+import { joinCircleByCode } from "@/actions/circles"
 import { CircleColorDot } from "@/components/circles/circle-color-dot"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { findCircleByInviteCode, joinCircle } from "@/hooks/use-circles"
+import { FieldError } from "@/components/ui/field"
+import { Spinner } from "@/components/ui/spinner"
+import {
+  circlePreviewQueryOptions,
+  circlesQueryOptions,
+} from "@/lib/data/circles"
 
 export const Route = createFileRoute("/home/circles/join/$code")({
+  loader: async ({ context, params }) => {
+    await context.queryClient.ensureQueryData(
+      circlePreviewQueryOptions(params.code),
+    )
+  },
   component: JoinCirclePage,
 })
 
 function JoinCirclePage() {
   const { code } = Route.useParams()
   const navigate = useNavigate()
-  const circle = findCircleByInviteCode(code)
+  const queryClient = useQueryClient()
+  const { data } = useSuspenseQuery(circlePreviewQueryOptions(code))
+  const [pending, setPending] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const circle = data.circle
 
   if (!circle) {
     return (
@@ -53,20 +70,36 @@ function JoinCirclePage() {
           </div>
           <p className="text-sm text-muted-foreground">{circle.description}</p>
           <p className="text-xs text-muted-foreground">
-            {circle.members.length} member
-            {circle.members.length === 1 ? "" : "s"}
+            {circle.memberCount === 1
+              ? "1 member"
+              : `${circle.memberCount} members`}
           </p>
+          <FieldError>{error}</FieldError>
           <div className="mt-2 flex items-center gap-2">
             <Button
               size="sm"
+              disabled={pending}
               onClick={async () => {
-                joinCircle(circle.id)
+                setPending(true)
+                setError(null)
+                const { error: joinError, slug } = await joinCircleByCode({
+                  data: { code },
+                })
+                setPending(false)
+                if (joinError || !slug) {
+                  setError(joinError?.message ?? "Unable to join circle.")
+                  return
+                }
+                await queryClient.invalidateQueries({
+                  queryKey: circlesQueryOptions().queryKey,
+                })
                 await navigate({
                   to: "/home/circles/$circleId",
-                  params: { circleId: circle.id },
+                  params: { circleId: slug },
                 })
               }}
             >
+              {pending && <Spinner data-icon="inline-start" />}
               Join circle
             </Button>
             <Button

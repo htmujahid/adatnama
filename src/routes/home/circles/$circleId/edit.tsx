@@ -1,10 +1,13 @@
+import { useState } from "react"
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { UsersIcon } from "lucide-react"
 
+import { updateCircle } from "@/actions/circles"
 import { CircleForm } from "@/components/circles/circle-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { updateCircle, useCircle } from "@/hooks/use-circles"
+import { circleQueryOptions, circlesQueryOptions } from "@/lib/data/circles"
 
 export const Route = createFileRoute("/home/circles/$circleId/edit")({
   component: EditCirclePage,
@@ -13,7 +16,10 @@ export const Route = createFileRoute("/home/circles/$circleId/edit")({
 function EditCirclePage() {
   const { circleId } = Route.useParams()
   const navigate = useNavigate()
-  const circle = useCircle(circleId)
+  const queryClient = useQueryClient()
+  const { data } = useSuspenseQuery(circleQueryOptions(circleId))
+  const [error, setError] = useState<string | null>(null)
+  const circle = data.circle
 
   if (!circle) {
     return (
@@ -52,12 +58,7 @@ function EditCirclePage() {
           variant="outline"
           size="sm"
           nativeButton={false}
-          render={
-            <Link
-              to="/home/circles/$circleId"
-              params={{ circleId: circle.id }}
-            />
-          }
+          render={<Link to="/home/circles/$circleId" params={{ circleId }} />}
         >
           <UsersIcon />
           Back to circle
@@ -73,26 +74,37 @@ function EditCirclePage() {
               color: circle.color,
             }}
             submitLabel="Save changes"
+            error={error}
             cancel={
               <Button
                 type="button"
                 variant="outline"
                 nativeButton={false}
                 render={
-                  <Link
-                    to="/home/circles/$circleId"
-                    params={{ circleId: circle.id }}
-                  />
+                  <Link to="/home/circles/$circleId" params={{ circleId }} />
                 }
               >
                 Cancel
               </Button>
             }
             onSubmit={async (input) => {
-              updateCircle(circle.id, input)
+              setError(null)
+              const { error: updateError } = await updateCircle({
+                data: { organizationId: circle.id, ...input },
+              })
+              if (updateError) {
+                setError(updateError.message)
+                return
+              }
+              await queryClient.invalidateQueries({
+                queryKey: circleQueryOptions(circleId).queryKey,
+              })
+              await queryClient.invalidateQueries({
+                queryKey: circlesQueryOptions().queryKey,
+              })
               await navigate({
                 to: "/home/circles/$circleId",
-                params: { circleId: circle.id },
+                params: { circleId },
               })
             }}
           />

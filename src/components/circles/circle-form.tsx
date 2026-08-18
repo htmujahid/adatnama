@@ -1,6 +1,7 @@
 import { useForm } from "@tanstack/react-form"
 import { CheckIcon } from "lucide-react"
 
+import type { CircleInput } from "@/actions/circles"
 import { Button } from "@/components/ui/button"
 import {
   Field,
@@ -12,9 +13,8 @@ import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import type { CircleInput } from "@/hooks/use-circles"
+import { PRESET_COLORS } from "@/lib/colors"
 import { cn } from "@/lib/utils"
-import { CIRCLE_COLORS } from "@/routes/home/-circles-data"
 
 export type CircleFormValues = {
   name: string
@@ -26,11 +26,13 @@ export function CircleForm({
   defaultValues,
   submitLabel,
   cancel,
+  error,
   onSubmit,
 }: {
   defaultValues: CircleFormValues
   submitLabel: string
   cancel: React.ReactNode
+  error?: string | null
   onSubmit: (input: CircleInput) => void | Promise<void>
 }) {
   const form = useForm({
@@ -118,7 +120,7 @@ export function CircleForm({
                   if (next) field.handleChange(next)
                 }}
               >
-                {CIRCLE_COLORS.map((color) => (
+                {PRESET_COLORS.map((color) => (
                   <ToggleGroupItem
                     key={color.id}
                     value={color.value}
@@ -142,6 +144,8 @@ export function CircleForm({
             </Field>
           )}
         </form.Field>
+
+        <FieldError>{error}</FieldError>
 
         <div className="flex items-center gap-2">
           <form.Subscribe

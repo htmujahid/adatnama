@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useQueryClient } from "@tanstack/react-query"
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query"
 import { Link, useRouter } from "@tanstack/react-router"
 import {
   AwardIcon,
@@ -25,10 +25,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { inviteLinkFor, useCircles } from "@/hooks/use-circles"
 import { useHomeUser } from "@/hooks/use-home-user"
 import { authClient } from "@/lib/auth-client"
 import { sessionQueryOptions } from "@/lib/data/auth"
+import { circlesQueryOptions } from "@/lib/data/circles"
 
 import { NavSecondary } from "./nav-secondary"
 
@@ -93,13 +93,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useHomeUser()
   const router = useRouter()
   const queryClient = useQueryClient()
-  const circles = useCircles()
+  const { data: circles } = useSuspenseQuery(circlesQueryOptions())
+  const origin = typeof window !== "undefined" ? window.location.origin : ""
   const circleNavItems = circles.map((circle) => ({
-    id: circle.id,
+    id: circle.slug,
+    organizationId: circle.id,
     name: circle.name,
-    url: `/home/circles/${circle.id}`,
+    url: `/home/circles/${circle.slug}`,
     color: circle.color,
-    inviteLink: inviteLinkFor(circle),
+    inviteLink: `${origin}/home/circles/join/${circle.joinCode}`,
   }))
 
   const handleSignOut = async () => {

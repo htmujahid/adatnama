@@ -1,9 +1,10 @@
 import { useState } from "react"
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { PlusIcon, UserPlusIcon } from "lucide-react"
 
+import { joinCircleByCode } from "@/actions/circles"
 import { CircleColorDot } from "@/components/circles/circle-color-dot"
-import { Avatar, AvatarFallback, AvatarGroup } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -29,29 +30,22 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Progress } from "@/components/ui/progress"
-import {
-  findCircleByInviteCode,
-  joinCircle,
-  useCircles,
-} from "@/hooks/use-circles"
+import { Spinner } from "@/components/ui/spinner"
+import { circlesQueryOptions } from "@/lib/data/circles"
 
 export const Route = createFileRoute("/home/circles/")({
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData(circlesQueryOptions())
+  },
   component: CirclesPage,
 })
 
-function initialsFor(name: string) {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase()
-}
-
 function JoinCircleDialog() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [code, setCode] = useState("")
   const [error, setError] = useState<string | null>(null)
+  const [pending, setPending] = useState(false)
   const [open, setOpen] = useState(false)
 
   return (
@@ -73,16 +67,22 @@ function JoinCircleDialog() {
         <form
           onSubmit={async (event) => {
             event.preventDefault()
-            const circle = findCircleByInviteCode(code.trim().toUpperCase())
-            if (!circle) {
-              setError("No circle found for that code.")
+            setPending(true)
+            const { error: joinError, slug } = await joinCircleByCode({
+              data: { code: code.trim().toUpperCase() },
+            })
+            setPending(false)
+            if (joinError || !slug) {
+              setError(joinError?.message ?? "No circle found for that code.")
               return
             }
-            joinCircle(circle.id)
+            await queryClient.invalidateQueries({
+              queryKey: circlesQueryOptions().queryKey,
+            })
             setOpen(false)
             await navigate({
               to: "/home/circles/$circleId",
-              params: { circleId: circle.id },
+              params: { circleId: slug },
             })
           }}
         >
@@ -112,7 +112,8 @@ function JoinCircleDialog() {
             <DialogClose render={<Button type="button" variant="outline" />}>
               Cancel
             </DialogClose>
-            <Button type="submit" disabled={!code.trim()}>
+            <Button type="submit" disabled={!code.trim() || pending}>
+              {pending && <Spinner data-icon="inline-start" />}
               Join
             </Button>
           </DialogFooter>
@@ -123,7 +124,7 @@ function JoinCircleDialog() {
 }
 
 function CirclesPage() {
-  const circles = useCircles()
+  const { data: circles } = useSuspenseQuery(circlesQueryOptions())
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
@@ -162,57 +163,34 @@ function CirclesPage() {
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {circles.map((circle) => {
-            const checkedIn = circle.members.filter((member) =>
-              member.habits.some((habit) => habit.done),
-            ).length
+          {circles.map((circle) => (
+            <Card key={circle.id}>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <CircleColorDot color={circle.color} className="size-3" />
+                  <CardTitle>{circle.name}</CardTitle>
+                </div>
+                <CardDescription className="line-clamp-1">
+                  {circle.description}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-3">
+                <span className="text-xs text-muted-foreground">
+                  {circle.memberCount === 1
+                    ? "1 member"
+                    : `${circle.memberCount} members`}
+                </span>
 
-            return (
-              <Card key={circle.id}>
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <CircleColorDot color={circle.color} className="size-3" />
-                    <CardTitle>{circle.name}</CardTitle>
-                  </div>
-                  <CardDescription className="line-clamp-1">
-                    {circle.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-col gap-3">
-                  <AvatarGroup>
-                    {circle.members.map((member) => (
-                      <Avatar key={member.id} size="sm">
-                        <AvatarFallback>
-                          {initialsFor(member.name)}
-                        </AvatarFallback>
-                      </Avatar>
-                    ))}
-                  </AvatarGroup>
-
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-xs text-muted-foreground">
-                      {circle.members.length === 0
-                        ? "No members yet"
-                        : `${checkedIn} of ${circle.members.length} checked in today`}
-                    </span>
-                    {circle.members.length > 0 && (
-                      <Progress
-                        value={(checkedIn / circle.members.length) * 100}
-                      />
-                    )}
-                  </div>
-
-                  <Link
-                    to="/home/circles/$circleId"
-                    params={{ circleId: circle.id }}
-                    className="text-xs font-medium text-primary hover:underline"
-                  >
-                    View circle
-                  </Link>
-                </CardContent>
-              </Card>
-            )
-          })}
+                <Link
+                  to="/home/circles/$circleId"
+                  params={{ circleId: circle.slug }}
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  View circle
+                </Link>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       )}
     </div>

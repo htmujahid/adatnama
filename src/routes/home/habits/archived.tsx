@@ -1,6 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { ArchiveIcon, FlameIcon, ListChecksIcon } from "lucide-react"
+import { format, parseISO } from "date-fns"
+import {
+  ArchiveIcon,
+  ArchiveRestoreIcon,
+  FlameIcon,
+  ListChecksIcon,
+  Trash2Icon,
+} from "lucide-react"
 
+import { CategoryBadge } from "@/components/categories/category-badge"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -10,38 +18,43 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useHabits } from "@/hooks/use-habits"
+import { useCollection } from "@/lib/data/collection"
+import { getHabitsCollection } from "@/lib/data/habits"
+import { useOfflineExecutor } from "@/lib/db/offline"
 
 export const Route = createFileRoute("/home/habits/archived")({
   component: ArchivedHabitsPage,
 })
 
-const ARCHIVED_HABITS: ReadonlyArray<{
-  name: string
-  category: string
-  bestStreak: number
-  daysTracked: number
-  archivedOn: string
-  note: string
-}> = [
-  {
-    name: "Cold showers",
-    category: "Wellness",
-    bestStreak: 14,
-    daysTracked: 21,
-    archivedOn: "Jul 12",
-    note: "Paused for winter — will revisit in spring.",
-  },
-  {
-    name: "Daily journaling",
-    category: "Mindful",
-    bestStreak: 32,
-    daysTracked: 58,
-    archivedOn: "Jun 3",
-    note: 'Replaced by the "Read 20 pages" habit.',
-  },
-]
-
 function ArchivedHabitsPage() {
+  const { habits, checkins, isLoading } = useHabits()
+  const collection = useCollection(getHabitsCollection)
+  const executor = useOfflineExecutor()
+  const archived = habits.filter((habit) => habit.archivedAt !== null)
+
+  function restore(habitId: string) {
+    if (!collection || !executor) return
+    executor
+      .createOfflineTransaction({ mutationFnName: "habits.restore" })
+      .mutate(() => {
+        collection.update(habitId, (draft) => {
+          draft.archivedAt = null
+          draft.archivedNote = null
+        })
+      })
+  }
+
+  function remove(habitId: string) {
+    if (!collection || !executor) return
+    executor
+      .createOfflineTransaction({ mutationFnName: "habits.delete" })
+      .mutate(() => {
+        collection.delete(habitId)
+      })
+  }
+
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -65,7 +78,21 @@ function ArchivedHabitsPage() {
         </Button>
       </div>
 
-      {ARCHIVED_HABITS.length === 0 ? (
+      {isLoading ? (
+        <div className="grid gap-4 md:grid-cols-2">
+          {Array.from({ length: 2 }, (_, index) => (
+            <Card key={index}>
+              <CardHeader>
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="mt-1.5 h-4 w-24" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-4 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : archived.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center text-sm text-muted-foreground">
             You haven't archived any habits yet.
@@ -73,37 +100,74 @@ function ArchivedHabitsPage() {
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
-          {ARCHIVED_HABITS.map((habit) => (
-            <Card key={habit.name} className="opacity-80">
-              <CardHeader>
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <CardTitle>{habit.name}</CardTitle>
-                    <CardDescription>{habit.category}</CardDescription>
+          {archived.map((habit) => {
+            const daysTracked = checkins.filter(
+              (checkin) =>
+                checkin.habitId === habit.id && checkin.status === "done",
+            ).length
+
+            return (
+              <Card key={habit.id} className="opacity-80">
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex flex-col gap-1.5">
+                      <CardTitle>{habit.name}</CardTitle>
+                      {habit.categoryId ? (
+                        <CategoryBadge categoryId={habit.categoryId} />
+                      ) : (
+                        <CardDescription>Uncategorized</CardDescription>
+                      )}
+                    </div>
+                    <Badge variant="outline">
+                      <ArchiveIcon />
+                      Archived{" "}
+                      {habit.archivedAt
+                        ? format(parseISO(habit.archivedAt), "MMM d")
+                        : ""}
+                    </Badge>
                   </div>
-                  <Badge variant="outline">
-                    <ArchiveIcon />
-                    Archived {habit.archivedOn}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-3">
-                <p className="text-sm text-muted-foreground">{habit.note}</p>
-                <div className="flex items-center justify-between border-t border-border pt-3 text-sm">
-                  <span className="flex items-center gap-1.5">
-                    <FlameIcon className="size-4 text-muted-foreground" />
-                    <span className="font-semibold tabular-nums">
-                      {habit.bestStreak}
+                </CardHeader>
+                <CardContent className="flex flex-col gap-3">
+                  {habit.archivedNote && (
+                    <p className="text-sm text-muted-foreground">
+                      {habit.archivedNote}
+                    </p>
+                  )}
+                  <div className="flex items-center justify-between border-t border-border pt-3 text-sm">
+                    <span className="flex items-center gap-1.5">
+                      <FlameIcon className="size-4 text-muted-foreground" />
+                      <span className="font-semibold tabular-nums">
+                        {habit.longestStreak}
+                      </span>
+                      <span className="text-muted-foreground">day best</span>
                     </span>
-                    <span className="text-muted-foreground">day best</span>
-                  </span>
-                  <span className="text-muted-foreground">
-                    Tracked {habit.daysTracked} days
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                    <span className="text-muted-foreground">
+                      Tracked {daysTracked} day{daysTracked === 1 ? "" : "s"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => restore(habit.id)}
+                    >
+                      <ArchiveRestoreIcon />
+                      Restore
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => remove(habit.id)}
+                    >
+                      <Trash2Icon />
+                      Delete
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          })}
         </div>
       )}
     </div>

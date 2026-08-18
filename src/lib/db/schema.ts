@@ -87,6 +87,65 @@ export interface CategoryTable {
   updatedAt: string
 }
 
+export interface HabitTable {
+  id: string
+  userId: string
+  categoryId: string | null
+  name: string
+  description: string
+  target: string
+  reminderTime: string | null
+  freezesTotal: number
+  startedAt: string
+  archivedAt: string | null
+  archivedNote: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface HabitScheduleDayTable {
+  id: string
+  habitId: string
+  dayOfWeek: number
+}
+
+export interface HabitCheckinTable {
+  id: string
+  habitId: string
+  date: string
+  status: string
+  note: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AchievementTable {
+  id: string
+  name: string
+  description: string
+  icon: string
+  target: number | null
+  createdAt: string
+}
+
+export interface UserAchievementUnlockTable {
+  id: string
+  userId: string
+  achievementId: string
+  unlockedAt: string
+}
+
+export interface UserPreferencesTable {
+  userId: string
+  timezone: string
+  defaultCategoryId: string | null
+  defaultSchedulePreset: string
+  defaultFreezesTotal: number
+  remindersEnabled: number
+  weeklySummaryEnabled: number
+  circleActivityEnabled: number
+}
+
 export interface Database {
   user: UserTable
   session: SessionTable
@@ -96,4 +155,10 @@ export interface Database {
   member: MemberTable
   invitation: InvitationTable
   category: CategoryTable
+  habit: HabitTable
+  habit_schedule_day: HabitScheduleDayTable
+  habit_checkin: HabitCheckinTable
+  achievement: AchievementTable
+  user_achievement_unlock: UserAchievementUnlockTable
+  user_preferences: UserPreferencesTable
 }

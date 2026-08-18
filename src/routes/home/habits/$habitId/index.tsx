@@ -1,9 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { useState } from "react"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { format } from "date-fns"
 import {
+  ArchiveIcon,
   BellIcon,
   CalendarDaysIcon,
   CircleCheckIcon,
-  CircleXIcon,
   FlameIcon,
   ListChecksIcon,
   MedalIcon,
@@ -11,12 +13,17 @@ import {
   RepeatIcon,
   SnowflakeIcon,
   TargetIcon,
-  TriangleAlertIcon,
   TrophyIcon,
 } from "lucide-react"
 
 import { CategoryBadge } from "@/components/categories/category-badge"
+import { HISTORY_LEGEND, HistoryGrid } from "@/components/habits/habit-history"
 import { HabitNoteButton } from "@/components/habits/habit-note-button"
+import {
+  habitStatus,
+  MILESTONES,
+  STATUS_META,
+} from "@/components/habits/habit-status"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -27,119 +34,159 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { useHabit } from "@/hooks/use-habit-catalog"
 import {
-  isHabitDone,
-  toggleHabitCheckIn,
-  useHabitCheckInNote,
-  useHabitCheckInOverrides,
-} from "@/hooks/use-habit-checkins"
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Textarea } from "@/components/ui/textarea"
+import { useHabitCheckins } from "@/hooks/use-habit-checkins"
+import { useHabit } from "@/hooks/use-habits"
+import type { HabitView } from "@/hooks/use-habits"
+import { useCollection } from "@/lib/data/collection"
+import { getHabitsCollection } from "@/lib/data/habits"
+import { useOfflineExecutor } from "@/lib/db/offline"
+import { formatHabitDays, lastNDays, WEEK_LENGTH } from "@/lib/habits"
 import { cn } from "@/lib/utils"
-
-import type { HistoryState } from "../../-data"
-import { formatHabitDays } from "../../-data"
 
 export const Route = createFileRoute("/home/habits/$habitId/")({
   component: HabitDetailPage,
 })
 
-const MILESTONES = [7, 30, 100] as const
-
-const WEEK_DATES = [
-  "Aug 11",
-  "Aug 12",
-  "Aug 13",
-  "Aug 14",
-  "Aug 15",
-  "Aug 16",
-  "Aug 17",
-]
-
-const HISTORY_LEGEND = [
-  { state: "done", label: "Done", className: "bg-primary" },
-  { state: "frozen", label: "Frozen", className: "bg-sky-400 dark:bg-sky-500" },
-  { state: "missed", label: "Missed", className: "bg-muted" },
-] as const
-
-function habitStatus(habit: { done: boolean; streak: number }) {
-  if (habit.streak === 0) return "broken" as const
-  return habit.done ? ("active" as const) : ("at-risk" as const)
-}
-
-const STATUS_META = {
-  active: {
-    label: "Active",
-    icon: CircleCheckIcon,
-    badgeVariant: "secondary" as const,
-  },
-  "at-risk": {
-    label: "At risk",
-    icon: TriangleAlertIcon,
-    badgeVariant: "outline" as const,
-  },
-  broken: {
-    label: "Broken",
-    icon: CircleXIcon,
-    badgeVariant: "destructive" as const,
-  },
-}
-
-function HistoryGrid({ history }: { history: ReadonlyArray<HistoryState> }) {
+function HabitDetailSkeleton() {
   return (
-    <div
-      className="grid grid-flow-col grid-rows-7 gap-1"
-      role="img"
-      aria-label="Last 4 weeks of check-ins"
-    >
-      {history.map((state, index) => (
-        <span
-          key={index}
-          title={state === "today" ? "Today" : state}
-          className={cn(
-            "size-3 rounded-sm",
-            state === "done" && "bg-primary",
-            state === "missed" && "bg-muted",
-            state === "frozen" && "bg-sky-400 dark:bg-sky-500",
-            state === "today" && "bg-muted ring-2 ring-primary/40",
-          )}
-        />
-      ))}
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+      <div>
+        <Skeleton className="h-8 w-56" />
+        <Skeleton className="mt-2 h-5 w-24 rounded-full" />
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {Array.from({ length: 4 }, (_, index) => (
+          <Card key={index} size="sm">
+            <CardHeader>
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="mt-1.5 h-8 w-20" />
+            </CardHeader>
+          </Card>
+        ))}
+      </div>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-48 w-full" />
+      </div>
     </div>
+  )
+}
+
+function HabitNotFound() {
+  return (
+    <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-3 py-24 text-center">
+      <h1 className="font-heading text-xl font-semibold tracking-tight">
+        Habit not found
+      </h1>
+      <p className="text-sm text-muted-foreground">
+        This habit doesn't exist or may have been removed.
+      </p>
+      <Button
+        variant="outline"
+        size="sm"
+        nativeButton={false}
+        render={<Link to="/home/habits" />}
+      >
+        <ListChecksIcon />
+        All habits
+      </Button>
+    </div>
+  )
+}
+
+function ArchiveHabitDialog({
+  habit,
+  open,
+  onOpenChange,
+}: {
+  habit: HabitView
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}) {
+  const navigate = useNavigate()
+  const collection = useCollection(getHabitsCollection)
+  const executor = useOfflineExecutor()
+  const [note, setNote] = useState("")
+
+  async function archive() {
+    if (!collection || !executor) return
+    const trimmed = note.trim()
+    executor
+      .createOfflineTransaction({ mutationFnName: "habits.archive" })
+      .mutate(() => {
+        collection.update(habit.id, (draft) => {
+          draft.archivedAt = new Date().toISOString()
+          draft.archivedNote = trimmed || null
+        })
+      })
+    onOpenChange(false)
+    await navigate({ to: "/home/habits/archived" })
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Archive {habit.name}?</DialogTitle>
+          <DialogDescription>
+            Archived habits stop counting toward your streaks. You can restore
+            them anytime.
+          </DialogDescription>
+        </DialogHeader>
+        <Field className="mt-4">
+          <FieldLabel htmlFor="archive-note">Note</FieldLabel>
+          <Textarea
+            id="archive-note"
+            placeholder="Paused for winter — will revisit in spring."
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+            rows={2}
+          />
+          <FieldDescription>
+            Optional — a reminder of why you're pausing this habit.
+          </FieldDescription>
+        </Field>
+        <DialogFooter className="mt-6">
+          <DialogClose render={<Button type="button" variant="outline" />}>
+            Cancel
+          </DialogClose>
+          <Button type="button" onClick={archive}>
+            <ArchiveIcon />
+            Archive habit
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 
 function HabitDetailPage() {
   const { habitId } = Route.useParams()
-  const overrides = useHabitCheckInOverrides()
-  const habit = useHabit(habitId)
-  const note = useHabitCheckInNote(habitId)
+  const { habit, isLoading } = useHabit(habitId)
+  const { todayByHabitId, toggleCheckin } = useHabitCheckins()
+  const [archiveOpen, setArchiveOpen] = useState(false)
 
-  if (!habit) {
-    return (
-      <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-3 py-24 text-center">
-        <h1 className="font-heading text-xl font-semibold tracking-tight">
-          Habit not found
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          This habit doesn't exist or may have been removed.
-        </p>
-        <Button
-          variant="outline"
-          size="sm"
-          nativeButton={false}
-          render={<Link to="/home/habits" />}
-        >
-          <ListChecksIcon />
-          All habits
-        </Button>
-      </div>
-    )
-  }
+  if (isLoading && !habit) return <HabitDetailSkeleton />
+  if (!habit) return <HabitNotFound />
 
-  const done = isHabitDone(habit, overrides)
+  const note = todayByHabitId.get(habit.id)?.note ?? ""
+  const done = habit.doneToday
   const status = habitStatus(habit)
   const statusMeta = STATUS_META[status]
   const weekDoneCount = habit.week.filter((day) => day === "done").length
+  const weekDates = lastNDays(WEEK_LENGTH, new Date())
 
   const stats = [
     {
@@ -162,7 +209,7 @@ function HabitDetailPage() {
     },
     {
       label: "Freezes left",
-      value: `${habit.freezes} of ${habit.freezesTotal}`,
+      value: `${habit.freezesLeft} of ${habit.freezesTotal}`,
       badge: "Available",
       icon: SnowflakeIcon,
     },
@@ -181,9 +228,11 @@ function HabitDetailPage() {
               {statusMeta.label}
             </Badge>
           </div>
-          <div className="mt-1">
-            <CategoryBadge categoryId={habit.category} />
-          </div>
+          {habit.categoryId && (
+            <div className="mt-1">
+              <CategoryBadge categoryId={habit.categoryId} />
+            </div>
+          )}
           {note && (
             <p className="mt-1 text-sm text-muted-foreground italic">
               "{note}"
@@ -191,6 +240,14 @@ function HabitDetailPage() {
           )}
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setArchiveOpen(true)}
+          >
+            <ArchiveIcon />
+            Archive
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -275,7 +332,9 @@ function HabitDetailPage() {
                   Tracking since
                 </dt>
                 <dd className="mt-1 text-sm font-medium">
-                  {habit.startedDaysAgo} days ago
+                  {habit.startedDaysAgo === 0
+                    ? "Today"
+                    : `${habit.startedDaysAgo} days ago`}
                 </dd>
               </div>
             </dl>
@@ -323,12 +382,12 @@ function HabitDetailPage() {
                 return (
                   <div key={index} className="flex flex-col items-center gap-2">
                     <span className="text-xs text-muted-foreground">
-                      {WEEK_DATES[index]}
+                      {format(weekDates[index], "MMM d")}
                     </span>
                     {isToday ? (
                       <button
                         type="button"
-                        onClick={() => toggleHabitCheckIn(habit)}
+                        onClick={() => toggleCheckin(habit.id)}
                         aria-pressed={done}
                         aria-label={
                           done ? "Mark today as not done" : "Mark today as done"
@@ -350,10 +409,15 @@ function HabitDetailPage() {
                             "bg-primary text-primary-foreground",
                           state === "missed" &&
                             "bg-muted text-muted-foreground",
+                          state === "frozen" &&
+                            "bg-sky-400 text-white dark:bg-sky-500",
                         )}
                       >
                         {state === "done" && (
                           <CircleCheckIcon className="size-4" />
+                        )}
+                        {state === "frozen" && (
+                          <SnowflakeIcon className="size-4" />
                         )}
                       </span>
                     )}
@@ -388,6 +452,12 @@ function HabitDetailPage() {
           </CardContent>
         </Card>
       </div>
+
+      <ArchiveHabitDialog
+        habit={habit}
+        open={archiveOpen}
+        onOpenChange={setArchiveOpen}
+      />
     </div>
   )
 }

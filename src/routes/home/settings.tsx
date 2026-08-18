@@ -33,18 +33,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
-import {
-  setNotificationPreference,
-  updateHabitDefaults,
-  usePreferences,
-} from "@/hooks/use-preferences"
+import { usePreferences } from "@/hooks/use-preferences"
 import type { NotificationPreferences } from "@/hooks/use-preferences"
 import { useThemeMode } from "@/hooks/use-theme-mode"
 import type { ThemeMode } from "@/hooks/use-theme-mode"
 import { authClient } from "@/lib/auth-client"
 import { sessionQueryOptions } from "@/lib/data/auth"
-import { HABIT_DAY_PRESETS } from "@/routes/home/-data"
+import { HABIT_DAY_PRESETS, schedulePresetFor } from "@/lib/habits"
 
 export const Route = createFileRoute("/home/settings")({
   component: SettingsPage,
@@ -84,7 +81,13 @@ const NOTIFICATION_OPTIONS = [
 
 function SettingsPage() {
   const { mode, setMode } = useThemeMode()
-  const { habitDefaults, notifications } = usePreferences()
+  const {
+    habitDefaults,
+    notifications,
+    isLoading,
+    updateHabitDefaults,
+    setNotificationPreference,
+  } = usePreferences()
   const router = useRouter()
   const queryClient = useQueryClient()
 
@@ -133,71 +136,80 @@ function SettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-3">
-          <Field>
-            <FieldLabel htmlFor="default-category">Category</FieldLabel>
-            <CategorySelect
-              id="default-category"
-              value={habitDefaults.category ?? ""}
-              onChange={(value) =>
-                updateHabitDefaults({ ...habitDefaults, category: value })
-              }
-            />
-          </Field>
+          {isLoading ? (
+            <>
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+            </>
+          ) : (
+            <>
+              <Field>
+                <FieldLabel htmlFor="default-category">Category</FieldLabel>
+                <CategorySelect
+                  id="default-category"
+                  value={habitDefaults.category ?? ""}
+                  onChange={(value) =>
+                    updateHabitDefaults({ ...habitDefaults, category: value })
+                  }
+                />
+              </Field>
 
-          <Field>
-            <FieldLabel htmlFor="default-frequency">
-              Default schedule
-            </FieldLabel>
-            <Select
-              value={
-                HABIT_DAY_PRESETS.find(
-                  (preset) =>
-                    preset.days.length === habitDefaults.days.length &&
-                    preset.days.every((day) =>
-                      habitDefaults.days.includes(day),
-                    ),
-                )?.id ?? HABIT_DAY_PRESETS[0].id
-              }
-              onValueChange={(value) => {
-                const preset = HABIT_DAY_PRESETS.find((p) => p.id === value)
-                if (preset) {
-                  updateHabitDefaults({ ...habitDefaults, days: preset.days })
+              <Field>
+                <FieldLabel htmlFor="default-frequency">
+                  Default schedule
+                </FieldLabel>
+                <Select
+                  value={
+                    schedulePresetFor(habitDefaults.days) ??
+                    HABIT_DAY_PRESETS[0].id
+                  }
+                  onValueChange={(value) => {
+                    const preset = HABIT_DAY_PRESETS.find((p) => p.id === value)
+                    if (preset) {
+                      updateHabitDefaults({
+                        ...habitDefaults,
+                        days: preset.days,
+                      })
+                    }
+                  }}
+                >
+                  <SelectTrigger id="default-frequency" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {HABIT_DAY_PRESETS.map((preset) => (
+                      <SelectItem key={preset.id} value={preset.id}>
+                        {preset.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+
+              <Field
+                data-invalid={
+                  habitDefaults.freezesTotal < 0 ||
+                  habitDefaults.freezesTotal > 5
                 }
-              }}
-            >
-              <SelectTrigger id="default-frequency" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {HABIT_DAY_PRESETS.map((preset) => (
-                  <SelectItem key={preset.id} value={preset.id}>
-                    {preset.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-
-          <Field
-            data-invalid={
-              habitDefaults.freezesTotal < 0 || habitDefaults.freezesTotal > 5
-            }
-          >
-            <FieldLabel htmlFor="default-freezes">Freezes</FieldLabel>
-            <Input
-              id="default-freezes"
-              type="number"
-              min={0}
-              max={5}
-              value={habitDefaults.freezesTotal}
-              onChange={(event) =>
-                updateHabitDefaults({
-                  ...habitDefaults,
-                  freezesTotal: Number(event.target.value),
-                })
-              }
-            />
-          </Field>
+              >
+                <FieldLabel htmlFor="default-freezes">Freezes</FieldLabel>
+                <Input
+                  id="default-freezes"
+                  type="number"
+                  min={0}
+                  max={5}
+                  value={habitDefaults.freezesTotal}
+                  onChange={(event) =>
+                    updateHabitDefaults({
+                      ...habitDefaults,
+                      freezesTotal: Number(event.target.value),
+                    })
+                  }
+                />
+              </Field>
+            </>
+          )}
         </CardContent>
       </Card>
 

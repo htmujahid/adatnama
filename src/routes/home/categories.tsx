@@ -26,11 +26,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useHabitCatalog } from "@/hooks/use-habit-catalog"
+import { useHabits } from "@/hooks/use-habits"
 import { useHomeUser } from "@/hooks/use-home-user"
+import type { CategoryInput, CategoryRecord } from "@/lib/data/categories"
+import { getCategoriesCollection } from "@/lib/data/categories"
 import { useCollection } from "@/lib/data/collection"
-import type { CategoryInput, CategoryRecord } from "@/lib/data/habit"
-import { getCategoriesCollection } from "@/lib/data/habit"
 import { useOfflineExecutor } from "@/lib/db/offline"
 
 export const Route = createFileRoute("/home/categories")({
@@ -46,7 +46,7 @@ function CategoriesPage() {
     return q.from({ category: collection })
   })
   const categoriesLoading = !collection || isLoading
-  const habits = useHabitCatalog()
+  const { habits } = useHabits()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editing, setEditing] = useState<CategoryRecord | undefined>(undefined)
 
@@ -154,7 +154,7 @@ function CategoriesPage() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {categories.map((category) => {
             const habitCount = habits.filter(
-              (habit) => habit.category === category.id,
+              (habit) => habit.categoryId === category.id,
             ).length
 
             return (

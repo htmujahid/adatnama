@@ -11,10 +11,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Textarea } from "@/components/ui/textarea"
-import {
-  setHabitCheckInNote,
-  useHabitCheckInNote,
-} from "@/hooks/use-habit-checkins"
+import { useHabitCheckins } from "@/hooks/use-habit-checkins"
 import { cn } from "@/lib/utils"
 
 export function HabitNoteButton({
@@ -26,12 +23,13 @@ export function HabitNoteButton({
   habitName: string
   className?: string
 }) {
-  const note = useHabitCheckInNote(habitId)
+  const { todayByHabitId, setCheckinNote } = useHabitCheckins()
+  const note = todayByHabitId.get(habitId)?.note ?? ""
   const [draft, setDraft] = useState(note)
   const [open, setOpen] = useState(false)
 
   function save() {
-    setHabitCheckInNote(habitId, draft.trim())
+    setCheckinNote(habitId, draft.trim())
     setOpen(false)
   }
 
@@ -89,7 +87,7 @@ export function HabitNoteButton({
               variant="ghost"
               size="sm"
               onClick={() => {
-                setHabitCheckInNote(habitId, "")
+                setCheckinNote(habitId, "")
                 setDraft("")
                 setOpen(false)
               }}

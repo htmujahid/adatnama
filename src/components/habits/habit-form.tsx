@@ -20,12 +20,12 @@ import {
 } from "@/components/ui/select"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
-import type { HabitInput } from "@/hooks/use-habit-catalog"
-import { HABIT_DAY_PRESETS, WEEKDAYS } from "@/routes/home/-data"
+import type { HabitInput } from "@/lib/data/habits"
+import { HABIT_DAY_PRESETS, schedulePresetFor, WEEKDAYS } from "@/lib/habits"
 
 export type HabitFormValues = {
   name: string
-  category: string
+  categoryId: string
   description: string
   target: string
   days: ReadonlyArray<number>
@@ -34,12 +34,7 @@ export type HabitFormValues = {
 }
 
 function scheduleTemplateFor(days: ReadonlyArray<number>): string {
-  const preset = HABIT_DAY_PRESETS.find(
-    (candidate) =>
-      candidate.days.length === days.length &&
-      candidate.days.every((day) => days.includes(day)),
-  )
-  return preset?.id ?? "custom"
+  return schedulePresetFor(days) ?? "custom"
 }
 
 export function reminderTimeToInputValue(reminderTime: string | null) {
@@ -76,7 +71,7 @@ export function HabitForm({
     onSubmit: async ({ value }) => {
       await onSubmit({
         name: value.name.trim(),
-        category: value.category,
+        categoryId: value.categoryId,
         description: value.description.trim(),
         target: value.target.trim(),
         days: value.days,
@@ -150,7 +145,7 @@ export function HabitForm({
         </form.Field>
 
         <form.Field
-          name="category"
+          name="categoryId"
           validators={{
             onChange: ({ value }) =>
               value.trim() ? undefined : "Category is required",

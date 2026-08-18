@@ -32,10 +32,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useHabitCatalog } from "@/hooks/use-habit-catalog"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useActiveHabits } from "@/hooks/use-habits"
+import { getCategoriesCollection } from "@/lib/data/categories"
 import { useCollection } from "@/lib/data/collection"
-import { getCategoriesCollection } from "@/lib/data/habit"
-import { formatHabitDays } from "@/routes/home/-data"
+import { formatHabitDays } from "@/lib/habits"
 
 export const Route = createFileRoute("/home/habits/")({
   component: HabitsPage,
@@ -44,53 +45,55 @@ export const Route = createFileRoute("/home/habits/")({
 function HabitsPage() {
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState<string | null>(null)
-  const HABIT_LIST = useHabitCatalog()
+  const { habits, isLoading } = useActiveHabits()
   const categoriesCollection = useCollection(getCategoriesCollection)
   const { data: categories = [] } = useLiveQuery((q) => {
     if (!categoriesCollection) return undefined
     return q.from({ category: categoriesCollection })
   })
 
-  const CATEGORIES = Array.from(
-    new Set(HABIT_LIST.map((habit) => habit.category)),
+  const usedCategories = Array.from(
+    new Set(
+      habits
+        .map((habit) => habit.categoryId)
+        .filter((id): id is string => id !== null),
+    ),
   ).map((id) => ({
     id,
-    label: categories.find((c) => c.id === id)?.name ?? id,
+    label: categories.find((candidate) => candidate.id === id)?.name ?? id,
   }))
 
-  const dailyCount = HABIT_LIST.filter(
-    (habit) => habit.days.length === 7,
-  ).length
-  const reminderCount = HABIT_LIST.filter(
+  const dailyCount = habits.filter((habit) => habit.days.length === 7).length
+  const reminderCount = habits.filter(
     (habit) => habit.reminderTime !== null,
   ).length
 
-  const HABIT_STATS = [
+  const stats = [
     {
       label: "Total habits",
-      value: `${HABIT_LIST.length}`,
+      value: `${habits.length}`,
       badge: "All active",
       icon: ListChecksIcon,
     },
     {
       label: "Daily habits",
-      value: `${dailyCount} of ${HABIT_LIST.length}`,
+      value: `${dailyCount} of ${habits.length}`,
       badge: "Every day",
       icon: RepeatIcon,
     },
     {
       label: "Reminders set",
-      value: `${reminderCount} of ${HABIT_LIST.length}`,
+      value: `${reminderCount} of ${habits.length}`,
       badge: "Enabled",
       icon: BellIcon,
     },
   ] as const
 
-  const filtered = HABIT_LIST.filter((habit) => {
+  const filtered = habits.filter((habit) => {
     const matchesSearch = habit.name
       .toLowerCase()
       .includes(search.trim().toLowerCase())
-    const matchesCategory = category === null || habit.category === category
+    const matchesCategory = category === null || habit.categoryId === category
     return matchesSearch && matchesCategory
   })
 
@@ -127,12 +130,12 @@ function HabitsPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        {HABIT_STATS.map((stat) => (
+        {stats.map((stat) => (
           <Card key={stat.label} size="sm">
             <CardHeader>
               <CardDescription>{stat.label}</CardDescription>
               <CardTitle className="text-2xl font-semibold tabular-nums">
-                {stat.value}
+                {isLoading ? <Skeleton className="h-8 w-16" /> : stat.value}
               </CardTitle>
               <CardAction>
                 <Badge variant="secondary">
@@ -165,7 +168,7 @@ function HabitsPage() {
           </SelectTrigger>
           <SelectContent align="end">
             <SelectItem value="all">All categories</SelectItem>
-            {CATEGORIES.map((cat) => (
+            {usedCategories.map((cat) => (
               <SelectItem key={cat.id} value={cat.id}>
                 {cat.label}
               </SelectItem>
@@ -174,7 +177,47 @@ function HabitsPage() {
         </Select>
       </div>
 
-      {filtered.length === 0 ? (
+      {isLoading ? (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 3 }, (_, index) => (
+            <Card key={index}>
+              <CardHeader>
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="mt-1.5 h-5 w-20 rounded-full" />
+              </CardHeader>
+              <CardContent className="flex flex-col gap-3">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-4 w-1/2" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : habits.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center gap-3 py-14 text-center">
+            <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
+              <ListChecksIcon className="size-5" />
+            </div>
+            <div>
+              <p className="text-sm font-medium">
+                You aren't tracking any habits yet.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Create your first habit to start building streaks.
+              </p>
+            </div>
+            <Button
+              size="sm"
+              nativeButton={false}
+              render={<Link to="/home/habits/new" />}
+            >
+              <PlusIcon />
+              New habit
+            </Button>
+          </CardContent>
+        </Card>
+      ) : filtered.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center text-sm text-muted-foreground">
             No habits match "{search}".
@@ -188,7 +231,9 @@ function HabitsPage() {
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex flex-col gap-1.5">
                     <CardTitle>{habit.name}</CardTitle>
-                    <CategoryBadge categoryId={habit.category} />
+                    {habit.categoryId && (
+                      <CategoryBadge categoryId={habit.categoryId} />
+                    )}
                   </div>
                   <Badge variant="secondary">
                     <CircleCheckIcon />

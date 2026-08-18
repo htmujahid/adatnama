@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useHomeUser } from "@/hooks/use-home-user"
+import type { CategoryInput } from "@/lib/data/categories"
+import { getCategoriesCollection } from "@/lib/data/categories"
 import { useCollection } from "@/lib/data/collection"
-import type { CategoryInput } from "@/lib/data/habit"
-import { getCategoriesCollection } from "@/lib/data/habit"
 import { useOfflineExecutor } from "@/lib/db/offline"
 
 const CREATE_VALUE = "__create__"

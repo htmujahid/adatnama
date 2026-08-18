@@ -7,7 +7,7 @@ import {
   deleteCategory,
   listCategories,
   updateCategory,
-} from "@/actions/habit"
+} from "@/actions/categories"
 import { getPersistedCollection } from "@/lib/data/collection"
 import type { CategoryTable } from "@/lib/db/schema"
 

@@ -4,22 +4,60 @@ import { startOfflineExecutor } from "@tanstack/offline-transactions"
 import type { QueryClient } from "@tanstack/query-core"
 import { useQueryClient } from "@tanstack/react-query"
 
+import {
+  achievementMutationFns,
+  getAchievementUnlocksCollection,
+} from "@/lib/data/achievements"
+import {
+  categoryMutationFns,
+  getCategoriesCollection,
+} from "@/lib/data/categories"
+import { checkinMutationFns, getCheckinsCollection } from "@/lib/data/checkins"
 import { circleMutationFns, getCirclesCollection } from "@/lib/data/circles"
-import { categoryMutationFns, getCategoriesCollection } from "@/lib/data/habit"
+import { getHabitsCollection, habitMutationFns } from "@/lib/data/habits"
+import {
+  getPreferencesCollection,
+  preferencesMutationFns,
+} from "@/lib/data/preferences"
 
 let executorPromise: Promise<OfflineExecutor> | null = null
 
 async function createOfflineExecutor(
   queryClient: QueryClient,
 ): Promise<OfflineExecutor> {
-  const [categories, circles] = await Promise.all([
+  const [
+    categories,
+    circles,
+    habits,
+    checkins,
+    achievementUnlocks,
+    preferences,
+  ] = await Promise.all([
     getCategoriesCollection(queryClient),
     getCirclesCollection(queryClient),
+    getHabitsCollection(queryClient),
+    getCheckinsCollection(queryClient),
+    getAchievementUnlocksCollection(queryClient),
+    getPreferencesCollection(queryClient),
   ])
 
   const executor = startOfflineExecutor({
-    collections: { categories, circles },
-    mutationFns: { ...categoryMutationFns, ...circleMutationFns },
+    collections: {
+      categories,
+      circles,
+      habits,
+      checkins,
+      achievementUnlocks,
+      preferences,
+    },
+    mutationFns: {
+      ...categoryMutationFns,
+      ...circleMutationFns,
+      ...habitMutationFns,
+      ...checkinMutationFns,
+      ...achievementMutationFns,
+      ...preferencesMutationFns,
+    },
   })
   await executor.waitForInit()
   return executor

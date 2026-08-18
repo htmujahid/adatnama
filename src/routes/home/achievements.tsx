@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { createFileRoute } from "@tanstack/react-router"
+import { differenceInCalendarDays, parseISO } from "date-fns"
 import {
   AwardIcon,
   CircleCheckIcon,
@@ -25,41 +26,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useAchievements } from "@/hooks/use-achievements"
 import { cn } from "@/lib/utils"
-
-import { ACHIEVEMENTS } from "./-data"
 
 export const Route = createFileRoute("/home/achievements")({
   component: AchievementsPage,
 })
-
-const unlockedCount = ACHIEVEMENTS.filter((a) => a.unlocked).length
-const completionRate = Math.round((unlockedCount / ACHIEVEMENTS.length) * 100)
-
-const nextUp = [...ACHIEVEMENTS]
-  .filter((a) => !a.unlocked)
-  .sort((a, b) => b.progress / b.target - a.progress / a.target)[0]
-
-const STATS = [
-  {
-    label: "Unlocked",
-    value: `${unlockedCount} of ${ACHIEVEMENTS.length}`,
-    badge: "Earned",
-    icon: TrophyIcon,
-  },
-  {
-    label: "Completion",
-    value: `${completionRate}%`,
-    badge: "Overall",
-    icon: TargetIcon,
-  },
-  {
-    label: "Next up",
-    value: nextUp.name,
-    badge: `${Math.round((nextUp.progress / nextUp.target) * 100)}%`,
-    icon: AwardIcon,
-  },
-] as const
 
 const FILTERS = ["all", "unlocked", "locked"] as const
 type Filter = (typeof FILTERS)[number]
@@ -70,10 +43,49 @@ const FILTER_LABELS: Record<Filter, string> = {
   locked: "Locked",
 }
 
+function unlockedLabel(unlockedAt: string | null): string {
+  if (!unlockedAt) return "Unlocked"
+  const daysAgo = differenceInCalendarDays(new Date(), parseISO(unlockedAt))
+  return daysAgo === 0 ? "Unlocked today" : `Unlocked ${daysAgo}d ago`
+}
+
 function AchievementsPage() {
   const [filter, setFilter] = useState<Filter>("all")
+  const { achievements, unlockedCount, isLoading } = useAchievements()
 
-  const filtered = ACHIEVEMENTS.filter((achievement) => {
+  const completionRate =
+    achievements.length > 0
+      ? Math.round((unlockedCount / achievements.length) * 100)
+      : 0
+  const nextUp = [...achievements]
+    .filter((achievement) => !achievement.unlocked)
+    .sort((a, b) => b.progress / b.target - a.progress / a.target)
+    .at(0)
+
+  const stats = [
+    {
+      label: "Unlocked",
+      value: `${unlockedCount} of ${achievements.length}`,
+      badge: "Earned",
+      icon: TrophyIcon,
+    },
+    {
+      label: "Completion",
+      value: `${completionRate}%`,
+      badge: "Overall",
+      icon: TargetIcon,
+    },
+    {
+      label: "Next up",
+      value: nextUp?.name ?? "All done!",
+      badge: nextUp
+        ? `${Math.round((nextUp.progress / nextUp.target) * 100)}%`
+        : "100%",
+      icon: AwardIcon,
+    },
+  ] as const
+
+  const filtered = achievements.filter((achievement) => {
     if (filter === "unlocked") return achievement.unlocked
     if (filter === "locked") return !achievement.unlocked
     return true
@@ -91,12 +103,12 @@ function AchievementsPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        {STATS.map((stat) => (
+        {stats.map((stat) => (
           <Card key={stat.label} size="sm">
             <CardHeader>
               <CardDescription>{stat.label}</CardDescription>
               <CardTitle className="text-2xl font-semibold tabular-nums">
-                {stat.value}
+                {isLoading ? <Skeleton className="h-8 w-20" /> : stat.value}
               </CardTitle>
               <CardAction>
                 <Badge variant="secondary">
@@ -128,7 +140,26 @@ function AchievementsPage() {
         </Select>
       </div>
 
-      {filtered.length === 0 ? (
+      {isLoading ? (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }, (_, index) => (
+            <Card key={index}>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <Skeleton className="size-10 rounded-full" />
+                  <div className="flex flex-col gap-1.5">
+                    <Skeleton className="h-5 w-28" />
+                    <Skeleton className="h-4 w-40" />
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-5 w-24" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center text-sm text-muted-foreground">
             No achievements match this filter.
@@ -164,7 +195,7 @@ function AchievementsPage() {
                 {achievement.unlocked ? (
                   <Badge variant="secondary">
                     <CircleCheckIcon />
-                    Unlocked {achievement.unlockedDaysAgo}d ago
+                    {unlockedLabel(achievement.unlockedAt)}
                   </Badge>
                 ) : (
                   <div className="flex flex-col gap-1.5">

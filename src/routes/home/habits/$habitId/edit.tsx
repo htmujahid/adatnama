@@ -7,7 +7,11 @@ import {
 } from "@/components/habits/habit-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { updateHabit, useHabit } from "@/hooks/use-habit-catalog"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useHabit } from "@/hooks/use-habits"
+import { useCollection } from "@/lib/data/collection"
+import { getHabitsCollection } from "@/lib/data/habits"
+import { useOfflineExecutor } from "@/lib/db/offline"
 
 export const Route = createFileRoute("/home/habits/$habitId/edit")({
   component: EditHabitPage,
@@ -16,7 +20,25 @@ export const Route = createFileRoute("/home/habits/$habitId/edit")({
 function EditHabitPage() {
   const { habitId } = Route.useParams()
   const navigate = useNavigate()
-  const habit = useHabit(habitId)
+  const { habit, isLoading } = useHabit(habitId)
+  const collection = useCollection(getHabitsCollection)
+  const executor = useOfflineExecutor()
+
+  if (isLoading && !habit) {
+    return (
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+        <Skeleton className="h-8 w-56" />
+        <Card>
+          <CardContent className="flex flex-col gap-4">
+            <Skeleton className="h-9 w-full" />
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-9 w-full" />
+            <Skeleton className="h-9 w-1/2" />
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   if (!habit) {
     return (
@@ -70,7 +92,7 @@ function EditHabitPage() {
             defaultValues={{
               name: habit.name,
               description: habit.description,
-              category: habit.category,
+              categoryId: habit.categoryId ?? "",
               days: habit.days,
               target: habit.target,
               reminderTime: reminderTimeToInputValue(habit.reminderTime),
@@ -93,7 +115,21 @@ function EditHabitPage() {
               </Button>
             }
             onSubmit={async (input) => {
-              updateHabit(habit.id, input)
+              if (!collection || !executor) return
+              executor
+                .createOfflineTransaction({ mutationFnName: "habits.update" })
+                .mutate(() => {
+                  collection.update(habit.id, (draft) => {
+                    draft.categoryId = input.categoryId
+                    draft.name = input.name
+                    draft.description = input.description
+                    draft.target = input.target
+                    draft.reminderTime = input.reminderTime
+                    draft.freezesTotal = input.freezesTotal
+                    draft.days = [...input.days]
+                    draft.updatedAt = new Date().toISOString()
+                  })
+                })
               await navigate({
                 to: "/home/habits/$habitId",
                 params: { habitId: habit.id },

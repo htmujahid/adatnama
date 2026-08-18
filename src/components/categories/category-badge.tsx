@@ -2,8 +2,8 @@ import { useLiveQuery } from "@tanstack/react-db"
 
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { getCategoriesCollection } from "@/lib/data/categories"
 import { useCollection } from "@/lib/data/collection"
-import { getCategoriesCollection } from "@/lib/data/habit"
 import { cn } from "@/lib/utils"
 
 export function CategoryBadge({

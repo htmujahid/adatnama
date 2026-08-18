@@ -1,3 +1,4 @@
+import { useMemo } from "react"
 import {
   areaY,
   barX,
@@ -25,9 +26,19 @@ import { scaleOrdinal } from "@tanstack/charts/scales/ordinal"
 import { scalePoint } from "@tanstack/charts/scales/point"
 import { tooltip } from "@tanstack/charts/tooltip"
 import { portal } from "@tanstack/charts/tooltip/portal"
-import { createFileRoute } from "@tanstack/react-router"
+import { useLiveQuery } from "@tanstack/react-db"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { curveLinearClosed, curveMonotoneX } from "d3-shape"
+import {
+  eachDayOfInterval,
+  format,
+  parseISO,
+  startOfWeek,
+  subDays,
+} from "date-fns"
+import { ChartColumnIcon, PlusIcon } from "lucide-react"
 
+import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
@@ -35,297 +46,58 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-
+import { Skeleton } from "@/components/ui/skeleton"
+import { useActiveHabits } from "@/hooks/use-habits"
+import type { HabitView } from "@/hooks/use-habits"
+import { getCategoriesCollection } from "@/lib/data/categories"
+import type { CheckinRecord } from "@/lib/data/checkins"
+import { useCollection } from "@/lib/data/collection"
 import {
-  doneToday,
-  habitCountForDay,
-  HABITS,
-  HEATMAP_DAYS,
+  computeHabitStats,
+  dateKey,
   HEATMAP_LEVEL_COLORS,
-  HEATMAP_WEEKS,
-} from "./-data"
+  heatmapLevelFor,
+  isScheduledOn,
+  lastNDays,
+  WEEKDAYS,
+} from "@/lib/habits"
 
 export const Route = createFileRoute("/home/insights")({
   component: InsightsPage,
 })
 
-const STREAK_TREND = [
-  { date: "Aug 4", streak: 3 },
-  { date: "Aug 5", streak: 0 },
-  { date: "Aug 6", streak: 1 },
-  { date: "Aug 7", streak: 2 },
-  { date: "Aug 8", streak: 3 },
-  { date: "Aug 9", streak: 4 },
-  { date: "Aug 10", streak: 5 },
-  { date: "Aug 11", streak: 6 },
-  { date: "Aug 12", streak: 7 },
-  { date: "Aug 13", streak: 8 },
-  { date: "Aug 14", streak: 9 },
-  { date: "Aug 15", streak: 10 },
-  { date: "Aug 16", streak: 11 },
-  { date: "Aug 17", streak: 12 },
-] as const
+const HEATMAP_WEEKS = 52
 
-const WEEKLY_CHECKINS_BY_HABIT = HABITS.map((habit) => ({
-  name: habit.name,
-  checkins: habit.week.filter((day) => day === "done").length,
-})).sort((a, b) => b.checkins - a.checkins)
-
-const HABIT_STREAK_BARS = HABITS.map((habit) => ({
-  name: habit.name.split(" ")[0],
-  streak: habit.streak,
-}))
-
-const WEEKLY_RATE_TREND = [
-  { week: "Wk 1", rate: 62 },
-  { week: "Wk 2", rate: 71 },
-  { week: "Wk 3", rate: 68 },
-  { week: "Wk 4", rate: 79 },
-  { week: "Wk 5", rate: 74 },
-  { week: "Wk 6", rate: 86 },
-] as const
-
-const TODAY_BREAKDOWN = [
-  { status: "completed", count: doneToday },
-  { status: "pending", count: HABITS.length - doneToday },
-] as const
-
-const WEEKLY_GOAL_PERCENT = 86
-
-const HABIT_BALANCE = [
-  { category: "Fitness", score: 82 },
-  { category: "Mindful", score: 55 },
-  { category: "Nutrition", score: 70 },
-  { category: "Learning", score: 64 },
-  { category: "Social", score: 45 },
-] as const
-
-const HEATMAP_WEEKDAYS = [
-  "Sun",
-  "Mon",
-  "Tue",
-  "Wed",
-  "Thu",
-  "Fri",
-  "Sat",
-] as const
-const HEATMAP_MONTHS = [
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-] as const
-
-const STREAK_HEATMAP = Array.from({ length: HEATMAP_DAYS }, (_, dayIndex) => {
-  const week = Math.floor(dayIndex / 7)
-  const weekday = HEATMAP_WEEKDAYS[dayIndex % 7]
-  const month =
-    HEATMAP_MONTHS[Math.floor((week / HEATMAP_WEEKS) * HEATMAP_MONTHS.length)]
-  return {
-    dateKey: `w${week}-${weekday}`,
-    week,
-    weekday,
-    month,
-    count: habitCountForDay(dayIndex),
+function doneDatesFor(
+  checkins: ReadonlyArray<CheckinRecord>,
+  habitId: string,
+): Set<string> {
+  const dates = new Set<string>()
+  for (const checkin of checkins) {
+    if (checkin.habitId === habitId && checkin.status === "done") {
+      dates.add(checkin.date)
+    }
   }
-})
+  return dates
+}
 
-const HEATMAP_MONTH_TICKS = HEATMAP_MONTHS.map((month, index) => ({
-  week: Math.round((index * HEATMAP_WEEKS) / HEATMAP_MONTHS.length),
-  month,
-}))
-
-const streakHeatmapChart = defineChart({
-  marks: [
-    cell(STREAK_HEATMAP, {
-      x: "week",
-      y: "weekday",
-      color: "count",
-      key: "dateKey",
-      inset: 2,
-      radius: 2,
-    }),
-  ],
-  x: {
-    scale: scaleBand<number>()
-      .domain(Array.from({ length: HEATMAP_WEEKS }, (_, index) => index))
-      .paddingInner(0.15)
-      .paddingOuter(0.02),
-    axis: {
-      line: false,
-      ticks: {
-        values: HEATMAP_MONTH_TICKS.map((tick) => tick.week),
-        size: 0,
-        padding: 6,
-        format: (week) =>
-          HEATMAP_MONTH_TICKS.find((tick) => tick.week === week)?.month ?? "",
-      },
-      tickLabels: { fontSize: 11, opacity: 0.65 },
-    },
-  },
-  y: {
-    scale: scaleBand<string>()
-      .domain([...HEATMAP_WEEKDAYS])
-      .paddingInner(0.15)
-      .paddingOuter(0.02),
-    axis: false,
-  },
-  color: {
-    scale: scaleOrdinal<number, string>()
-      .domain([0, 1, 2, 3, 4, 5])
-      .range([...HEATMAP_LEVEL_COLORS]),
-  },
-  margin: { top: 4, right: 4, bottom: 20, left: 4 },
-  tooltip: {
-    use: tooltip,
-    anchor: "point",
-    portal,
-    format: (point) =>
-      `${point.datum.month} · ${point.datum.weekday}: ${point.datum.count} of 5 habits`,
-  },
-})
-
-const streakTrendChart = defineChart({
-  marks: [
-    areaY(STREAK_TREND, {
-      x: "date",
-      y: "streak",
-      fill: "url(#streak-fill)",
-      stroke: "var(--primary)",
-      strokeWidth: 2,
-      curve: d3Curve(curveMonotoneX),
-    }),
-  ],
-  x: {
-    scale: () => scalePoint().padding(0.1),
-    axis: {
-      ticks: {
-        values: STREAK_TREND.filter((_, index) => index % 2 === 0).map(
-          (point) => point.date,
-        ),
-      },
-    },
-  },
-  y: { scale: scaleLinear, nice: true, grid: true },
-  gradients: [
-    {
-      id: "streak-fill",
-      x1: 0,
-      y1: 1,
-      x2: 0,
-      y2: 0,
-      stops: [
-        { offset: 0, color: "var(--primary)", opacity: 0.05 },
-        { offset: 1, color: "var(--primary)", opacity: 0.55 },
-      ],
-    },
-  ],
-  tooltip: {
-    use: tooltip,
-    content: (points) => ({
-      title: String(points[0]?.xValue ?? ""),
-      rows: points.map((point) => ({
-        label: "Streak",
-        value: String(point.yValue),
-        color: "var(--primary)",
-      })),
-    }),
-  },
-})
-
-const weeklyCheckinsChart = defineChart({
-  marks: [
-    barX(WEEKLY_CHECKINS_BY_HABIT, {
-      x: "checkins",
-      y: "name",
-      fill: "var(--primary)",
-      radius: 5,
-    }),
-  ],
-  x: { scale: scaleLinear, axis: false },
-  y: {
-    scale: () => scaleBand<string>().paddingInner(0.18).paddingOuter(0.08),
-    axis: { line: false, ticks: { size: 0, padding: 10 } },
-  },
-  margin: { top: 5, right: 5, bottom: 5, left: 110 },
-  focus: "group-x",
-  tooltip: {
-    use: tooltip,
-    anchor: "group-center",
-    placement: "auto",
-    content: (points) => ({
-      title: String(points[0]?.yValue ?? ""),
-      rows: points.map((point) => ({
-        label: "Check-ins this week",
-        value: String(point.xValue),
-        color: "var(--primary)",
-      })),
-    }),
-  },
-})
-
-const habitStreakBarChart = defineChart({
-  marks: [
-    barY(HABIT_STREAK_BARS, {
-      x: "name",
-      y: "streak",
-      fill: "var(--primary)",
-      inset: 1,
-      radius: 5,
-    }),
-  ],
-  x: { scale: () => scaleBand().padding(0.3) },
-  y: { scale: scaleLinear, nice: true, grid: true },
-  tooltip: {
-    use: tooltip,
-    content: (points) => ({
-      title: String(points[0]?.xValue ?? ""),
-      rows: points.map((point) => ({
-        label: "Current streak",
-        value: String(point.yValue),
-        color: "var(--primary)",
-      })),
-    }),
-  },
-})
-
-const weeklyRateLineChart = defineChart({
-  marks: [
-    lineY(WEEKLY_RATE_TREND, {
-      x: "week",
-      y: "rate",
-      stroke: "var(--primary)",
-      strokeWidth: 2,
-      points: true,
-      curve: d3Curve(curveMonotoneX),
-    }),
-  ],
-  x: { scale: () => scalePoint().padding(0.2) },
-  y: {
-    scale: scaleLinear().domain([0, 100]),
-    grid: true,
-    axis: { ticks: { format: (value: number) => `${value}%` } },
-  },
-  tooltip: {
-    use: tooltip,
-    content: (points) => ({
-      title: String(points[0]?.xValue ?? ""),
-      rows: points.map((point) => ({
-        label: "Completion rate",
-        value: `${point.yValue}%`,
-        color: "var(--primary)",
-      })),
-    }),
-  },
-})
+function weeklyCompletion(
+  habits: ReadonlyArray<HabitView>,
+  doneCountByDate: ReadonlyMap<string, number>,
+  days: ReadonlyArray<Date>,
+): { done: number; scheduled: number; rate: number } {
+  let done = 0
+  let scheduled = 0
+  for (const day of days) {
+    done += doneCountByDate.get(dateKey(day)) ?? 0
+    scheduled += habits.filter((habit) => isScheduledOn(habit, day)).length
+  }
+  return {
+    done,
+    scheduled,
+    rate: scheduled > 0 ? Math.round((done / scheduled) * 100) : 0,
+  }
+}
 
 function polarAngleFromTop(degrees: number) {
   return ((90 - degrees) * Math.PI) / 180
@@ -371,191 +143,633 @@ function breakdownDatum(datum: unknown) {
     : undefined
 }
 
-const todayBreakdownSlices = pie(TODAY_BREAKDOWN, { value: "count" })
-
-const todayBreakdownChart = defineChart({
-  marks: [
-    polar({
-      inset: 4,
-      radiusRatio: 0.85,
-      angle: { scale: scaleLinear().domain([0, Math.PI * 2]) },
-      radius: { scale: scaleLinear().domain([0, 1]) },
-      marks: [
-        radialArc(todayBreakdownSlices, {
-          id: "today-breakdown-slices",
-          key: "status",
-          innerRadius: ({ radius }) => radius * 0.62,
-          cornerRadius: 3,
-          color: "status",
-          stroke: "var(--background)",
-          strokeWidth: 1,
-        }),
-        radialText([{ id: "total", text: `${doneToday}/${HABITS.length}` }], {
-          id: "today-breakdown-total",
-          angle: 0,
-          radius: 0,
-          key: "id",
-          text: "text",
-          dy: -5,
-          fill: "var(--foreground)",
-          fontSize: 22,
-          fontWeight: 700,
-        }),
-        radialText([{ id: "label", text: "done today" }], {
-          id: "today-breakdown-label",
-          angle: 0,
-          radius: 0,
-          key: "id",
-          text: "text",
-          dy: 19,
-          fill: "var(--muted-foreground)",
-          fontSize: 12,
-        }),
-      ],
-    }),
-  ],
-  color: {
-    domain: ["completed", "pending"],
-    range: ["var(--primary)", "var(--muted-foreground)"],
-  },
-  margin: 0,
-  focus: focusGroupAngle,
-  tooltip: {
-    use: tooltip,
-    anchor: "group-center",
-    placement: "auto",
-    sort: "color-domain",
-    content: (points) => {
-      const point = points.find((candidate) => breakdownDatum(candidate.datum))
-      const datum = point && breakdownDatum(point.datum)
-      if (!point || !datum) return { rows: [] }
-      return {
-        title: datum.status === "completed" ? "Completed" : "Pending",
-        rows: [
-          { label: "Habits", value: String(datum.count), color: point.color },
-        ],
-      }
-    },
-  },
-})
-
-const weeklyGoalBackground = pie([{ id: "background", value: 1 }] as const, {
-  value: "value",
-})
-
-const weeklyGoalRows = [
-  { metric: "completion", value: WEEKLY_GOAL_PERCENT, ring: "completion" },
-] as const
-
-const weeklyGoalChart = defineChart({
-  marks: [
-    polar({
-      marks: [
-        radialArc(weeklyGoalBackground, {
-          id: "weekly-goal-background",
-          key: "id",
-          innerRadius: ({ radius }) => radius * 0.62,
-          outerRadius: ({ radius }) => radius * 0.82,
-          fill: "var(--muted)",
-        }),
-      ],
-    }),
-    polar({
-      startAngle: polarAngleFromTop(0),
-      endAngle: polarAngleFromTop(250),
-      angle: { scale: scaleLinear().domain([0, 100]) },
-      radius: {
-        scale: scaleBand<string>().domain(["completion"]),
-        range: [({ radius }) => radius * 0.62, ({ radius }) => radius * 0.82],
-      },
-      marks: [
-        radialBarAngle(weeklyGoalRows, {
-          id: "weekly-goal-value",
-          angle: "value",
-          radius: "ring",
-          key: "metric",
-          fill: "var(--primary)",
-          cornerRadius: 10,
-        }),
-      ],
-    }),
-    radialCenterLabel("weekly-goal", `${WEEKLY_GOAL_PERCENT}%`, "of goal"),
-  ],
-  focus: focusGroupAngle,
-  tooltip: {
-    use: tooltip,
-    content: () => ({
-      rows: [
-        {
-          label: "Weekly goal",
-          value: `${WEEKLY_GOAL_PERCENT}%`,
-          color: "var(--primary)",
-        },
-      ],
-    }),
-  },
-})
-
-const habitBalanceCategories = HABIT_BALANCE.map((row) => row.category)
-
-const habitBalanceChart = defineChart({
-  marks: [
-    polar({
-      radiusRatio: 0.76,
-      angle: {
-        scale: scalePoint<string>().domain(habitBalanceCategories),
-        wrap: true,
-      },
-      radius: { scale: scaleLinear().domain([0, 100]) },
-      guides: [
-        radialGrid({
-          values: [25, 50, 75, 100],
-          shape: "polygon",
-          stroke: "var(--border)",
-          strokeOpacity: 1,
-        }),
-        angleGrid({
-          labels: true,
-          labelOffset: 10,
-          labelFill: "var(--muted-foreground)",
-          labelFontSize: 12,
-          stroke: "var(--border)",
-          strokeOpacity: 1,
-        }),
-      ],
-      marks: [
-        radialArea(HABIT_BALANCE, {
-          id: "habit-balance-radar",
-          angle: "category",
-          radius: "score",
-          key: "category",
-          z: () => "score",
-          curve: curveLinearClosed,
-          fill: "var(--primary)",
-          fillOpacity: 0.28,
-          stroke: "var(--primary)",
-          strokeOpacity: 1,
-          strokeWidth: 2,
-        }),
-      ],
-    }),
-  ],
-  margin: 0,
-  focus: focusGroupAngle,
-  tooltip: {
-    use: tooltip,
-    content: (points) => ({
-      title: String(points[0]?.xValue ?? ""),
-      rows: points.map((point) => ({
-        label: "Score",
-        value: String(point.yValue),
-        color: point.color,
-      })),
-    }),
-  },
-})
+function ChartCard({
+  title,
+  description,
+  children,
+  className,
+  centered,
+}: {
+  title: string
+  description: string
+  children: React.ReactNode
+  className?: string
+  centered?: boolean
+}) {
+  return (
+    <Card className={className}>
+      <CardHeader className={centered ? "items-center pb-0" : undefined}>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
+  )
+}
 
 function InsightsPage() {
+  const { habits, checkins, isLoading } = useActiveHabits()
+  const categoriesCollection = useCollection(getCategoriesCollection)
+  const { data: categories = [] } = useLiveQuery((q) => {
+    if (!categoriesCollection) return undefined
+    return q.from({ category: categoriesCollection })
+  })
+  const todayKey = dateKey(new Date())
+
+  const data = useMemo(() => {
+    const today = parseISO(todayKey)
+    const doneCountByDate = new Map<string, number>()
+    for (const checkin of checkins) {
+      if (checkin.status !== "done") continue
+      doneCountByDate.set(
+        checkin.date,
+        (doneCountByDate.get(checkin.date) ?? 0) + 1,
+      )
+    }
+
+    // Streak trend for the habit with the strongest current streak.
+    const strongest = [...habits].sort((a, b) => b.streak - a.streak).at(0)
+    const streakTrend = strongest
+      ? (() => {
+          const doneDates = doneDatesFor(checkins, strongest.id)
+          return lastNDays(14, today).map((day) => ({
+            date: format(day, "MMM d"),
+            streak: computeHabitStats(strongest, doneDates, day).streak,
+          }))
+        })()
+      : []
+
+    const weeklyCheckinsByHabit = habits
+      .map((habit) => ({
+        name: habit.name,
+        checkins: habit.week.filter((day) => day === "done").length,
+      }))
+      .sort((a, b) => b.checkins - a.checkins)
+
+    const habitStreakBars = habits.map((habit) => ({
+      name: habit.name.split(" ")[0],
+      streak: habit.streak,
+    }))
+
+    const weekDays = lastNDays(7, today)
+    const thisWeek = weeklyCompletion(habits, doneCountByDate, weekDays)
+    const weeklyRateTrend = Array.from({ length: 6 }, (_, index) => {
+      const end = subDays(today, (5 - index) * 7)
+      return {
+        week: `Wk ${index + 1}`,
+        rate: weeklyCompletion(habits, doneCountByDate, lastNDays(7, end)).rate,
+      }
+    })
+
+    const scheduledToday = habits.filter((habit) => isScheduledOn(habit, today))
+    const doneToday = scheduledToday.filter((habit) => habit.doneToday).length
+    const todayBreakdown = [
+      { status: "completed", count: doneToday },
+      { status: "pending", count: scheduledToday.length - doneToday },
+    ]
+
+    const habitBalance = categories
+      .map((category) => {
+        const categoryHabits = habits.filter(
+          (habit) => habit.categoryId === category.id,
+        )
+        if (categoryHabits.length === 0) return null
+        let done = 0
+        let scheduled = 0
+        for (const habit of categoryHabits) {
+          done += habit.week.filter((day) => day === "done").length
+          scheduled += weekDays.filter((day) =>
+            isScheduledOn(habit, day),
+          ).length
+        }
+        return {
+          category: category.name,
+          score: scheduled > 0 ? Math.round((done / scheduled) * 100) : 0,
+        }
+      })
+      .filter((row) => row !== null)
+
+    // Calendar-aligned heatmap: columns start on Sundays, ending today.
+    const heatmapStart = startOfWeek(subDays(today, HEATMAP_WEEKS * 7 - 1))
+    const heatmapCells = eachDayOfInterval({
+      start: heatmapStart,
+      end: today,
+    }).map((day, index) => {
+      const key = dateKey(day)
+      const done = doneCountByDate.get(key) ?? 0
+      const scheduled = habits.filter((habit) =>
+        isScheduledOn(habit, day),
+      ).length
+      return {
+        dateKey: key,
+        week: Math.floor(index / 7),
+        weekday: WEEKDAYS[day.getDay()].short,
+        label: format(day, "MMM d"),
+        done,
+        scheduled,
+        level: heatmapLevelFor(done, scheduled),
+      }
+    })
+    const heatmapWeekCount = Math.ceil(heatmapCells.length / 7)
+    const heatmapMonthTicks: Array<{ week: number; month: string }> = []
+    for (let week = 0; week < heatmapWeekCount; week++) {
+      const first = heatmapCells[week * 7]
+      const month = first.label.split(" ")[0]
+      const previous = heatmapMonthTicks.at(-1)
+      if (!previous || previous.month !== month) {
+        heatmapMonthTicks.push({ week, month })
+      }
+    }
+
+    return {
+      strongest,
+      streakTrend,
+      weeklyCheckinsByHabit,
+      habitStreakBars,
+      thisWeek,
+      weeklyRateTrend,
+      scheduledToday,
+      doneToday,
+      todayBreakdown,
+      habitBalance,
+      heatmapCells,
+      heatmapWeekCount,
+      heatmapMonthTicks,
+    }
+  }, [habits, checkins, categories, todayKey])
+
+  const charts = useMemo(() => {
+    const {
+      streakTrend,
+      weeklyCheckinsByHabit,
+      habitStreakBars,
+      thisWeek,
+      weeklyRateTrend,
+      scheduledToday,
+      doneToday,
+      todayBreakdown,
+      habitBalance,
+      heatmapCells,
+      heatmapWeekCount,
+      heatmapMonthTicks,
+    } = data
+
+    const streakTrendChart = defineChart({
+      marks: [
+        areaY(streakTrend, {
+          x: "date",
+          y: "streak",
+          fill: "url(#streak-fill)",
+          stroke: "var(--primary)",
+          strokeWidth: 2,
+          curve: d3Curve(curveMonotoneX),
+        }),
+      ],
+      x: {
+        scale: () => scalePoint().padding(0.1),
+        axis: {
+          ticks: {
+            values: streakTrend
+              .filter((_, index) => index % 2 === 0)
+              .map((point) => point.date),
+          },
+        },
+      },
+      y: { scale: scaleLinear, nice: true, grid: true },
+      gradients: [
+        {
+          id: "streak-fill",
+          x1: 0,
+          y1: 1,
+          x2: 0,
+          y2: 0,
+          stops: [
+            { offset: 0, color: "var(--primary)", opacity: 0.05 },
+            { offset: 1, color: "var(--primary)", opacity: 0.55 },
+          ],
+        },
+      ],
+      tooltip: {
+        use: tooltip,
+        content: (points) => ({
+          title: String(points[0]?.xValue ?? ""),
+          rows: points.map((point) => ({
+            label: "Streak",
+            value: String(point.yValue),
+            color: "var(--primary)",
+          })),
+        }),
+      },
+    })
+
+    const weeklyCheckinsChart = defineChart({
+      marks: [
+        barX(weeklyCheckinsByHabit, {
+          x: "checkins",
+          y: "name",
+          fill: "var(--primary)",
+          radius: 5,
+        }),
+      ],
+      x: { scale: scaleLinear, axis: false },
+      y: {
+        scale: () => scaleBand<string>().paddingInner(0.18).paddingOuter(0.08),
+        axis: { line: false, ticks: { size: 0, padding: 10 } },
+      },
+      margin: { top: 5, right: 5, bottom: 5, left: 110 },
+      focus: "group-x",
+      tooltip: {
+        use: tooltip,
+        anchor: "group-center",
+        placement: "auto",
+        content: (points) => ({
+          title: String(points[0]?.yValue ?? ""),
+          rows: points.map((point) => ({
+            label: "Check-ins this week",
+            value: String(point.xValue),
+            color: "var(--primary)",
+          })),
+        }),
+      },
+    })
+
+    const habitStreakBarChart = defineChart({
+      marks: [
+        barY(habitStreakBars, {
+          x: "name",
+          y: "streak",
+          fill: "var(--primary)",
+          inset: 1,
+          radius: 5,
+        }),
+      ],
+      x: { scale: () => scaleBand().padding(0.3) },
+      y: { scale: scaleLinear, nice: true, grid: true },
+      tooltip: {
+        use: tooltip,
+        content: (points) => ({
+          title: String(points[0]?.xValue ?? ""),
+          rows: points.map((point) => ({
+            label: "Current streak",
+            value: String(point.yValue),
+            color: "var(--primary)",
+          })),
+        }),
+      },
+    })
+
+    const weeklyRateLineChart = defineChart({
+      marks: [
+        lineY(weeklyRateTrend, {
+          x: "week",
+          y: "rate",
+          stroke: "var(--primary)",
+          strokeWidth: 2,
+          points: true,
+          curve: d3Curve(curveMonotoneX),
+        }),
+      ],
+      x: { scale: () => scalePoint().padding(0.2) },
+      y: {
+        scale: scaleLinear().domain([0, 100]),
+        grid: true,
+        axis: { ticks: { format: (value: number) => `${value}%` } },
+      },
+      tooltip: {
+        use: tooltip,
+        content: (points) => ({
+          title: String(points[0]?.xValue ?? ""),
+          rows: points.map((point) => ({
+            label: "Completion rate",
+            value: `${point.yValue}%`,
+            color: "var(--primary)",
+          })),
+        }),
+      },
+    })
+
+    const streakHeatmapChart = defineChart({
+      marks: [
+        cell(heatmapCells, {
+          x: "week",
+          y: "weekday",
+          color: "level",
+          key: "dateKey",
+          inset: 2,
+          radius: 2,
+        }),
+      ],
+      x: {
+        scale: scaleBand<number>()
+          .domain(Array.from({ length: heatmapWeekCount }, (_, index) => index))
+          .paddingInner(0.15)
+          .paddingOuter(0.02),
+        axis: {
+          line: false,
+          ticks: {
+            values: heatmapMonthTicks.map((tick) => tick.week),
+            size: 0,
+            padding: 6,
+            format: (week) =>
+              heatmapMonthTicks.find((tick) => tick.week === week)?.month ?? "",
+          },
+          tickLabels: { fontSize: 11, opacity: 0.65 },
+        },
+      },
+      y: {
+        scale: scaleBand<string>()
+          .domain(WEEKDAYS.map((weekday) => weekday.short))
+          .paddingInner(0.15)
+          .paddingOuter(0.02),
+        axis: false,
+      },
+      color: {
+        scale: scaleOrdinal<number, string>()
+          .domain([0, 1, 2, 3, 4, 5])
+          .range([...HEATMAP_LEVEL_COLORS]),
+      },
+      margin: { top: 4, right: 4, bottom: 20, left: 4 },
+      tooltip: {
+        use: tooltip,
+        anchor: "point",
+        portal,
+        format: (point) =>
+          `${point.datum.label}: ${point.datum.done} of ${point.datum.scheduled} habits`,
+      },
+    })
+
+    const todayBreakdownSlices = pie(todayBreakdown, { value: "count" })
+    const todayBreakdownChart = defineChart({
+      marks: [
+        polar({
+          inset: 4,
+          radiusRatio: 0.85,
+          angle: { scale: scaleLinear().domain([0, Math.PI * 2]) },
+          radius: { scale: scaleLinear().domain([0, 1]) },
+          marks: [
+            radialArc(todayBreakdownSlices, {
+              id: "today-breakdown-slices",
+              key: "status",
+              innerRadius: ({ radius }) => radius * 0.62,
+              cornerRadius: 3,
+              color: "status",
+              stroke: "var(--background)",
+              strokeWidth: 1,
+            }),
+            radialText(
+              [
+                {
+                  id: "total",
+                  text: `${doneToday}/${scheduledToday.length}`,
+                },
+              ],
+              {
+                id: "today-breakdown-total",
+                angle: 0,
+                radius: 0,
+                key: "id",
+                text: "text",
+                dy: -5,
+                fill: "var(--foreground)",
+                fontSize: 22,
+                fontWeight: 700,
+              },
+            ),
+            radialText([{ id: "label", text: "done today" }], {
+              id: "today-breakdown-label",
+              angle: 0,
+              radius: 0,
+              key: "id",
+              text: "text",
+              dy: 19,
+              fill: "var(--muted-foreground)",
+              fontSize: 12,
+            }),
+          ],
+        }),
+      ],
+      color: {
+        domain: ["completed", "pending"],
+        range: ["var(--primary)", "var(--muted-foreground)"],
+      },
+      margin: 0,
+      focus: focusGroupAngle,
+      tooltip: {
+        use: tooltip,
+        anchor: "group-center",
+        placement: "auto",
+        sort: "color-domain",
+        content: (points) => {
+          const point = points.find((candidate) =>
+            breakdownDatum(candidate.datum),
+          )
+          const datum = point && breakdownDatum(point.datum)
+          if (!point || !datum) return { rows: [] }
+          return {
+            title: datum.status === "completed" ? "Completed" : "Pending",
+            rows: [
+              {
+                label: "Habits",
+                value: String(datum.count),
+                color: point.color,
+              },
+            ],
+          }
+        },
+      },
+    })
+
+    const weeklyGoalBackground = pie(
+      [{ id: "background", value: 1 }] as const,
+      {
+        value: "value",
+      },
+    )
+    const weeklyGoalRows = [
+      { metric: "completion", value: thisWeek.rate, ring: "completion" },
+    ]
+    const weeklyGoalChart = defineChart({
+      marks: [
+        polar({
+          marks: [
+            radialArc(weeklyGoalBackground, {
+              id: "weekly-goal-background",
+              key: "id",
+              innerRadius: ({ radius }) => radius * 0.62,
+              outerRadius: ({ radius }) => radius * 0.82,
+              fill: "var(--muted)",
+            }),
+          ],
+        }),
+        polar({
+          startAngle: polarAngleFromTop(0),
+          endAngle: polarAngleFromTop(250),
+          angle: { scale: scaleLinear().domain([0, 100]) },
+          radius: {
+            scale: scaleBand<string>().domain(["completion"]),
+            range: [
+              ({ radius }) => radius * 0.62,
+              ({ radius }) => radius * 0.82,
+            ],
+          },
+          marks: [
+            radialBarAngle(weeklyGoalRows, {
+              id: "weekly-goal-value",
+              angle: "value",
+              radius: "ring",
+              key: "metric",
+              fill: "var(--primary)",
+              cornerRadius: 10,
+            }),
+          ],
+        }),
+        radialCenterLabel("weekly-goal", `${thisWeek.rate}%`, "of goal"),
+      ],
+      focus: focusGroupAngle,
+      tooltip: {
+        use: tooltip,
+        content: () => ({
+          rows: [
+            {
+              label: "Weekly goal",
+              value: `${thisWeek.rate}%`,
+              color: "var(--primary)",
+            },
+          ],
+        }),
+      },
+    })
+
+    const habitBalanceChart =
+      habitBalance.length >= 3
+        ? defineChart({
+            marks: [
+              polar({
+                radiusRatio: 0.76,
+                angle: {
+                  scale: scalePoint<string>().domain(
+                    habitBalance.map((row) => row.category),
+                  ),
+                  wrap: true,
+                },
+                radius: { scale: scaleLinear().domain([0, 100]) },
+                guides: [
+                  radialGrid({
+                    values: [25, 50, 75, 100],
+                    shape: "polygon",
+                    stroke: "var(--border)",
+                    strokeOpacity: 1,
+                  }),
+                  angleGrid({
+                    labels: true,
+                    labelOffset: 10,
+                    labelFill: "var(--muted-foreground)",
+                    labelFontSize: 12,
+                    stroke: "var(--border)",
+                    strokeOpacity: 1,
+                  }),
+                ],
+                marks: [
+                  radialArea(habitBalance, {
+                    id: "habit-balance-radar",
+                    angle: "category",
+                    radius: "score",
+                    key: "category",
+                    z: () => "score",
+                    curve: curveLinearClosed,
+                    fill: "var(--primary)",
+                    fillOpacity: 0.28,
+                    stroke: "var(--primary)",
+                    strokeOpacity: 1,
+                    strokeWidth: 2,
+                  }),
+                ],
+              }),
+            ],
+            margin: 0,
+            focus: focusGroupAngle,
+            tooltip: {
+              use: tooltip,
+              content: (points) => ({
+                title: String(points[0]?.xValue ?? ""),
+                rows: points.map((point) => ({
+                  label: "Score",
+                  value: String(point.yValue),
+                  color: point.color,
+                })),
+              }),
+            },
+          })
+        : null
+
+    return {
+      streakTrendChart,
+      weeklyCheckinsChart,
+      habitStreakBarChart,
+      weeklyRateLineChart,
+      streakHeatmapChart,
+      todayBreakdownChart,
+      weeklyGoalChart,
+      habitBalanceChart,
+    }
+  }, [data])
+
+  if (isLoading) {
+    return (
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+        <div>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight">
+            Insights
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Trends and patterns across your habits.
+          </p>
+        </div>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-64 w-full" />
+        </div>
+        <Skeleton className="h-48 w-full" />
+      </div>
+    )
+  }
+
+  if (habits.length === 0) {
+    return (
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+        <div>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight">
+            Insights
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Trends and patterns across your habits.
+          </p>
+        </div>
+        <Card>
+          <CardContent className="flex flex-col items-center gap-3 py-14 text-center">
+            <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
+              <ChartColumnIcon className="size-5" />
+            </div>
+            <div>
+              <p className="text-sm font-medium">No insights yet.</p>
+              <p className="text-sm text-muted-foreground">
+                Create a habit and check in for a few days to see trends here.
+              </p>
+            </div>
+            <Button
+              size="sm"
+              nativeButton={false}
+              render={<Link to="/home/habits/new" />}
+            >
+              <PlusIcon />
+              New habit
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
       <div>
@@ -568,147 +782,127 @@ function InsightsPage() {
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Current streak</CardTitle>
-            <CardDescription>Morning run, last 14 days</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="min-w-0">
-              <Chart
-                definition={streakTrendChart}
-                height={200}
-                initialWidth={480}
-                ariaLabel="Morning run streak, last 14 days"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Check-ins by habit</CardTitle>
-            <CardDescription>Times completed this week</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="min-w-0">
-              <Chart
-                definition={weeklyCheckinsChart}
-                height={200}
-                initialWidth={480}
-                ariaLabel="Check-ins by habit, this week"
-              />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Year in check-ins</CardTitle>
-          <CardDescription>
-            Habits completed per day, last 12 months
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="min-w-0 overflow-x-auto">
+        <ChartCard
+          title="Current streak"
+          description={`${data.strongest?.name ?? ""}, last 14 days`}
+        >
+          <div className="min-w-0">
             <Chart
-              definition={streakHeatmapChart}
-              aspectRatio={6.466}
-              style={{ minWidth: 1048 }}
-              ariaLabel="Habits completed per day over the last 12 months"
+              definition={charts.streakTrendChart}
+              height={200}
+              initialWidth={480}
+              ariaLabel={`${data.strongest?.name ?? "Habit"} streak, last 14 days`}
             />
           </div>
-        </CardContent>
-      </Card>
+        </ChartCard>
+
+        <ChartCard
+          title="Check-ins by habit"
+          description="Times completed this week"
+        >
+          <div className="min-w-0">
+            <Chart
+              definition={charts.weeklyCheckinsChart}
+              height={200}
+              initialWidth={480}
+              ariaLabel="Check-ins by habit, this week"
+            />
+          </div>
+        </ChartCard>
+      </div>
+
+      <ChartCard
+        title="Year in check-ins"
+        description="Habits completed per day, last 12 months"
+      >
+        <div className="min-w-0 overflow-x-auto">
+          <Chart
+            definition={charts.streakHeatmapChart}
+            aspectRatio={6.466}
+            style={{ minWidth: 1048 }}
+            ariaLabel="Habits completed per day over the last 12 months"
+          />
+        </div>
+      </ChartCard>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Streaks by habit</CardTitle>
-            <CardDescription>Current streak length, per habit</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="min-w-0">
-              <Chart
-                definition={habitStreakBarChart}
-                height={200}
-                initialWidth={480}
-                ariaLabel="Current streak length, per habit"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <ChartCard
+          title="Streaks by habit"
+          description="Current streak length, per habit"
+        >
+          <div className="min-w-0">
+            <Chart
+              definition={charts.habitStreakBarChart}
+              height={200}
+              initialWidth={480}
+              ariaLabel="Current streak length, per habit"
+            />
+          </div>
+        </ChartCard>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Weekly completion rate</CardTitle>
-            <CardDescription>Last 6 weeks</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="min-w-0">
-              <Chart
-                definition={weeklyRateLineChart}
-                height={200}
-                initialWidth={480}
-                ariaLabel="Weekly completion rate, last 6 weeks"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <ChartCard title="Weekly completion rate" description="Last 6 weeks">
+          <div className="min-w-0">
+            <Chart
+              definition={charts.weeklyRateLineChart}
+              height={200}
+              initialWidth={480}
+              ariaLabel="Weekly completion rate, last 6 weeks"
+            />
+          </div>
+        </ChartCard>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        <Card>
-          <CardHeader className="items-center pb-0">
-            <CardTitle>Today's breakdown</CardTitle>
-            <CardDescription>Completed vs. pending</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="mx-auto min-w-0 max-w-[220px]">
-              <Chart
-                definition={todayBreakdownChart}
-                height={200}
-                initialWidth={220}
-                ariaLabel={`${doneToday} of ${HABITS.length} habits completed today`}
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <ChartCard
+          title="Today's breakdown"
+          description="Completed vs. pending"
+          centered
+        >
+          <div className="mx-auto min-w-0 max-w-[220px]">
+            <Chart
+              definition={charts.todayBreakdownChart}
+              height={200}
+              initialWidth={220}
+              ariaLabel={`${data.doneToday} of ${data.scheduledToday.length} habits completed today`}
+            />
+          </div>
+        </ChartCard>
 
-        <Card>
-          <CardHeader className="items-center pb-0">
-            <CardTitle>Weekly goal</CardTitle>
-            <CardDescription>Target: 80% completion</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="mx-auto min-w-0 max-w-[220px]">
-              <Chart
-                definition={weeklyGoalChart}
-                height={200}
-                initialWidth={220}
-                ariaLabel={`${WEEKLY_GOAL_PERCENT}% of weekly goal`}
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <ChartCard
+          title="Weekly goal"
+          description="Target: 80% completion"
+          centered
+        >
+          <div className="mx-auto min-w-0 max-w-[220px]">
+            <Chart
+              definition={charts.weeklyGoalChart}
+              height={200}
+              initialWidth={220}
+              ariaLabel={`${data.thisWeek.rate}% of weekly goal`}
+            />
+          </div>
+        </ChartCard>
 
-        <Card>
-          <CardHeader className="items-center pb-0">
-            <CardTitle>Habit balance</CardTitle>
-            <CardDescription>Score by life area, this week</CardDescription>
-          </CardHeader>
-          <CardContent>
+        <ChartCard
+          title="Habit balance"
+          description="Completion by category, this week"
+          centered
+        >
+          {charts.habitBalanceChart ? (
             <div className="mx-auto min-w-0 max-w-[240px]">
               <Chart
-                definition={habitBalanceChart}
+                definition={charts.habitBalanceChart}
                 height={220}
                 initialWidth={240}
-                ariaLabel="Habit balance score by life area, this week"
+                ariaLabel="Habit completion by category, this week"
               />
             </div>
-          </CardContent>
-        </Card>
+          ) : (
+            <p className="py-12 text-center text-sm text-muted-foreground">
+              Track habits in at least 3 categories to see your balance.
+            </p>
+          )}
+        </ChartCard>
       </div>
     </div>
   )

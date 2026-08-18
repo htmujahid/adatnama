@@ -8,6 +8,7 @@ import {
   SunIcon,
 } from "lucide-react"
 
+import { CategorySelect } from "@/components/categories/category-select"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -43,7 +44,7 @@ import { useThemeMode } from "@/hooks/use-theme-mode"
 import type { ThemeMode } from "@/hooks/use-theme-mode"
 import { authClient } from "@/lib/auth-client"
 import { sessionQueryOptions } from "@/lib/data/auth"
-import { HABIT_CATEGORIES, HABIT_FREQUENCIES } from "@/routes/home/-data"
+import { HABIT_FREQUENCIES } from "@/routes/home/-data"
 
 export const Route = createFileRoute("/home/settings")({
   component: SettingsPage,
@@ -134,24 +135,13 @@ function SettingsPage() {
         <CardContent className="grid gap-4 sm:grid-cols-3">
           <Field>
             <FieldLabel htmlFor="default-category">Category</FieldLabel>
-            <Select
-              value={habitDefaults.category}
-              onValueChange={(value) =>
-                value &&
+            <CategorySelect
+              id="default-category"
+              value={habitDefaults.category ?? ""}
+              onChange={(value) =>
                 updateHabitDefaults({ ...habitDefaults, category: value })
               }
-            >
-              <SelectTrigger id="default-category" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {HABIT_CATEGORIES.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
           </Field>
 
           <Field>

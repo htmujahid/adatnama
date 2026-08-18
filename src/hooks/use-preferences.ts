@@ -1,9 +1,10 @@
 import { useSyncExternalStore } from "react"
 
-import { HABIT_CATEGORIES, HABIT_FREQUENCIES } from "@/routes/home/-data"
+import { HABIT_FREQUENCIES } from "@/routes/home/-data"
 
 export type HabitDefaults = {
-  category: string
+  // A category id, or null until the user has created one to default to.
+  category: string | null
   frequency: string
   freezesTotal: number
 }
@@ -23,7 +24,7 @@ export type Preferences = {
 // reload, same as the habit catalog and circles stores.
 let state: Preferences = {
   habitDefaults: {
-    category: HABIT_CATEGORIES[0],
+    category: null,
     frequency: HABIT_FREQUENCIES[0],
     freezesTotal: 2,
   },

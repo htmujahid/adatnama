@@ -20,6 +20,7 @@ import { Route as MarketingStatusRouteImport } from './routes/_marketing/status'
 import { Route as ApiStatusRouteImport } from './routes/api/status'
 import { Route as HomeIndexRouteImport } from './routes/home/index'
 import { Route as HomeAchievementsRouteImport } from './routes/home/achievements'
+import { Route as HomeCategoriesRouteImport } from './routes/home/categories'
 import { Route as HomeCheckinsRouteImport } from './routes/home/checkins'
 import { Route as HomeInsightsRouteImport } from './routes/home/insights'
 import { Route as HomeProfileRouteImport } from './routes/home/profile'
@@ -90,6 +91,11 @@ const HomeIndexRoute = HomeIndexRouteImport.update({
 const HomeAchievementsRoute = HomeAchievementsRouteImport.update({
   id: '/achievements',
   path: '/achievements',
+  getParentRoute: () => HomeRouteRoute,
+} as any)
+const HomeCategoriesRoute = HomeCategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
   getParentRoute: () => HomeRouteRoute,
 } as any)
 const HomeCheckinsRoute = HomeCheckinsRouteImport.update({
@@ -194,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/status': typeof MarketingStatusRoute
   '/api/status': typeof ApiStatusRoute
   '/home/achievements': typeof HomeAchievementsRoute
+  '/home/categories': typeof HomeCategoriesRoute
   '/home/checkins': typeof HomeCheckinsRoute
   '/home/insights': typeof HomeInsightsRoute
   '/home/profile': typeof HomeProfileRoute
@@ -222,6 +229,7 @@ export interface FileRoutesByTo {
   '/status': typeof MarketingStatusRoute
   '/api/status': typeof ApiStatusRoute
   '/home/achievements': typeof HomeAchievementsRoute
+  '/home/categories': typeof HomeCategoriesRoute
   '/home/checkins': typeof HomeCheckinsRoute
   '/home/insights': typeof HomeInsightsRoute
   '/home/profile': typeof HomeProfileRoute
@@ -251,6 +259,7 @@ export interface FileRoutesById {
   '/_marketing/status': typeof MarketingStatusRoute
   '/api/status': typeof ApiStatusRoute
   '/home/achievements': typeof HomeAchievementsRoute
+  '/home/categories': typeof HomeCategoriesRoute
   '/home/checkins': typeof HomeCheckinsRoute
   '/home/insights': typeof HomeInsightsRoute
   '/home/profile': typeof HomeProfileRoute
@@ -283,6 +292,7 @@ export interface FileRouteTypes {
     | '/status'
     | '/api/status'
     | '/home/achievements'
+    | '/home/categories'
     | '/home/checkins'
     | '/home/insights'
     | '/home/profile'
@@ -311,6 +321,7 @@ export interface FileRouteTypes {
     | '/status'
     | '/api/status'
     | '/home/achievements'
+    | '/home/categories'
     | '/home/checkins'
     | '/home/insights'
     | '/home/profile'
@@ -339,6 +350,7 @@ export interface FileRouteTypes {
     | '/_marketing/status'
     | '/api/status'
     | '/home/achievements'
+    | '/home/categories'
     | '/home/checkins'
     | '/home/insights'
     | '/home/profile'
@@ -446,6 +458,13 @@ declare module '@tanstack/react-router' {
       path: '/achievements'
       fullPath: '/home/achievements'
       preLoaderRoute: typeof HomeAchievementsRouteImport
+      parentRoute: typeof HomeRouteRoute
+    }
+    '/home/categories': {
+      id: '/home/categories'
+      path: '/categories'
+      fullPath: '/home/categories'
+      preLoaderRoute: typeof HomeCategoriesRouteImport
       parentRoute: typeof HomeRouteRoute
     }
     '/home/checkins': {
@@ -641,6 +660,7 @@ const HomeHabitsHabitIdRouteRouteWithChildren =
 
 interface HomeRouteRouteChildren {
   HomeAchievementsRoute: typeof HomeAchievementsRoute
+  HomeCategoriesRoute: typeof HomeCategoriesRoute
   HomeCheckinsRoute: typeof HomeCheckinsRoute
   HomeInsightsRoute: typeof HomeInsightsRoute
   HomeProfileRoute: typeof HomeProfileRoute
@@ -659,6 +679,7 @@ interface HomeRouteRouteChildren {
 
 const HomeRouteRouteChildren: HomeRouteRouteChildren = {
   HomeAchievementsRoute: HomeAchievementsRoute,
+  HomeCategoriesRoute: HomeCategoriesRoute,
   HomeCheckinsRoute: HomeCheckinsRoute,
   HomeInsightsRoute: HomeInsightsRoute,
   HomeProfileRoute: HomeProfileRoute,

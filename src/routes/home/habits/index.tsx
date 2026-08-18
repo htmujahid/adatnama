@@ -9,9 +9,11 @@ import {
   PlusIcon,
   RepeatIcon,
   SearchIcon,
+  TagIcon,
   TargetIcon,
 } from "lucide-react"
 
+import { CategoryBadge } from "@/components/categories/category-badge"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -30,6 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useCategories } from "@/hooks/use-categories"
 import { useHabitCatalog } from "@/hooks/use-habit-catalog"
 
 export const Route = createFileRoute("/home/habits/")({
@@ -40,10 +43,14 @@ function HabitsPage() {
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState<string | null>(null)
   const HABIT_LIST = useHabitCatalog()
+  const categories = useCategories()
 
   const CATEGORIES = Array.from(
     new Set(HABIT_LIST.map((habit) => habit.category)),
-  )
+  ).map((id) => ({
+    id,
+    label: categories.find((c) => c.id === id)?.name ?? id,
+  }))
 
   const dailyCount = HABIT_LIST.filter(
     (habit) => habit.frequency === "Daily",
@@ -93,6 +100,15 @@ function HabitsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            nativeButton={false}
+            render={<Link to="/home/categories" />}
+          >
+            <TagIcon />
+            Categories
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -153,8 +169,8 @@ function HabitsPage() {
           <SelectContent align="end">
             <SelectItem value="all">All categories</SelectItem>
             {CATEGORIES.map((cat) => (
-              <SelectItem key={cat} value={cat}>
-                {cat}
+              <SelectItem key={cat.id} value={cat.id}>
+                {cat.label}
               </SelectItem>
             ))}
           </SelectContent>
@@ -173,9 +189,9 @@ function HabitsPage() {
             <Card key={habit.id}>
               <CardHeader>
                 <div className="flex items-start justify-between gap-2">
-                  <div>
+                  <div className="flex flex-col gap-1.5">
                     <CardTitle>{habit.name}</CardTitle>
-                    <CardDescription>{habit.category}</CardDescription>
+                    <CategoryBadge categoryId={habit.category} />
                   </div>
                   <Badge variant="secondary">
                     <CircleCheckIcon />

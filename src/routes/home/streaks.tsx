@@ -10,6 +10,7 @@ import {
   TrophyIcon,
 } from "lucide-react"
 
+import { CategoryBadge } from "@/components/categories/category-badge"
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
@@ -186,9 +187,9 @@ function StreaksPage() {
             >
               <CardHeader>
                 <div className="flex items-start justify-between gap-2">
-                  <div>
+                  <div className="flex flex-col gap-1.5">
                     <CardTitle>{habit.name}</CardTitle>
-                    <CardDescription>{habit.category}</CardDescription>
+                    <CategoryBadge categoryId={habit.category} />
                   </div>
                   <Badge variant={statusMeta.badgeVariant}>
                     <statusMeta.icon />

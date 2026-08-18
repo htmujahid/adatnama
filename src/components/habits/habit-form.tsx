@@ -1,5 +1,6 @@
 import { useForm } from "@tanstack/react-form"
 
+import { CategorySelect } from "@/components/categories/category-select"
 import { Button } from "@/components/ui/button"
 import {
   Field,
@@ -19,7 +20,7 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
 import type { HabitInput } from "@/hooks/use-habit-catalog"
-import { HABIT_CATEGORIES, HABIT_FREQUENCIES } from "@/routes/home/-data"
+import { HABIT_FREQUENCIES } from "@/routes/home/-data"
 
 export type HabitFormValues = {
   name: string
@@ -143,25 +144,26 @@ export function HabitForm({
         </form.Field>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <form.Field name="category">
+          <form.Field
+            name="category"
+            validators={{
+              onChange: ({ value }) =>
+                value.trim() ? undefined : "Category is required",
+            }}
+          >
             {(field) => (
-              <Field>
+              <Field data-invalid={field.state.meta.errors.length > 0}>
                 <FieldLabel htmlFor={field.name}>Category</FieldLabel>
-                <Select
+                <CategorySelect
+                  id={field.name}
                   value={field.state.value}
-                  onValueChange={(value) => value && field.handleChange(value)}
-                >
-                  <SelectTrigger id={field.name} className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {HABIT_CATEGORIES.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onChange={field.handleChange}
+                />
+                <FieldError
+                  errors={field.state.meta.errors.map((fieldError) => ({
+                    message: String(fieldError),
+                  }))}
+                />
               </Field>
             )}
           </form.Field>
@@ -230,7 +232,9 @@ export function HabitForm({
                   onBlur={field.handleBlur}
                   onChange={(event) => field.handleChange(event.target.value)}
                 />
-                <FieldDescription>Leave blank for no reminder.</FieldDescription>
+                <FieldDescription>
+                  Leave blank for no reminder.
+                </FieldDescription>
               </Field>
             )}
           </form.Field>

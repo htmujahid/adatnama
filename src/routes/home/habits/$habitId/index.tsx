@@ -15,6 +15,7 @@ import {
   TrophyIcon,
 } from "lucide-react"
 
+import { CategoryBadge } from "@/components/categories/category-badge"
 import { HabitNoteButton } from "@/components/habits/habit-note-button"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -181,7 +182,9 @@ function HabitDetailPage() {
               {statusMeta.label}
             </Badge>
           </div>
-          <p className="text-sm text-muted-foreground">{habit.category}</p>
+          <div className="mt-1">
+            <CategoryBadge categoryId={habit.category} />
+          </div>
           {note && (
             <p className="mt-1 text-sm text-muted-foreground italic">
               "{note}"

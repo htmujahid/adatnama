@@ -30,14 +30,6 @@ export type Habit = {
   history: ReadonlyArray<HistoryState>
 }
 
-export const HABIT_CATEGORIES = [
-  "Fitness",
-  "Learning",
-  "Nutrition",
-  "Mindful",
-  "Wellness",
-] as const
-
 export const HABIT_FREQUENCIES = [
   "Daily",
   "Weekdays",

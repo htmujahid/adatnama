@@ -45,6 +45,10 @@ const data = {
           url: "/home/habits",
         },
         {
+          title: "Categories",
+          url: "/home/categories",
+        },
+        {
           title: "Archived",
           url: "/home/habits/archived",
         },

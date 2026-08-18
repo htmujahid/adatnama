@@ -7,6 +7,7 @@ import {
   FlameIcon,
   ListChecksIcon,
   MedalIcon,
+  PencilIcon,
   RepeatIcon,
   SnowflakeIcon,
   TargetIcon,
@@ -24,12 +25,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { useHabit } from "@/hooks/use-habit-catalog"
+import {
+  isHabitDone,
+  toggleHabitCheckIn,
+  useHabitCheckInOverrides,
+} from "@/hooks/use-habit-checkins"
 import { cn } from "@/lib/utils"
 
-import type { HistoryState } from "../-data"
-import { HABITS } from "../-data"
+import type { HistoryState } from "../../-data"
 
-export const Route = createFileRoute("/home/habits/$habitId")({
+export const Route = createFileRoute("/home/habits/$habitId/")({
   component: HabitDetailPage,
 })
 
@@ -102,7 +108,8 @@ function HistoryGrid({ history }: { history: ReadonlyArray<HistoryState> }) {
 
 function HabitDetailPage() {
   const { habitId } = Route.useParams()
-  const habit = HABITS.find((entry) => entry.id === habitId)
+  const overrides = useHabitCheckInOverrides()
+  const habit = useHabit(habitId)
 
   if (!habit) {
     return (
@@ -126,6 +133,7 @@ function HabitDetailPage() {
     )
   }
 
+  const done = isHabitDone(habit, overrides)
   const status = habitStatus(habit)
   const statusMeta = STATUS_META[status]
   const weekDoneCount = habit.week.filter((day) => day === "done").length
@@ -172,15 +180,39 @@ function HabitDetailPage() {
           </div>
           <p className="text-sm text-muted-foreground">{habit.category}</p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          nativeButton={false}
-          render={<Link to="/home/habits" />}
-        >
-          <ListChecksIcon />
-          All habits
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant={done ? "outline" : "default"}
+            size="sm"
+            onClick={() => toggleHabitCheckIn(habit)}
+          >
+            {done ? <CircleXIcon /> : <CircleCheckIcon />}
+            {done ? "Undo today's check-in" : "Mark today done"}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            nativeButton={false}
+            render={
+              <Link
+                to="/home/habits/$habitId/edit"
+                params={{ habitId: habit.id }}
+              />
+            }
+          >
+            <PencilIcon />
+            Edit
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            nativeButton={false}
+            render={<Link to="/home/habits" />}
+          >
+            <ListChecksIcon />
+            All habits
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -279,24 +311,53 @@ function HabitDetailPage() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between gap-2">
-              {habit.week.map((state, index) => (
-                <div key={index} className="flex flex-col items-center gap-2">
-                  <span className="text-xs text-muted-foreground">
-                    {WEEK_DATES[index]}
-                  </span>
-                  <span
-                    className={cn(
-                      "flex size-8 items-center justify-center rounded-full",
-                      state === "done" && "bg-primary text-primary-foreground",
-                      state === "missed" && "bg-muted text-muted-foreground",
-                      state === "today" &&
-                        "bg-muted text-muted-foreground ring-2 ring-primary/40",
-                    )}
+              {habit.week.map((state, index) => {
+                const isToday = index === habit.week.length - 1
+                return (
+                  <div
+                    key={index}
+                    className="flex flex-col items-center gap-2"
                   >
-                    {state === "done" && <CircleCheckIcon className="size-4" />}
-                  </span>
-                </div>
-              ))}
+                    <span className="text-xs text-muted-foreground">
+                      {WEEK_DATES[index]}
+                    </span>
+                    {isToday ? (
+                      <button
+                        type="button"
+                        onClick={() => toggleHabitCheckIn(habit)}
+                        aria-pressed={done}
+                        aria-label={
+                          done
+                            ? "Mark today as not done"
+                            : "Mark today as done"
+                        }
+                        className={cn(
+                          "flex size-8 cursor-pointer items-center justify-center rounded-full transition-colors",
+                          done
+                            ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                            : "bg-muted text-muted-foreground ring-2 ring-primary/40 hover:bg-muted/70",
+                        )}
+                      >
+                        {done && <CircleCheckIcon className="size-4" />}
+                      </button>
+                    ) : (
+                      <span
+                        className={cn(
+                          "flex size-8 items-center justify-center rounded-full",
+                          state === "done" &&
+                            "bg-primary text-primary-foreground",
+                          state === "missed" &&
+                            "bg-muted text-muted-foreground",
+                        )}
+                      >
+                        {state === "done" && (
+                          <CircleCheckIcon className="size-4" />
+                        )}
+                      </span>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </CardContent>
         </Card>

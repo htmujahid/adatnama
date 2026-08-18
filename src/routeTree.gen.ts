@@ -26,8 +26,11 @@ import { Route as HomeProfileRouteImport } from './routes/home/profile'
 import { Route as HomeStreaksRouteImport } from './routes/home/streaks'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as HomeHabitsIndexRouteImport } from './routes/home/habits/index'
-import { Route as HomeHabitsHabitIdRouteImport } from './routes/home/habits/$habitId'
+import { Route as HomeHabitsHabitIdRouteRouteImport } from './routes/home/habits/$habitId/route'
 import { Route as HomeHabitsArchivedRouteImport } from './routes/home/habits/archived'
+import { Route as HomeHabitsNewRouteImport } from './routes/home/habits/new'
+import { Route as HomeHabitsHabitIdIndexRouteImport } from './routes/home/habits/$habitId/index'
+import { Route as HomeHabitsHabitIdEditRouteImport } from './routes/home/habits/$habitId/edit'
 
 const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/_auth',
@@ -112,7 +115,7 @@ const HomeHabitsIndexRoute = HomeHabitsIndexRouteImport.update({
   path: '/habits/',
   getParentRoute: () => HomeRouteRoute,
 } as any)
-const HomeHabitsHabitIdRoute = HomeHabitsHabitIdRouteImport.update({
+const HomeHabitsHabitIdRouteRoute = HomeHabitsHabitIdRouteRouteImport.update({
   id: '/habits/$habitId',
   path: '/habits/$habitId',
   getParentRoute: () => HomeRouteRoute,
@@ -121,6 +124,21 @@ const HomeHabitsArchivedRoute = HomeHabitsArchivedRouteImport.update({
   id: '/habits/archived',
   path: '/habits/archived',
   getParentRoute: () => HomeRouteRoute,
+} as any)
+const HomeHabitsNewRoute = HomeHabitsNewRouteImport.update({
+  id: '/habits/new',
+  path: '/habits/new',
+  getParentRoute: () => HomeRouteRoute,
+} as any)
+const HomeHabitsHabitIdIndexRoute = HomeHabitsHabitIdIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => HomeHabitsHabitIdRouteRoute,
+} as any)
+const HomeHabitsHabitIdEditRoute = HomeHabitsHabitIdEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => HomeHabitsHabitIdRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -137,10 +155,13 @@ export interface FileRoutesByFullPath {
   '/home/profile': typeof HomeProfileRoute
   '/home/streaks': typeof HomeStreaksRoute
   '/home/': typeof HomeIndexRoute
+  '/home/habits/$habitId': typeof HomeHabitsHabitIdRouteRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/home/habits/$habitId': typeof HomeHabitsHabitIdRoute
   '/home/habits/archived': typeof HomeHabitsArchivedRoute
+  '/home/habits/new': typeof HomeHabitsNewRoute
   '/home/habits/': typeof HomeHabitsIndexRoute
+  '/home/habits/$habitId/edit': typeof HomeHabitsHabitIdEditRoute
+  '/home/habits/$habitId/': typeof HomeHabitsHabitIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof MarketingIndexRoute
@@ -156,9 +177,11 @@ export interface FileRoutesByTo {
   '/home/streaks': typeof HomeStreaksRoute
   '/home': typeof HomeIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/home/habits/$habitId': typeof HomeHabitsHabitIdRoute
   '/home/habits/archived': typeof HomeHabitsArchivedRoute
+  '/home/habits/new': typeof HomeHabitsNewRoute
   '/home/habits': typeof HomeHabitsIndexRoute
+  '/home/habits/$habitId/edit': typeof HomeHabitsHabitIdEditRoute
+  '/home/habits/$habitId': typeof HomeHabitsHabitIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -177,10 +200,13 @@ export interface FileRoutesById {
   '/home/streaks': typeof HomeStreaksRoute
   '/_marketing/': typeof MarketingIndexRoute
   '/home/': typeof HomeIndexRoute
+  '/home/habits/$habitId': typeof HomeHabitsHabitIdRouteRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
-  '/home/habits/$habitId': typeof HomeHabitsHabitIdRoute
   '/home/habits/archived': typeof HomeHabitsArchivedRoute
+  '/home/habits/new': typeof HomeHabitsNewRoute
   '/home/habits/': typeof HomeHabitsIndexRoute
+  '/home/habits/$habitId/edit': typeof HomeHabitsHabitIdEditRoute
+  '/home/habits/$habitId/': typeof HomeHabitsHabitIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -198,10 +224,13 @@ export interface FileRouteTypes {
     | '/home/profile'
     | '/home/streaks'
     | '/home/'
-    | '/api/auth/$'
     | '/home/habits/$habitId'
+    | '/api/auth/$'
     | '/home/habits/archived'
+    | '/home/habits/new'
     | '/home/habits/'
+    | '/home/habits/$habitId/edit'
+    | '/home/habits/$habitId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -217,9 +246,11 @@ export interface FileRouteTypes {
     | '/home/streaks'
     | '/home'
     | '/api/auth/$'
-    | '/home/habits/$habitId'
     | '/home/habits/archived'
+    | '/home/habits/new'
     | '/home/habits'
+    | '/home/habits/$habitId/edit'
+    | '/home/habits/$habitId'
   id:
     | '__root__'
     | '/_auth'
@@ -237,10 +268,13 @@ export interface FileRouteTypes {
     | '/home/streaks'
     | '/_marketing/'
     | '/home/'
-    | '/api/auth/$'
     | '/home/habits/$habitId'
+    | '/api/auth/$'
     | '/home/habits/archived'
+    | '/home/habits/new'
     | '/home/habits/'
+    | '/home/habits/$habitId/edit'
+    | '/home/habits/$habitId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -376,7 +410,7 @@ declare module '@tanstack/react-router' {
       id: '/home/habits/$habitId'
       path: '/habits/$habitId'
       fullPath: '/home/habits/$habitId'
-      preLoaderRoute: typeof HomeHabitsHabitIdRouteImport
+      preLoaderRoute: typeof HomeHabitsHabitIdRouteRouteImport
       parentRoute: typeof HomeRouteRoute
     }
     '/home/habits/archived': {
@@ -385,6 +419,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/home/habits/archived'
       preLoaderRoute: typeof HomeHabitsArchivedRouteImport
       parentRoute: typeof HomeRouteRoute
+    }
+    '/home/habits/new': {
+      id: '/home/habits/new'
+      path: '/habits/new'
+      fullPath: '/home/habits/new'
+      preLoaderRoute: typeof HomeHabitsNewRouteImport
+      parentRoute: typeof HomeRouteRoute
+    }
+    '/home/habits/$habitId/': {
+      id: '/home/habits/$habitId/'
+      path: '/'
+      fullPath: '/home/habits/$habitId/'
+      preLoaderRoute: typeof HomeHabitsHabitIdIndexRouteImport
+      parentRoute: typeof HomeHabitsHabitIdRouteRoute
+    }
+    '/home/habits/$habitId/edit': {
+      id: '/home/habits/$habitId/edit'
+      path: '/edit'
+      fullPath: '/home/habits/$habitId/edit'
+      preLoaderRoute: typeof HomeHabitsHabitIdEditRouteImport
+      parentRoute: typeof HomeHabitsHabitIdRouteRoute
     }
   }
 }
@@ -419,6 +474,22 @@ const MarketingRouteRouteWithChildren = MarketingRouteRoute._addFileChildren(
   MarketingRouteRouteChildren,
 )
 
+interface HomeHabitsHabitIdRouteRouteChildren {
+  HomeHabitsHabitIdEditRoute: typeof HomeHabitsHabitIdEditRoute
+  HomeHabitsHabitIdIndexRoute: typeof HomeHabitsHabitIdIndexRoute
+}
+
+const HomeHabitsHabitIdRouteRouteChildren: HomeHabitsHabitIdRouteRouteChildren =
+  {
+    HomeHabitsHabitIdEditRoute: HomeHabitsHabitIdEditRoute,
+    HomeHabitsHabitIdIndexRoute: HomeHabitsHabitIdIndexRoute,
+  }
+
+const HomeHabitsHabitIdRouteRouteWithChildren =
+  HomeHabitsHabitIdRouteRoute._addFileChildren(
+    HomeHabitsHabitIdRouteRouteChildren,
+  )
+
 interface HomeRouteRouteChildren {
   HomeAchievementsRoute: typeof HomeAchievementsRoute
   HomeCheckinsRoute: typeof HomeCheckinsRoute
@@ -426,8 +497,9 @@ interface HomeRouteRouteChildren {
   HomeProfileRoute: typeof HomeProfileRoute
   HomeStreaksRoute: typeof HomeStreaksRoute
   HomeIndexRoute: typeof HomeIndexRoute
-  HomeHabitsHabitIdRoute: typeof HomeHabitsHabitIdRoute
+  HomeHabitsHabitIdRouteRoute: typeof HomeHabitsHabitIdRouteRouteWithChildren
   HomeHabitsArchivedRoute: typeof HomeHabitsArchivedRoute
+  HomeHabitsNewRoute: typeof HomeHabitsNewRoute
   HomeHabitsIndexRoute: typeof HomeHabitsIndexRoute
 }
 
@@ -438,8 +510,9 @@ const HomeRouteRouteChildren: HomeRouteRouteChildren = {
   HomeProfileRoute: HomeProfileRoute,
   HomeStreaksRoute: HomeStreaksRoute,
   HomeIndexRoute: HomeIndexRoute,
-  HomeHabitsHabitIdRoute: HomeHabitsHabitIdRoute,
+  HomeHabitsHabitIdRouteRoute: HomeHabitsHabitIdRouteRouteWithChildren,
   HomeHabitsArchivedRoute: HomeHabitsArchivedRoute,
+  HomeHabitsNewRoute: HomeHabitsNewRoute,
   HomeHabitsIndexRoute: HomeHabitsIndexRoute,
 }
 

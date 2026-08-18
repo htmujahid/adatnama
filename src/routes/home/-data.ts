@@ -12,6 +12,39 @@ import {
 export type DayState = "done" | "missed" | "today"
 export type HistoryState = "done" | "missed" | "frozen" | "today"
 
+export type Habit = {
+  id: string
+  name: string
+  category: string
+  description: string
+  target: string
+  frequency: string
+  reminderTime: string | null
+  streak: number
+  longestStreak: number
+  freezes: number
+  freezesTotal: number
+  startedDaysAgo: number
+  done: boolean
+  week: ReadonlyArray<DayState>
+  history: ReadonlyArray<HistoryState>
+}
+
+export const HABIT_CATEGORIES = [
+  "Fitness",
+  "Learning",
+  "Nutrition",
+  "Mindful",
+  "Wellness",
+] as const
+
+export const HABIT_FREQUENCIES = [
+  "Daily",
+  "Weekdays",
+  "Weekends",
+  "Weekly",
+] as const
+
 export const HABITS = [
   {
     id: "morning-run",
@@ -244,23 +277,7 @@ export const HABITS = [
       "today",
     ],
   },
-] as const satisfies ReadonlyArray<{
-  id: string
-  name: string
-  category: string
-  description: string
-  target: string
-  frequency: string
-  reminderTime: string | null
-  streak: number
-  longestStreak: number
-  freezes: number
-  freezesTotal: number
-  startedDaysAgo: number
-  done: boolean
-  week: ReadonlyArray<DayState>
-  history: ReadonlyArray<HistoryState>
-}>
+] as const satisfies ReadonlyArray<Habit>
 
 export const doneToday = HABITS.filter((habit) => habit.done).length
 

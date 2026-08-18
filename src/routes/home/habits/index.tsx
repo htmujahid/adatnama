@@ -6,6 +6,7 @@ import {
   CircleCheckIcon,
   FlameIcon,
   ListChecksIcon,
+  PlusIcon,
   RepeatIcon,
   SearchIcon,
   TargetIcon,
@@ -29,50 +30,48 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-
-import { HABITS } from "../-data"
+import { useHabitCatalog } from "@/hooks/use-habit-catalog"
 
 export const Route = createFileRoute("/home/habits/")({
   component: HabitsPage,
 })
 
-const HABIT_LIST = HABITS
-
-const CATEGORIES = Array.from(
-  new Set(HABIT_LIST.map((habit) => habit.category)),
-)
-
-const dailyCount = HABIT_LIST.filter(
-  (habit) => habit.frequency === "Daily",
-).length
-const reminderCount = HABIT_LIST.filter(
-  (habit) => habit.reminderTime !== null,
-).length
-
-const HABIT_STATS = [
-  {
-    label: "Total habits",
-    value: `${HABIT_LIST.length}`,
-    badge: "All active",
-    icon: ListChecksIcon,
-  },
-  {
-    label: "Daily habits",
-    value: `${dailyCount} of ${HABIT_LIST.length}`,
-    badge: "Every day",
-    icon: RepeatIcon,
-  },
-  {
-    label: "Reminders set",
-    value: `${reminderCount} of ${HABIT_LIST.length}`,
-    badge: "Enabled",
-    icon: BellIcon,
-  },
-] as const
-
 function HabitsPage() {
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState<string | null>(null)
+  const HABIT_LIST = useHabitCatalog()
+
+  const CATEGORIES = Array.from(
+    new Set(HABIT_LIST.map((habit) => habit.category)),
+  )
+
+  const dailyCount = HABIT_LIST.filter(
+    (habit) => habit.frequency === "Daily",
+  ).length
+  const reminderCount = HABIT_LIST.filter(
+    (habit) => habit.reminderTime !== null,
+  ).length
+
+  const HABIT_STATS = [
+    {
+      label: "Total habits",
+      value: `${HABIT_LIST.length}`,
+      badge: "All active",
+      icon: ListChecksIcon,
+    },
+    {
+      label: "Daily habits",
+      value: `${dailyCount} of ${HABIT_LIST.length}`,
+      badge: "Every day",
+      icon: RepeatIcon,
+    },
+    {
+      label: "Reminders set",
+      value: `${reminderCount} of ${HABIT_LIST.length}`,
+      badge: "Enabled",
+      icon: BellIcon,
+    },
+  ] as const
 
   const filtered = HABIT_LIST.filter((habit) => {
     const matchesSearch = habit.name
@@ -93,15 +92,25 @@ function HabitsPage() {
             Everything you're tracking, in one place.
           </p>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          nativeButton={false}
-          render={<Link to="/home/habits/archived" />}
-        >
-          <ArchiveIcon />
-          Archived
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            nativeButton={false}
+            render={<Link to="/home/habits/archived" />}
+          >
+            <ArchiveIcon />
+            Archived
+          </Button>
+          <Button
+            size="sm"
+            nativeButton={false}
+            render={<Link to="/home/habits/new" />}
+          >
+            <PlusIcon />
+            New habit
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
@@ -161,7 +170,7 @@ function HabitsPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((habit) => (
-            <Card key={habit.name}>
+            <Card key={habit.id}>
               <CardHeader>
                 <div className="flex items-start justify-between gap-2">
                   <div>

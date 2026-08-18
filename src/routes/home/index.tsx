@@ -29,6 +29,11 @@ import {
 } from "@/components/ui/item"
 import { Progress } from "@/components/ui/progress"
 import { useHomeUser } from "@/hooks/use-home-user"
+import {
+  isHabitDone,
+  toggleHabitCheckIn,
+  useHabitCheckInOverrides,
+} from "@/hooks/use-habit-checkins"
 import { cn } from "@/lib/utils"
 
 import type { DayState } from "./-data"
@@ -117,6 +122,7 @@ function WeekDots({ week }: { week: ReadonlyArray<DayState> }) {
 function HomePage() {
   const user = useHomeUser()
   const firstName = user.name.split(" ")[0]
+  const overrides = useHabitCheckInOverrides()
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
@@ -158,28 +164,44 @@ function HomePage() {
           </CardHeader>
           <CardContent>
             <ItemGroup>
-              {HABITS.map((habit) => (
-                <Item key={habit.name} variant="outline">
-                  <ItemMedia>
-                    <Checkbox checked={habit.done} disabled />
-                  </ItemMedia>
-                  <ItemContent>
-                    <ItemTitle>{habit.name}</ItemTitle>
-                    <ItemDescription>
-                      {habit.freezes > 0
-                        ? `${habit.freezes} freeze${habit.freezes > 1 ? "s" : ""} left`
-                        : "No freezes left"}
-                    </ItemDescription>
-                  </ItemContent>
-                  <ItemActions>
-                    <WeekDots week={habit.week} />
-                    <Badge variant={habit.done ? "secondary" : "outline"}>
-                      <FlameIcon />
-                      {habit.streak}
-                    </Badge>
-                  </ItemActions>
-                </Item>
-              ))}
+              {HABITS.map((habit) => {
+                const done = isHabitDone(habit, overrides)
+                return (
+                  <Item
+                    key={habit.id}
+                    variant="outline"
+                    onClick={() => toggleHabitCheckIn(habit)}
+                    className="cursor-pointer select-none transition-colors hover:bg-muted/60 active:bg-muted"
+                  >
+                    <ItemMedia>
+                      <Checkbox
+                        checked={done}
+                        onCheckedChange={() => toggleHabitCheckIn(habit)}
+                        onClick={(event) => {
+                          // The row already toggles on click; avoid double-firing.
+                          event.stopPropagation()
+                        }}
+                        aria-label={`Mark ${habit.name} as ${done ? "not done" : "done"} for today`}
+                      />
+                    </ItemMedia>
+                    <ItemContent>
+                      <ItemTitle>{habit.name}</ItemTitle>
+                      <ItemDescription>
+                        {habit.freezes > 0
+                          ? `${habit.freezes} freeze${habit.freezes > 1 ? "s" : ""} left`
+                          : "No freezes left"}
+                      </ItemDescription>
+                    </ItemContent>
+                    <ItemActions>
+                      <WeekDots week={habit.week} />
+                      <Badge variant={habit.done ? "secondary" : "outline"}>
+                        <FlameIcon />
+                        {habit.streak}
+                      </Badge>
+                    </ItemActions>
+                  </Item>
+                )
+              })}
             </ItemGroup>
           </CardContent>
         </Card>

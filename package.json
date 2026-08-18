@@ -29,6 +29,7 @@
     "@tanstack/charts": "^0.14.0",
     "@tanstack/db": "^0.7.2",
     "@tanstack/db-sqlite-persistence-core": "^0.2.12",
+    "@tanstack/offline-transactions": "^1.0.45",
     "@tanstack/query-db-collection": "^1.2.4",
     "@tanstack/react-db": "^0.2.1",
     "@tanstack/react-devtools": "latest",

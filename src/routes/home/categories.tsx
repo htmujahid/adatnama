@@ -25,11 +25,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useHomeUser } from "@/hooks/use-home-user"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useHabitCatalog } from "@/hooks/use-habit-catalog"
+import { useHomeUser } from "@/hooks/use-home-user"
 import { useCollection } from "@/lib/data/collection"
 import type { CategoryInput, CategoryRecord } from "@/lib/data/habit"
 import { getCategoriesCollection } from "@/lib/data/habit"
+import { useOfflineExecutor } from "@/lib/db/offline"
 
 export const Route = createFileRoute("/home/categories")({
   component: CategoriesPage,
@@ -38,34 +40,52 @@ export const Route = createFileRoute("/home/categories")({
 function CategoriesPage() {
   const user = useHomeUser()
   const collection = useCollection(getCategoriesCollection)
-  const { data: categories = [] } = useLiveQuery((q) => {
+  const executor = useOfflineExecutor()
+  const { data: categories = [], isLoading } = useLiveQuery((q) => {
     if (!collection) return undefined
     return q.from({ category: collection })
   })
+  const categoriesLoading = !collection || isLoading
   const habits = useHabitCatalog()
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [editing, setEditing] = useState<CategoryRecord | undefined>(
-    undefined,
-  )
+  const [editing, setEditing] = useState<CategoryRecord | undefined>(undefined)
 
   function handleSave(input: CategoryInput) {
-    if (!collection) return
+    if (!collection || !executor) return
     if (editing) {
-      collection.update(editing.id, (draft) => {
-        draft.name = input.name
-        draft.color = input.color
-      })
+      const editingId = editing.id
+      executor
+        .createOfflineTransaction({ mutationFnName: "categories.update" })
+        .mutate(() => {
+          collection.update(editingId, (draft) => {
+            draft.name = input.name
+            draft.color = input.color
+          })
+        })
       return
     }
     const now = new Date().toISOString()
-    collection.insert({
-      id: safeRandomUUID(),
-      userId: user.id,
-      name: input.name,
-      color: input.color,
-      createdAt: now,
-      updatedAt: now,
-    })
+    executor
+      .createOfflineTransaction({ mutationFnName: "categories.create" })
+      .mutate(() => {
+        collection.insert({
+          id: safeRandomUUID(),
+          userId: user.id,
+          name: input.name,
+          color: input.color,
+          createdAt: now,
+          updatedAt: now,
+        })
+      })
+  }
+
+  function handleDelete(categoryId: string) {
+    if (!executor) return
+    executor
+      .createOfflineTransaction({ mutationFnName: "categories.delete" })
+      .mutate(() => {
+        collection?.delete(categoryId)
+      })
   }
 
   function openCreate() {
@@ -96,7 +116,21 @@ function CategoriesPage() {
         </Button>
       </div>
 
-      {categories.length === 0 ? (
+      {categoriesLoading ? (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 3 }, (_, index) => (
+            <Card key={index}>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Skeleton className="size-3 rounded-full" />
+                  <Skeleton className="h-5 w-24" />
+                </div>
+                <Skeleton className="mt-1.5 h-4 w-16" />
+              </CardHeader>
+            </Card>
+          ))}
+        </div>
+      ) : categories.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center gap-3 py-14 text-center">
             <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
@@ -151,7 +185,7 @@ function CategoriesPage() {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           variant="destructive"
-                          onClick={() => collection?.delete(category.id)}
+                          onClick={() => handleDelete(category.id)}
                         >
                           <Trash2Icon />
                           Delete

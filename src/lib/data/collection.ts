@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react"
 import type { Collection } from "@tanstack/db"
+import { persistedCollectionOptions } from "@tanstack/db-sqlite-persistence-core"
 import type { QueryClient } from "@tanstack/query-core"
 import type { QueryCollectionConfig } from "@tanstack/query-db-collection"
-import { persistedCollectionOptions } from "@tanstack/db-sqlite-persistence-core"
+import { queryCollectionOptions } from "@tanstack/query-db-collection"
 import { createCollection } from "@tanstack/react-db"
 import { useQueryClient } from "@tanstack/react-query"
-import { queryCollectionOptions } from "@tanstack/query-db-collection"
 
 import { getBrowserPersistence } from "@/lib/db/browser"
 
@@ -23,9 +23,7 @@ export function getPersistedCollection<T extends object, TKey extends string>(
   config: PersistedQueryCollectionConfig<T, TKey>,
 ): Promise<Collection<T, TKey>> {
   if (typeof window === "undefined") {
-    throw new Error(
-      "Persisted collections are only available in the browser.",
-    )
+    throw new Error("Persisted collections are only available in the browser.")
   }
 
   const cached = collections.get(config.id)

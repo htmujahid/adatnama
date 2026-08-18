@@ -43,7 +43,16 @@ export const createCategory = createServerFn({ method: "POST" })
       createdAt: now,
       updatedAt: now,
     }
-    await db.insertInto("category").values(category).execute()
+    await db
+      .insertInto("category")
+      .values(category)
+      .onConflict((oc) =>
+        oc.column("id").doUpdateSet({
+          name: category.name,
+          color: category.color,
+        }),
+      )
+      .execute()
 
     return { error: null, category }
   })

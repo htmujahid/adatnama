@@ -12,10 +12,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton"
 import { useHomeUser } from "@/hooks/use-home-user"
 import { useCollection } from "@/lib/data/collection"
 import type { CategoryInput } from "@/lib/data/habit"
 import { getCategoriesCollection } from "@/lib/data/habit"
+import { useOfflineExecutor } from "@/lib/db/offline"
 
 const CREATE_VALUE = "__create__"
 
@@ -32,25 +34,34 @@ export function CategorySelect({
 }) {
   const user = useHomeUser()
   const collection = useCollection(getCategoriesCollection)
-  const { data: categories = [] } = useLiveQuery((q) => {
+  const executor = useOfflineExecutor()
+  const { data: categories = [], isLoading } = useLiveQuery((q) => {
     if (!collection) return undefined
     return q.from({ category: collection })
   })
   const [dialogOpen, setDialogOpen] = useState(false)
 
   function handleCreate(input: CategoryInput) {
-    if (!collection) return
+    if (!collection || !executor) return
     const now = new Date().toISOString()
     const categoryId = safeRandomUUID()
-    collection.insert({
-      id: categoryId,
-      userId: user.id,
-      name: input.name,
-      color: input.color,
-      createdAt: now,
-      updatedAt: now,
-    })
+    executor
+      .createOfflineTransaction({ mutationFnName: "categories.create" })
+      .mutate(() => {
+        collection.insert({
+          id: categoryId,
+          userId: user.id,
+          name: input.name,
+          color: input.color,
+          createdAt: now,
+          updatedAt: now,
+        })
+      })
     onChange(categoryId)
+  }
+
+  if (!collection || isLoading) {
+    return <Skeleton className={className ?? "h-9 w-full"} />
   }
 
   if (categories.length === 0) {

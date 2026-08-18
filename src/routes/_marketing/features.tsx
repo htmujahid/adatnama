@@ -109,8 +109,7 @@ function FeaturesPage() {
             <p className="text-muted-foreground">
               A complete set of accessible field components, built on base-ui
               primitives and styled with semantic design tokens. They power
-              sign-in and profile settings today, and every habit you add
-              next.
+              sign-in and profile settings today, and every habit you add next.
             </p>
             <p className="text-muted-foreground">
               Every component ships in this repo under{" "}
@@ -212,8 +211,8 @@ function FeaturesPage() {
               Deploy to Cloudflare
             </h2>
             <p className="text-muted-foreground">
-              One command builds the app and publishes it to Cloudflare
-              Workers. Add a binding in{" "}
+              One command builds the app and publishes it to Cloudflare Workers.
+              Add a binding in{" "}
               <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-sm">
                 wrangler.jsonc
               </code>{" "}
@@ -239,8 +238,7 @@ function FeaturesPage() {
             <p className="text-muted-foreground">
               shadcn/ui on Tailwind CSS v4, themed with semantic tokens in
               OKLCH. Light, dark, and auto modes persist to localStorage and
-              apply before first paint, so there is no flash of the wrong
-              theme.
+              apply before first paint, so there is no flash of the wrong theme.
             </p>
             <p className="text-muted-foreground">
               Try the toggle in the header. Every page, including the streak
@@ -257,8 +255,8 @@ function FeaturesPage() {
               See it running
             </h2>
             <p className="mt-2 max-w-xl text-muted-foreground">
-              The status page is a real server route and a real reactive
-              query, refreshing live.
+              The status page is a real server route and a real reactive query,
+              refreshing live.
             </p>
           </div>
           <Button nativeButton={false} render={<Link to="/status" />}>

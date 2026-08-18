@@ -171,7 +171,9 @@ function App() {
       <section className="border-b border-border">
         <div className="mx-auto grid w-full max-w-7xl items-center gap-12 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:py-28 lg:px-8">
           <div className="flex flex-col items-start gap-6">
-            <Badge variant="secondary">Built for daily habits. Edge native.</Badge>
+            <Badge variant="secondary">
+              Built for daily habits. Edge native.
+            </Badge>
             <h1 className="font-heading text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
               Check in daily. Never break the streak.
             </h1>
@@ -301,8 +303,8 @@ function App() {
               Start with a working example
             </h2>
             <p className="mt-2 max-w-xl text-muted-foreground">
-              The status page is a live route built on the same data layer
-              your habits will use.
+              The status page is a live route built on the same data layer your
+              habits will use.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">

@@ -7,9 +7,6 @@ import { useCollection } from "@/lib/data/collection"
 import { useOfflineExecutor } from "@/lib/db/offline"
 import { dateKey } from "@/lib/habits"
 
-// Today's check-in rows keyed by habit id, plus offline-first mutations for
-// toggling a habit and editing its note. A row with status "pending" only
-// exists to carry a note for a habit that isn't checked off yet.
 export function useHabitCheckins() {
   const collection = useCollection(getCheckinsCollection)
   const executor = useOfflineExecutor()

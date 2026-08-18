@@ -1,9 +1,14 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router"
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
 
 import { Footer } from "@/components/layouts/footer"
 import { Header } from "@/components/layouts/header"
 
 export const Route = createFileRoute("/_marketing")({
+  beforeLoad: ({ context }) => {
+    if (context.session) {
+      throw redirect({ to: "/home" })
+    }
+  },
   component: MarketingLayout,
 })
 

@@ -39,17 +39,17 @@ function AboutPage() {
               About Adatnama
             </h1>
             <p className="mt-4 text-lg text-muted-foreground">
-              Adatnama is a streak and habit tracker built on TanStack Start
-              and deployed to Cloudflare. Add a habit, check in daily, and
-              Adatnama turns that into a running streak: a current count, a
-              longest count, and a freeze you can spend when a day slips.
+              Adatnama is a streak and habit tracker built on TanStack Start and
+              deployed to Cloudflare. Add a habit, check in daily, and Adatnama
+              turns that into a running streak: a current count, a longest
+              count, and a freeze you can spend when a day slips.
             </p>
             <p className="mt-4 text-lg text-muted-foreground">
-              Streaks work because the feedback is immediate: you do the
-              thing, the count goes up, and losing it feels like something
-              worth protecting. Adatnama exists to keep that loop tight, so a
-              check-in updates your streak instantly, with no gap between
-              doing the habit and seeing it counted.
+              Streaks work because the feedback is immediate: you do the thing,
+              the count goes up, and losing it feels like something worth
+              protecting. Adatnama exists to keep that loop tight, so a check-in
+              updates your streak instantly, with no gap between doing the habit
+              and seeing it counted.
             </p>
           </div>
         </div>

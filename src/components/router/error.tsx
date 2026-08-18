@@ -1,6 +1,7 @@
 import { Link, useRouter } from "@tanstack/react-router"
-import { TriangleAlertIcon, WifiOffIcon } from "lucide-react"
+import { TriangleAlertIcon } from "lucide-react"
 
+import { OfflineScreen } from "@/components/pwa/offline-screen"
 import { Button } from "@/components/ui/button"
 import { useOnlineStatus } from "@/hooks/use-online-status"
 
@@ -10,21 +11,15 @@ export function RouterError({ error }: { error: Error }) {
 
   if (!online) {
     return (
-      <div className="mx-auto flex min-h-svh w-full max-w-sm flex-col items-center justify-center gap-4 px-4 text-center">
-        <WifiOffIcon className="size-8 text-muted-foreground" />
-        <div className="flex flex-col gap-1">
-          <h1 className="font-heading text-xl font-semibold tracking-tight">
-            You&apos;re offline
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            This page hasn&apos;t been loaded before, so it isn&apos;t available
-            offline. Reconnect and try again.
-          </p>
-        </div>
-        <Button variant="outline" onClick={() => router.invalidate()}>
-          Try again
-        </Button>
-      </div>
+      <OfflineScreen
+        description="This page hasn't been loaded before, so it isn't available offline. Reconnect and try again."
+        onRetry={() => router.invalidate()}
+        actions={
+          <Button nativeButton={false} render={<Link to="/home" />}>
+            Go to my habits
+          </Button>
+        }
+      />
     )
   }
 

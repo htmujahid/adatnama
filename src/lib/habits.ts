@@ -107,11 +107,6 @@ export function isScheduledOn(habit: ScheduledHabit, date: Date): boolean {
   return habit.days.includes(getDay(date))
 }
 
-// Streak rules: a done check-in extends the streak (even on unscheduled
-// days); a missed scheduled day consumes a freeze while the streak is
-// active and freezes remain, otherwise it breaks the streak. Today never
-// breaks a streak — the day isn't over yet. Freezes replenish whenever a
-// streak breaks and a new run starts.
 export function computeHabitStats(
   habit: ScheduledHabit,
   doneDates: ReadonlySet<string>,

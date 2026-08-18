@@ -7,6 +7,7 @@ export const sessionQueryOptions = () =>
     queryKey: ["session"],
     queryFn: () => getSession(),
     staleTime: 0,
+    gcTime: Number.POSITIVE_INFINITY,
   })
 
 export const accountsQueryOptions = () =>

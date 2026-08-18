@@ -49,8 +49,8 @@ export function SetPasswordForm() {
     >
       <FieldGroup>
         <FieldDescription>
-          You signed up with Google, so there's no password on this account
-          yet. Set one to also sign in with your username.
+          You signed up with Google, so there's no password on this account yet.
+          Set one to also sign in with your username.
         </FieldDescription>
 
         <form.Field

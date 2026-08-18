@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button"
 import { FieldDescription, FieldError } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 import { formatBytes, useFileUpload } from "@/hooks/use-file-upload"
-import { sessionQueryOptions } from "@/lib/data/auth"
 import { AVATAR_ACCEPT, AVATAR_MAX_SIZE_BYTES } from "@/lib/avatar"
+import { sessionQueryOptions } from "@/lib/data/auth"
 
 export function AvatarForm({
   user,

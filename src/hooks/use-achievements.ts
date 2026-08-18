@@ -22,8 +22,6 @@ export type AchievementView = Omit<AchievementDefinition, "compute"> & {
   target: number
 }
 
-// Unlock attempts already made this session, so overlapping hook instances
-// (home + achievements page) don't insert the same unlock twice.
 const attemptedUnlocks = new Set<string>()
 
 export function useAchievements(): {
@@ -86,7 +84,6 @@ export function useAchievements(): {
     })
   }, [habits, checkins, circles, unlocks, todayKey])
 
-  // Persist newly earned achievements as unlock records.
   useEffect(() => {
     if (isLoading || !executor) return
     for (const achievement of achievements) {

@@ -43,8 +43,6 @@ function thresholdProgress(value: number, target: number): AchievementProgress {
   }
 }
 
-// Ids must match the rows seeded into the `achievement` table
-// (migrations/0007_seed_achievements.sql) — unlock records reference them.
 export const ACHIEVEMENT_DEFINITIONS: ReadonlyArray<AchievementDefinition> = [
   {
     id: "first-step",

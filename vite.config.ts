@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url"
 import { devtools } from "@tanstack/devtools-vite"
 import { tanstackStart } from "@tanstack/react-start/plugin/vite"
 import { cloudflare } from "@cloudflare/vite-plugin"
@@ -23,6 +24,15 @@ function pwaServiceWorker(): Plugin {
         skipWaiting: true,
         runtimeCaching: [
           {
+            urlPattern: ({ request }) => request.mode === "navigate",
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "pages",
+              networkTimeoutSeconds: 3,
+              expiration: { maxEntries: 40, maxAgeSeconds: 30 * 24 * 60 * 60 },
+            },
+          },
+          {
             urlPattern: ({ request }) => request.destination === "image",
             handler: "StaleWhileRevalidate",
             options: {
@@ -43,7 +53,9 @@ function pwaServiceWorker(): Plugin {
 }
 
 const config = defineConfig({
-  resolve: { tsconfigPaths: true },
+  resolve: {
+    alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
+  },
   plugins: [
     devtools(),
     cloudflare({ viteEnvironment: { name: "ssr" } }),

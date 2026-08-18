@@ -22,9 +22,10 @@ interface RouterContext {
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   beforeLoad: async ({ context, location }) => {
-    const session = await context.queryClient.ensureQueryData(
-      sessionQueryOptions(),
-    )
+    const options = sessionQueryOptions()
+    const session = await context.queryClient
+      .ensureQueryData(options)
+      .catch(() => context.queryClient.getQueryData(options.queryKey) ?? null)
     if (!session && location.pathname.startsWith("/home")) {
       throw redirect({ to: "/login" })
     }

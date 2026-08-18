@@ -187,7 +187,6 @@ function InsightsPage() {
       )
     }
 
-    // Streak trend for the habit with the strongest current streak.
     const strongest = [...habits].sort((a, b) => b.streak - a.streak).at(0)
     const streakTrend = strongest
       ? (() => {
@@ -249,7 +248,6 @@ function InsightsPage() {
       })
       .filter((row) => row !== null)
 
-    // Calendar-aligned heatmap: columns start on Sundays, ending today.
     const heatmapStart = startOfWeek(subDays(today, HEATMAP_WEEKS * 7 - 1))
     const heatmapCells = eachDayOfInterval({
       start: heatmapStart,

@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router"
 
 import { AppSidebar } from "@/components/layouts/app-sidebar"
+import { OfflineStatusBadge } from "@/components/pwa/offline-status-badge"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -70,6 +71,7 @@ function HomeLayout() {
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
+          <OfflineStatusBadge className="ml-auto" />
         </header>
 
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">

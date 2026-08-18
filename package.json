@@ -72,6 +72,7 @@
     "prettier": "^3.8.1",
     "typescript": "^6.0.2",
     "vite": "^8.0.0",
+    "workbox-build": "^7.4.1",
     "wrangler": "^4.70.0"
   },
   "pnpm": {

@@ -34,12 +34,15 @@ function EditCirclePage() {
   const navigate = useNavigate()
   const collection = useCollection(getCirclesCollection)
   const executor = useOfflineExecutor()
-  const { data: matches = [], isLoading } = useLiveQuery((q) => {
-    if (!collection) return undefined
-    return q
-      .from({ circle: collection })
-      .where(({ circle }) => eq(circle.slug, circleId))
-  })
+  const { data: matches = [], isLoading } = useLiveQuery(
+    (q) => {
+      if (!collection) return undefined
+      return q
+        .from({ circle: collection })
+        .where(({ circle }) => eq(circle.slug, circleId))
+    },
+    [collection, circleId],
+  )
   const circle = matches.at(0)
 
   if (!collection || isLoading) {

@@ -5,6 +5,7 @@ import { sql } from "kysely"
 
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { slugify } from "@/lib/slug"
 
 export type CircleMember = {
   id: string
@@ -21,15 +22,6 @@ export type CircleInput = {
 
 export function memberRoles(role: string): string[] {
   return role.split(",")
-}
-
-function slugify(name: string) {
-  const slug = name
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-  return slug || "circle"
 }
 
 function generateJoinCode() {

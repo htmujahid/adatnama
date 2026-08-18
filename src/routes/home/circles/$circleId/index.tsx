@@ -250,12 +250,15 @@ function CircleDetailPage() {
   const collection = useCollection(getCirclesCollection)
   const executor = useOfflineExecutor()
   const user = useHomeUser()
-  const { data: matches = [], isLoading: circleLoading } = useLiveQuery((q) => {
-    if (!collection) return undefined
-    return q
-      .from({ circle: collection })
-      .where(({ circle }) => eq(circle.slug, circleId))
-  })
+  const { data: matches = [], isLoading: circleLoading } = useLiveQuery(
+    (q) => {
+      if (!collection) return undefined
+      return q
+        .from({ circle: collection })
+        .where(({ circle }) => eq(circle.slug, circleId))
+    },
+    [collection, circleId],
+  )
   const circle = matches.at(0)
 
   if (!collection || circleLoading) {

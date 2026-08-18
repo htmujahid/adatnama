@@ -1,14 +1,16 @@
-import { useState } from "react"
+import { safeRandomUUID } from "@tanstack/react-db"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { UsersIcon } from "lucide-react"
 
-import { createCircle } from "@/actions/circles"
 import { CircleForm } from "@/components/circles/circle-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { useHomeUser } from "@/hooks/use-home-user"
 import { PRESET_COLORS } from "@/lib/colors"
 import { getCirclesCollection } from "@/lib/data/circles"
 import { useCollection } from "@/lib/data/collection"
+import { useOfflineExecutor } from "@/lib/db/offline"
+import { slugify } from "@/lib/slug"
 
 export const Route = createFileRoute("/home/circles/new")({
   component: NewCirclePage,
@@ -17,7 +19,8 @@ export const Route = createFileRoute("/home/circles/new")({
 function NewCirclePage() {
   const navigate = useNavigate()
   const collection = useCollection(getCirclesCollection)
-  const [error, setError] = useState<string | null>(null)
+  const executor = useOfflineExecutor()
+  const user = useHomeUser()
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
@@ -50,7 +53,6 @@ function NewCirclePage() {
               color: PRESET_COLORS[0].value,
             }}
             submitLabel="Create circle"
-            error={error}
             cancel={
               <Button
                 type="button"
@@ -62,18 +64,35 @@ function NewCirclePage() {
               </Button>
             }
             onSubmit={async (input) => {
-              setError(null)
-              const { error: createError, circle } = await createCircle({
-                data: input,
-              })
-              if (createError) {
-                setError(createError.message)
-                return
-              }
-              await collection?.utils.refetch()
+              if (!collection || !executor) return
+              const id = safeRandomUUID()
+              const slug = slugify(input.name)
+              executor
+                .createOfflineTransaction({ mutationFnName: "circles.create" })
+                .mutate(() => {
+                  collection.insert({
+                    id,
+                    name: input.name,
+                    description: input.description,
+                    color: input.color,
+                    slug,
+                    joinCode: safeRandomUUID()
+                      .replace(/-/g, "")
+                      .slice(0, 8)
+                      .toUpperCase(),
+                    members: [
+                      {
+                        id: safeRandomUUID(),
+                        userId: user.id,
+                        role: "owner",
+                        name: user.name,
+                      },
+                    ],
+                  })
+                })
               await navigate({
                 to: "/home/circles/$circleId",
-                params: { circleId: circle.slug },
+                params: { circleId: slug },
               })
             }}
           />

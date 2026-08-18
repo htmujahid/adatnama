@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Link } from "@tanstack/react-router"
+import { Link, useParams } from "@tanstack/react-router"
 import {
   ArrowRightIcon,
   LogOutIcon,
@@ -48,6 +48,7 @@ export function NavCircles({
   const collection = useCollection(getCirclesCollection)
   const executor = useOfflineExecutor()
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const { circleId: activeCircleId } = useParams({ strict: false })
 
   const handleLeave = (organizationId: string) => {
     if (!executor) return
@@ -70,7 +71,10 @@ export function NavCircles({
       <SidebarMenu>
         {circles.map((item) => (
           <SidebarMenuItem key={item.id}>
-            <SidebarMenuButton render={<Link to={item.url} />}>
+            <SidebarMenuButton
+              isActive={item.id === activeCircleId}
+              render={<Link to={item.url} />}
+            >
               <CircleColorDot color={item.color} />
               <span>{item.name}</span>
             </SidebarMenuButton>

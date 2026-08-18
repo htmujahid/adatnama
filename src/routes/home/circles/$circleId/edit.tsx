@@ -14,6 +14,21 @@ export const Route = createFileRoute("/home/circles/$circleId/edit")({
   component: EditCirclePage,
 })
 
+function EditCircleSkeleton() {
+  return (
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+      <Skeleton className="h-8 w-64" />
+      <Card>
+        <CardContent className="flex flex-col gap-4">
+          <Skeleton className="h-9 w-full" />
+          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-9 w-40" />
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
 function EditCirclePage() {
   const { circleId } = Route.useParams()
   const navigate = useNavigate()
@@ -28,18 +43,7 @@ function EditCirclePage() {
   const circle = matches.at(0)
 
   if (!collection || isLoading) {
-    return (
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
-        <Skeleton className="h-8 w-64" />
-        <Card>
-          <CardContent className="flex flex-col gap-4">
-            <Skeleton className="h-9 w-full" />
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-9 w-40" />
-          </CardContent>
-        </Card>
-      </div>
-    )
+    return <EditCircleSkeleton />
   }
 
   if (!circle) {

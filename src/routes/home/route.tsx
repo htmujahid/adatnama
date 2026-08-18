@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/sidebar"
 
 export const Route = createFileRoute("/home")({
+  ssr: false,
   beforeLoad: ({ context }) => {
     if (!context.session) {
       throw redirect({ to: "/login" })

@@ -234,6 +234,16 @@ function MemberRow({
   )
 }
 
+function CircleDetailSkeleton() {
+  return (
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+      <Skeleton className="h-8 w-64" />
+      <Skeleton className="h-40 w-full" />
+      <Skeleton className="h-40 w-full" />
+    </div>
+  )
+}
+
 function CircleDetailPage() {
   const { circleId } = Route.useParams()
   const navigate = useNavigate()
@@ -249,13 +259,7 @@ function CircleDetailPage() {
   const circle = matches.at(0)
 
   if (!collection || circleLoading) {
-    return (
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-40 w-full" />
-        <Skeleton className="h-40 w-full" />
-      </div>
-    )
+    return <CircleDetailSkeleton />
   }
 
   if (!circle) {

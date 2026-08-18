@@ -118,6 +118,39 @@ function JoinCircleDialog({
   )
 }
 
+function CirclesPageSkeleton() {
+  return (
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <h1 className="font-heading text-2xl font-semibold tracking-tight">
+            Circles
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Shared streaks with your people.
+          </p>
+        </div>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {Array.from({ length: 3 }, (_, index) => (
+          <Card key={index}>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Skeleton className="size-3 rounded-full" />
+                <Skeleton className="h-5 w-24" />
+              </div>
+              <Skeleton className="mt-1.5 h-4 w-32" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-3 w-16" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function CirclesPage() {
   const navigate = useNavigate()
   const collection = useCollection(getCirclesCollection)
@@ -133,6 +166,10 @@ function CirclesPage() {
       to: "/home/circles/$circleId",
       params: { circleId: slug },
     })
+  }
+
+  if (circlesLoading) {
+    return <CirclesPageSkeleton />
   }
 
   return (
@@ -159,24 +196,7 @@ function CirclesPage() {
         </div>
       </div>
 
-      {circlesLoading ? (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {Array.from({ length: 3 }, (_, index) => (
-            <Card key={index}>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Skeleton className="size-3 rounded-full" />
-                  <Skeleton className="h-5 w-24" />
-                </div>
-                <Skeleton className="mt-1.5 h-4 w-32" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-3 w-16" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : circles.length === 0 ? (
+      {circles.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center gap-1 py-10 text-center">
             <p className="text-sm font-medium">

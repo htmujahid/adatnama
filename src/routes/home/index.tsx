@@ -29,6 +29,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   isHabitDone,
   toggleHabitCheckIn,
@@ -155,15 +156,65 @@ function TodayHabitItem({ habit, done }: { habit: Habit; done: boolean }) {
   )
 }
 
-function HomePage() {
-  const user = useHomeUser()
-  const firstName = user.name.split(" ")[0]
-  const overrides = useHabitCheckInOverrides()
+function CirclesSummaryCard() {
   const circlesCollection = useCollection(getCirclesCollection)
   const { data: circles = [] } = useLiveQuery((q) => {
     if (!circlesCollection) return undefined
     return q.from({ circle: circlesCollection })
   })
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Circles</CardTitle>
+        <CardDescription>Shared streaks with your people</CardDescription>
+        <CardAction>
+          <Link
+            to="/home/circles"
+            className="text-xs font-medium text-primary hover:underline"
+          >
+            View all
+          </Link>
+        </CardAction>
+      </CardHeader>
+      <CardContent>
+        {!circlesCollection ? (
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        ) : circles.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            You haven't joined a circle yet.
+          </p>
+        ) : (
+          <ItemGroup>
+            {circles.map((circle) => (
+              <Item key={circle.id} variant="outline" size="sm">
+                <ItemContent>
+                  <ItemTitle>
+                    <CircleColorDot color={circle.color} />
+                    {circle.name}
+                  </ItemTitle>
+                  <ItemDescription>
+                    {circle.members.length === 1
+                      ? "1 member"
+                      : `${circle.members.length} members`}
+                  </ItemDescription>
+                </ItemContent>
+              </Item>
+            ))}
+          </ItemGroup>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+function HomePage() {
+  const user = useHomeUser()
+  const firstName = user.name.split(" ")[0]
+  const overrides = useHabitCheckInOverrides()
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
@@ -216,45 +267,7 @@ function HomePage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Circles</CardTitle>
-            <CardDescription>Shared streaks with your people</CardDescription>
-            <CardAction>
-              <Link
-                to="/home/circles"
-                className="text-xs font-medium text-primary hover:underline"
-              >
-                View all
-              </Link>
-            </CardAction>
-          </CardHeader>
-          <CardContent>
-            {circles.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                You haven't joined a circle yet.
-              </p>
-            ) : (
-              <ItemGroup>
-                {circles.map((circle) => (
-                  <Item key={circle.id} variant="outline" size="sm">
-                    <ItemContent>
-                      <ItemTitle>
-                        <CircleColorDot color={circle.color} />
-                        {circle.name}
-                      </ItemTitle>
-                      <ItemDescription>
-                        {circle.members.length === 1
-                          ? "1 member"
-                          : `${circle.members.length} members`}
-                      </ItemDescription>
-                    </ItemContent>
-                  </Item>
-                ))}
-              </ItemGroup>
-            )}
-          </CardContent>
-        </Card>
+        <CirclesSummaryCard />
       </div>
 
       <div className="grid items-start gap-4 lg:grid-cols-3">

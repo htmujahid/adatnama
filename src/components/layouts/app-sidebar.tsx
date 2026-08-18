@@ -14,21 +14,18 @@ import {
   TrendingUpIcon,
 } from "lucide-react"
 
-import { NavCircles } from "@/components/layouts/nav-circles"
+import { NavCircles, NavCirclesSkeleton } from "@/components/layouts/nav-circles"
 import { NavMain } from "@/components/layouts/nav-main"
 import { NavUser } from "@/components/layouts/nav-user"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { Skeleton } from "@/components/ui/skeleton"
 import { useHomeUser } from "@/hooks/use-home-user"
 import { authClient } from "@/lib/auth-client"
 import { circlesCollection } from "@/lib/collection/circles"
@@ -93,23 +90,11 @@ const data = {
   ],
 }
 
-function CirclesNavSkeleton() {
-  return (
-    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Circles</SidebarGroupLabel>
-      <SidebarMenu>
-        {Array.from({ length: 2 }, (_, index) => (
-          <SidebarMenuItem key={index}>
-            <Skeleton className="h-8 w-full" />
-          </SidebarMenuItem>
-        ))}
-      </SidebarMenu>
-    </SidebarGroup>
-  )
-}
-
-function CirclesNavSection() {
-  const { data: circles = [], isLoading } = useLiveQuery((q) =>
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const user = useHomeUser()
+  const router = useRouter()
+  const queryClient = useQueryClient()
+  const { data: circles = [], isLoading: circlesLoading } = useLiveQuery((q) =>
     q.from({ circle: circlesCollection }),
   )
   const origin = typeof window !== "undefined" ? window.location.origin : ""
@@ -121,18 +106,6 @@ function CirclesNavSection() {
     color: circle.color,
     inviteLink: `${origin}/home/circles/join/${circle.joinCode}`,
   }))
-
-  if (isLoading) {
-    return <CirclesNavSkeleton />
-  }
-
-  return <NavCircles circles={circleNavItems} />
-}
-
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const user = useHomeUser()
-  const router = useRouter()
-  const queryClient = useQueryClient()
 
   const handleSignOut = async () => {
     await authClient.signOut()
@@ -161,7 +134,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <CirclesNavSection />
+        {circlesLoading ? (
+          <NavCirclesSkeleton />
+        ) : (
+          <NavCircles circles={circleNavItems} />
+        )}
       </SidebarContent>
       <SidebarFooter>
         <NavSecondary items={data.navSecondary} />

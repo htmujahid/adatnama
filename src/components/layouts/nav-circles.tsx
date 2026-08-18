@@ -28,21 +28,35 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { Skeleton } from "@/components/ui/skeleton"
 import { circlesCollection } from "@/lib/collection/circles"
 import { useOfflineExecutor } from "@/lib/db/offline"
 
-export function NavCircles({
-  circles,
-}: {
-  circles: {
-    id: string
-    organizationId: string
-    name: string
-    url: string
-    color: string
-    inviteLink: string
-  }[]
-}) {
+export type NavCircleItem = {
+  id: string
+  organizationId: string
+  name: string
+  url: string
+  color: string
+  inviteLink: string
+}
+
+export function NavCirclesSkeleton() {
+  return (
+    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+      <SidebarGroupLabel>Circles</SidebarGroupLabel>
+      <SidebarMenu>
+        {Array.from({ length: 2 }, (_, index) => (
+          <SidebarMenuItem key={index}>
+            <Skeleton className="h-8 w-full" />
+          </SidebarMenuItem>
+        ))}
+      </SidebarMenu>
+    </SidebarGroup>
+  )
+}
+
+export function NavCircles({ circles }: { circles: Array<NavCircleItem> }) {
   const { isMobile } = useSidebar()
   const executor = useOfflineExecutor()
   const [copiedId, setCopiedId] = useState<string | null>(null)

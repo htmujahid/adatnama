@@ -107,6 +107,24 @@ export function isScheduledOn(habit: ScheduledHabit, date: Date): boolean {
   return habit.days.includes(getDay(date))
 }
 
+type DoneCheckin = { habitId: string; date: string; status: string }
+
+export function doneDatesByHabitId(
+  checkins: ReadonlyArray<DoneCheckin>,
+): Map<string, Set<string>> {
+  const map = new Map<string, Set<string>>()
+  for (const checkin of checkins) {
+    if (checkin.status !== "done") continue
+    let dates = map.get(checkin.habitId)
+    if (!dates) {
+      dates = new Set()
+      map.set(checkin.habitId, dates)
+    }
+    dates.add(checkin.date)
+  }
+  return map
+}
+
 export function computeHabitStats(
   habit: ScheduledHabit,
   doneDates: ReadonlySet<string>,

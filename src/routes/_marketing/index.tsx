@@ -388,7 +388,7 @@ function ScheduleVisual() {
           <span
             key={index}
             className={cn(
-              "flex size-8 items-center justify-center rounded-lg text-xs font-medium",
+              "flex h-8 max-w-8 flex-1 items-center justify-center rounded-lg text-xs font-medium",
               day.active
                 ? "bg-primary/10 text-primary"
                 : "bg-muted text-muted-foreground/50",
@@ -702,7 +702,7 @@ function App() {
         />
 
         <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
-          <div className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-6 sm:p-8 lg:col-span-3">
+          <div className="flex min-w-0 flex-col gap-5 rounded-2xl border border-border bg-card p-6 sm:p-8 lg:col-span-3">
             <div className="flex flex-col gap-2">
               <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <UsersIcon className="size-5" />
@@ -740,7 +740,7 @@ function App() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-6 sm:p-8 lg:col-span-2">
+          <div className="flex min-w-0 flex-col gap-5 rounded-2xl border border-border bg-card p-6 sm:p-8 lg:col-span-2">
             <div className="flex flex-col gap-2">
               <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <CalendarDaysIcon className="size-5" />
@@ -758,7 +758,7 @@ function App() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-6 sm:p-8 lg:col-span-2">
+          <div className="flex min-w-0 flex-col gap-5 rounded-2xl border border-border bg-card p-6 sm:p-8 lg:col-span-2">
             <div className="flex flex-col gap-2">
               <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <TrophyIcon className="size-5" />
@@ -776,7 +776,7 @@ function App() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-6 sm:p-8 lg:col-span-2">
+          <div className="flex min-w-0 flex-col gap-5 rounded-2xl border border-border bg-card p-6 sm:p-8 lg:col-span-2">
             <div className="flex flex-col gap-2">
               <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <PencilLineIcon className="size-5" />
@@ -794,7 +794,7 @@ function App() {
             </div>
           </div>
 
-          <div className="flex flex-col justify-between gap-6 rounded-2xl border border-border bg-card p-6 sm:flex-row sm:items-center sm:p-8 lg:col-span-6">
+          <div className="flex min-w-0 flex-col justify-between gap-6 rounded-2xl border border-border bg-card p-6 sm:flex-row sm:items-center sm:p-8 lg:col-span-6">
             <div className="flex max-w-md flex-col gap-2">
               <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <WifiOffIcon className="size-5" />

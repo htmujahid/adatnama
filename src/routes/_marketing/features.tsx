@@ -89,7 +89,7 @@ function HabitFormVisual() {
                 <span
                   key={index}
                   className={cn(
-                    "flex size-8 items-center justify-center rounded-lg text-xs font-medium",
+                    "flex h-8 max-w-8 flex-1 items-center justify-center rounded-lg text-xs font-medium",
                     day.active
                       ? "bg-primary text-primary-foreground"
                       : "bg-muted text-muted-foreground/50",
@@ -916,7 +916,7 @@ function FeaturesPage() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-6 sm:p-8 lg:col-span-2">
+            <div className="flex min-w-0 flex-col gap-5 rounded-2xl border border-border bg-card p-6 sm:p-8 lg:col-span-2">
               <div className="flex flex-col gap-2">
                 <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <CalendarDaysIcon className="size-5" />
@@ -933,7 +933,7 @@ function FeaturesPage() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-6 sm:p-8 lg:col-span-3">
+            <div className="flex min-w-0 flex-col gap-5 rounded-2xl border border-border bg-card p-6 sm:p-8 lg:col-span-3">
               <div className="flex flex-col gap-2">
                 <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <ChartColumnIcon className="size-5" />
@@ -951,7 +951,7 @@ function FeaturesPage() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-6 sm:p-8 lg:col-span-3">
+            <div className="flex min-w-0 flex-col gap-5 rounded-2xl border border-border bg-card p-6 sm:p-8 lg:col-span-3">
               <div className="flex flex-col gap-2">
                 <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <TrophyIcon className="size-5" />

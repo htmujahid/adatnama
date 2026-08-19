@@ -41,15 +41,6 @@ type WallDay = {
   weekday: number
 }
 
-function safeTimezone(timezone: string): string {
-  try {
-    new Intl.DateTimeFormat("en-US", { timeZone: timezone })
-    return timezone
-  } catch {
-    return "UTC"
-  }
-}
-
 function wallClockAt(utcMs: number, timeZone: string): WallClock {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone,
@@ -148,7 +139,7 @@ function nextReminderInstant(
 async function loadReminderState(userId: string): Promise<ReminderState> {
   const preferences = await db
     .selectFrom("user_preferences")
-    .select(["timezone", "remindersEnabled"])
+    .select(["remindersEnabled"])
     .where("userId", "=", userId)
     .executeTakeFirst()
   const subscriptions = await db
@@ -177,7 +168,7 @@ async function loadReminderState(userId: string): Promise<ReminderState> {
     days: JSON.parse(row.days) as Array<number>,
   }))
 
-  const timezone = safeTimezone(preferences?.timezone ?? "UTC")
+  const timezone = "UTC"
   const todayKey = dayKeyOf(wallClockAt(Date.now(), timezone))
   const doneRows =
     habits.length > 0

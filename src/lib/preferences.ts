@@ -15,10 +15,7 @@ export type NotificationPreferences = {
   circleActivity: boolean
 }
 
-export const PREFERENCES_FALLBACK: Omit<
-  UserPreferencesTable,
-  "userId" | "timezone"
-> = {
+export const PREFERENCES_FALLBACK: Omit<UserPreferencesTable, "userId"> = {
   defaultSchedulePreset: HABIT_DAY_PRESETS[0].id,
   defaultFreezesTotal: 2,
   remindersEnabled: 1,
@@ -90,7 +87,6 @@ export function savePreferences({
     .mutate(() => {
       collection.insert({
         userId,
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         ...PREFERENCES_FALLBACK,
         ...changes,
       })

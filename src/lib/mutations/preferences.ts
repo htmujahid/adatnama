@@ -13,7 +13,6 @@ async function upsertFromMutation(mutation: {
   const modified = mutation.modified as UserPreferencesTable
   const result = await upsertPreferences({
     data: {
-      timezone: modified.timezone,
       defaultSchedulePreset: modified.defaultSchedulePreset,
       defaultFreezesTotal: modified.defaultFreezesTotal,
       remindersEnabled: modified.remindersEnabled,

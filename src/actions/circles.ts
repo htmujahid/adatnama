@@ -28,23 +28,23 @@ function generateJoinCode() {
   return crypto.randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase()
 }
 
-async function uniqueSlug(name: string, headers: Headers) {
+async function uniqueSlug(name: string): Promise<string> {
   const base = slugify(name)
-  let slug = base
-  let suffix = 2
-  for (;;) {
-    try {
-      await auth.api.checkOrganizationSlug({ body: { slug }, headers })
-      return slug
-    } catch (error) {
-      if (error instanceof APIError) {
-        slug = `${base}-${suffix}`
-        suffix += 1
-        continue
-      }
-      throw error
-    }
-  }
+  const result = await sql<{ slug: string }>`
+    SELECT CASE
+      WHEN NOT EXISTS (SELECT 1 FROM "organization" WHERE "slug" = ${base})
+        THEN ${base}
+      ELSE ${base} || '-' || (
+        COALESCE((
+          SELECT MAX(CAST(substr("slug", length(${base}) + 2) AS INTEGER))
+          FROM "organization"
+          WHERE "slug" LIKE ${base} || '-%'
+            AND substr("slug", length(${base}) + 2) GLOB '[0-9]*'
+        ), 1) + 1
+      )
+    END AS "slug"
+  `.execute(db)
+  return result.rows[0].slug
 }
 
 export const listCircles = createServerFn({ method: "GET" }).handler(
@@ -53,41 +53,45 @@ export const listCircles = createServerFn({ method: "GET" }).handler(
     const session = await auth.api.getSession({ headers })
     if (!session) return []
 
-    const rows = await db
+    const result = await db
       .selectFrom("organization")
       .innerJoin("member as selfMember", (join) =>
         join
           .onRef("selfMember.organizationId", "=", "organization.id")
           .on("selfMember.userId", "=", session.user.id),
       )
-      .select([
-        "organization.id",
-        "organization.name",
-        "organization.slug",
-        "organization.description",
-        "organization.color",
-        "organization.joinCode",
-      ])
       .select(
-        sql<string>`(
-          select coalesce(json_group_array(json_object(
-            'id', "member"."id",
-            'userId', "member"."userId",
-            'role', "member"."role",
-            'name', "user"."name"
-          )), '[]')
-          from "member"
-          inner join "user" on "user"."id" = "member"."userId"
-          where "member"."organizationId" = "organization"."id"
-          order by "member"."createdAt"
-        )`.as("members"),
+        sql<string>`coalesce(json_group_array(json_object(
+          'id', "organization"."id",
+          'name', "organization"."name",
+          'slug', "organization"."slug",
+          'description', "organization"."description",
+          'color', "organization"."color",
+          'joinCode', "organization"."joinCode",
+          'members', json((
+            select coalesce(json_group_array(json_object(
+              'id', "member"."id",
+              'userId', "member"."userId",
+              'role', "member"."role",
+              'name', "user"."name"
+            ) order by "member"."createdAt"), '[]')
+            from "member"
+            inner join "user" on "user"."id" = "member"."userId"
+            where "member"."organizationId" = "organization"."id"
+          ))
+        )), '[]')`.as("payload"),
       )
-      .execute()
+      .executeTakeFirst()
 
-    return rows.map((row) => ({
-      ...row,
-      members: JSON.parse(row.members) as Array<CircleMember>,
-    }))
+    return JSON.parse(result?.payload ?? "[]") as Array<{
+      id: string
+      name: string
+      slug: string
+      description: string
+      color: string
+      joinCode: string
+      members: Array<CircleMember>
+    }>
   },
 )
 
@@ -96,7 +100,7 @@ export const createCircle = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const headers = getRequestHeaders()
     try {
-      const slug = await uniqueSlug(data.name, headers)
+      const slug = await uniqueSlug(data.name)
       const circle = await auth.api.createOrganization({
         body: {
           name: data.name,

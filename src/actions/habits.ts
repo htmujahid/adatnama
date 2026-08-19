@@ -20,13 +20,13 @@ export type HabitInput = {
 export type HabitRow = HabitTable & { days: Array<number> }
 
 const daysJson = sql<string>`(
-  select coalesce(json_group_array("dayOfWeek"), '[]')
+  select coalesce(json_group_array("dayOfWeek" order by "dayOfWeek"), '[]')
   from "habit_schedule_day"
   where "habit_schedule_day"."habitId" = "habit"."id"
 )`
 
 function parseDays(days: string): Array<number> {
-  return (JSON.parse(days) as Array<number>).sort((a, b) => a - b)
+  return JSON.parse(days) as Array<number>
 }
 
 async function selectHabit(
@@ -50,33 +50,35 @@ async function replaceScheduleDays(habitId: string, days: Array<number>) {
     .where("habitId", "=", habitId)
     .execute()
   if (days.length === 0) return
-  await db
-    .insertInto("habit_schedule_day")
-    .values(
-      days.map((dayOfWeek) => ({
-        id: crypto.randomUUID(),
-        habitId,
-        dayOfWeek,
-      })),
-    )
-    .execute()
+  await sql`
+    insert into "habit_schedule_day" ("id", "habitId", "dayOfWeek")
+    select ${habitId} || '-day-' || "value", ${habitId}, "value"
+    from json_each(${JSON.stringify(days)})
+  `.execute(db)
 }
 
 export const listHabits = createServerFn({ method: "GET" }).handler(
-  async () => {
+  async (): Promise<Array<HabitRow>> => {
     const headers = getRequestHeaders()
     const session = await auth.api.getSession({ headers })
     if (!session) return []
 
-    const rows = await db
+    const result = await db
       .selectFrom("habit")
-      .selectAll("habit")
-      .select(daysJson.as("days"))
+      .select(
+        sql<string>`coalesce(json_group_array(json_object(
+          'id', "id", 'userId', "userId", 'categoryId', "categoryId",
+          'name', "name", 'description', "description", 'target', "target",
+          'reminderTime', "reminderTime", 'freezesTotal', "freezesTotal",
+          'startedAt', "startedAt", 'archivedAt', "archivedAt",
+          'archivedNote', "archivedNote", 'createdAt', "createdAt",
+          'updatedAt', "updatedAt", 'days', json(${daysJson})
+        ) order by "createdAt"), '[]')`.as("payload"),
+      )
       .where("userId", "=", session.user.id)
-      .orderBy("createdAt")
-      .execute()
+      .executeTakeFirst()
 
-    return rows.map((row) => ({ ...row, days: parseDays(row.days) }))
+    return JSON.parse(result?.payload ?? "[]") as Array<HabitRow>
   },
 )
 

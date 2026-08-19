@@ -897,7 +897,7 @@ function FeaturesPage() {
           </div>
 
           <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
-            <div className="flex flex-col gap-5 rounded-2xl border border-border bg-card p-6 sm:p-8 lg:col-span-4">
+            <div className="flex min-w-0 flex-col gap-5 rounded-2xl border border-border bg-card p-6 sm:p-8 lg:col-span-4">
               <div className="flex flex-col gap-2">
                 <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <ChartColumnIcon className="size-5" />

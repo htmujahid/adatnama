@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import { PageHeader } from "@/components/layouts/page-header"
 import { AchievementsSummaryCard } from "@/components/overview/achievements-summary-card"
 import { CirclesSummaryCard } from "@/components/overview/circles-summary-card"
 import { LevelCard } from "@/components/overview/level-card"
@@ -17,14 +18,10 @@ function HomePage() {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-      <div>
-        <h1 className="font-heading text-2xl font-semibold tracking-tight">
-          Welcome back, {firstName}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Here's how your habits are doing.
-        </p>
-      </div>
+      <PageHeader
+        title={<>Welcome back, {firstName}</>}
+        description="Here's how your habits are doing."
+      />
 
       <div className="grid gap-4 sm:grid-cols-3">
         <TodayStatCard />

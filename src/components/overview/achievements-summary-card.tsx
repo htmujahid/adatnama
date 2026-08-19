@@ -1,6 +1,5 @@
 import { eq, useLiveQuery } from "@tanstack/react-db"
 import { Link } from "@tanstack/react-router"
-import { LockIcon } from "lucide-react"
 
 import {
   Card,
@@ -20,7 +19,6 @@ import { checkinsCollection } from "@/lib/collection/checkins"
 import { circlesCollection } from "@/lib/collection/circles"
 import { habitsCollection } from "@/lib/collection/habits"
 import { computeHabitStats } from "@/lib/habits"
-import { cn } from "@/lib/utils"
 
 const EMPTY_DONE_DATES: ReadonlySet<string> = new Set()
 
@@ -87,16 +85,16 @@ export function AchievementsSummaryCard() {
         unlocks.some((unlock) => unlock.achievementId === definition.id),
     }),
   )
-  const unlockedCount = achievements.filter(
+  const unlockedAchievements = achievements.filter(
     (achievement) => achievement.unlocked,
-  ).length
+  )
 
   return (
     <Card className="lg:col-span-2">
       <CardHeader>
         <CardTitle>Achievements</CardTitle>
         <CardDescription>
-          {unlockedCount} of {achievements.length} unlocked
+          {unlockedAchievements.length} of {achievements.length} unlocked
         </CardDescription>
         <CardAction>
           <Link
@@ -114,31 +112,21 @@ export function AchievementsSummaryCard() {
               <Skeleton key={index} className="h-24 w-24 shrink-0 rounded-lg" />
             ))}
           </div>
+        ) : unlockedAchievements.length === 0 ? (
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            No achievements unlocked yet. Keep building your habits!
+          </p>
         ) : (
           <div className="min-w-0 overflow-x-auto">
             <div className="flex gap-3 pb-1">
-              {achievements.map((achievement) => (
+              {unlockedAchievements.map((achievement) => (
                 <div
                   key={achievement.id}
                   title={achievement.description}
-                  className={cn(
-                    "flex w-24 shrink-0 flex-col items-center gap-2 rounded-lg border border-border p-3 text-center",
-                    !achievement.unlocked && "opacity-50",
-                  )}
+                  className="flex w-24 shrink-0 flex-col items-center gap-2 rounded-lg border border-border p-3 text-center"
                 >
-                  <div
-                    className={cn(
-                      "flex size-10 items-center justify-center rounded-full",
-                      achievement.unlocked
-                        ? "bg-primary/10 text-primary"
-                        : "bg-muted text-muted-foreground",
-                    )}
-                  >
-                    {achievement.unlocked ? (
-                      <achievement.icon className="size-5" />
-                    ) : (
-                      <LockIcon className="size-4" />
-                    )}
+                  <div className="flex size-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <achievement.icon className="size-5" />
                   </div>
                   <span className="text-xs font-medium">
                     {achievement.name}

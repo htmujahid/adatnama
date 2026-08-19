@@ -79,11 +79,9 @@ export function lastNDays(count: number, today: Date): Array<Date> {
 }
 
 export function reminderMinutes(time: string): number {
-  const match = /^(\d{1,2}):(\d{2})\s?(AM|PM)$/i.exec(time)
+  const match = /^(\d{1,2}):(\d{2})$/.exec(time)
   if (!match) return Number.POSITIVE_INFINITY
-  const hours =
-    (Number(match[1]) % 12) + (match[3].toUpperCase() === "PM" ? 12 : 0)
-  return hours * 60 + Number(match[2])
+  return Number(match[1]) * 60 + Number(match[2])
 }
 
 export const WEEK_LENGTH = 7

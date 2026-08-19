@@ -19,6 +19,7 @@ function pwaServiceWorker(): Plugin {
         globDirectory: "dist/client",
         globPatterns: ["**/*.{js,css,woff2,png,svg,ico,webmanifest}"],
         swDest: "dist/client/sw.js",
+        importScripts: ["push-sw.js"],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,

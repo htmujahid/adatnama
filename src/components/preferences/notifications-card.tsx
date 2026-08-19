@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { useLiveQuery } from "@tanstack/react-db"
 
 import {
@@ -11,6 +12,7 @@ import {
   Field,
   FieldContent,
   FieldDescription,
+  FieldError,
   FieldLabel,
 } from "@/components/ui/field"
 import { Switch } from "@/components/ui/switch"
@@ -19,6 +21,7 @@ import { usePreferencesCollection } from "@/lib/collection/preferences"
 import { useOfflineExecutor } from "@/lib/db/offline"
 import { notificationsFrom, savePreferences } from "@/lib/preferences"
 import type { NotificationPreferences } from "@/lib/preferences"
+import { disablePushReminders, enablePushReminders } from "@/lib/push-client"
 
 const NOTIFICATION_OPTIONS = [
   {
@@ -46,6 +49,7 @@ export function NotificationsCard() {
   const user = useHomeUser()
   const preferencesCollection = usePreferencesCollection()
   const executor = useOfflineExecutor()
+  const [pushError, setPushError] = useState<string | null>(null)
   const { data: preferenceRows = [] } = useLiveQuery((q) =>
     q.from({ preferences: preferencesCollection }),
   )
@@ -68,6 +72,14 @@ export function NotificationsCard() {
       record,
       changes: { [field[key]]: value ? 1 : 0 },
     })
+    if (key === "reminders") {
+      setPushError(null)
+      if (value) {
+        void enablePushReminders().then(({ error }) => setPushError(error))
+      } else {
+        void disablePushReminders()
+      }
+    }
   }
 
   return (
@@ -96,6 +108,7 @@ export function NotificationsCard() {
             />
           </Field>
         ))}
+        <FieldError>{pushError}</FieldError>
       </CardContent>
     </Card>
   )

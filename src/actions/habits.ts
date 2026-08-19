@@ -5,6 +5,7 @@ import { sql } from "kysely"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import type { HabitTable } from "@/lib/db/schema"
+import { syncReminderSchedule } from "@/lib/reminders"
 
 export type HabitInput = {
   categoryId: string | null
@@ -121,6 +122,7 @@ export const createHabit = createServerFn({ method: "POST" })
     await replaceScheduleDays(data.id, data.days)
 
     const habit = await selectHabit(data.id, session.user.id)
+    await syncReminderSchedule(session.user.id)
     return { error: null, habit }
   })
 
@@ -154,6 +156,7 @@ export const updateHabit = createServerFn({ method: "POST" })
     await replaceScheduleDays(data.id, data.days)
 
     const habit = await selectHabit(data.id, session.user.id)
+    await syncReminderSchedule(session.user.id)
     return { error: null, habit }
   })
 
@@ -178,6 +181,7 @@ export const archiveHabit = createServerFn({ method: "POST" })
       return { error: { message: "Habit not found." }, habit: null }
     }
     const habit = await selectHabit(data.id, session.user.id)
+    await syncReminderSchedule(session.user.id)
     return { error: null, habit }
   })
 
@@ -205,6 +209,7 @@ export const restoreHabit = createServerFn({ method: "POST" })
       return { error: { message: "Habit not found." }, habit: null }
     }
     const habit = await selectHabit(data.id, session.user.id)
+    await syncReminderSchedule(session.user.id)
     return { error: null, habit }
   })
 
@@ -223,5 +228,6 @@ export const deleteHabit = createServerFn({ method: "POST" })
       .where("userId", "=", session.user.id)
       .execute()
 
+    await syncReminderSchedule(session.user.id)
     return { error: null }
   })

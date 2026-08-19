@@ -37,24 +37,6 @@ function scheduleTemplateFor(days: ReadonlyArray<number>): string {
   return schedulePresetFor(days) ?? "custom"
 }
 
-export function reminderTimeToInputValue(reminderTime: string | null) {
-  if (!reminderTime) return ""
-  const match = /^(\d{1,2}):(\d{2})\s?(AM|PM)$/i.exec(reminderTime)
-  if (!match) return ""
-  let hours = Number(match[1]) % 12
-  if (match[3].toUpperCase() === "PM") hours += 12
-  return `${String(hours).padStart(2, "0")}:${match[2]}`
-}
-
-function inputValueToReminderTime(value: string): string | null {
-  if (!value) return null
-  const [hoursText, minutes] = value.split(":")
-  const hours24 = Number(hoursText)
-  const period = hours24 >= 12 ? "PM" : "AM"
-  const hours12 = hours24 % 12 === 0 ? 12 : hours24 % 12
-  return `${hours12}:${minutes} ${period}`
-}
-
 export function HabitForm({
   defaultValues,
   submitLabel,
@@ -75,7 +57,7 @@ export function HabitForm({
         description: value.description.trim(),
         target: value.target.trim(),
         days: value.days,
-        reminderTime: inputValueToReminderTime(value.reminderTime),
+        reminderTime: value.reminderTime || null,
         freezesTotal: value.freezesTotal,
       })
     },

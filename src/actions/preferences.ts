@@ -3,6 +3,7 @@ import { getRequestHeaders } from "@tanstack/react-start/server"
 
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { syncReminderSchedule } from "@/lib/reminders"
 
 export type PreferencesInput = {
   timezone: string
@@ -60,5 +61,6 @@ export const upsertPreferences = createServerFn({ method: "POST" })
       )
       .execute()
 
+    await syncReminderSchedule(session.user.id)
     return { error: null, preferences }
   })

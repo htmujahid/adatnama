@@ -81,7 +81,7 @@ const DEFINITION_BY_ID: Record<
   },
   "early-riser": {
     name: "Early riser",
-    description: "Complete a habit with a reminder before 7 AM",
+    description: "Complete a habit with a reminder before 07:00",
     icon: SunriseIcon,
     compute: (context) => thresholdProgress(context.hasEarlyCheckin ? 1 : 0, 1),
   },

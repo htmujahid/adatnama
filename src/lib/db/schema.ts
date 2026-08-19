@@ -136,6 +136,15 @@ export interface UserPreferencesTable {
   circleActivityEnabled: number
 }
 
+export interface PushSubscriptionTable {
+  id: string
+  userId: string
+  endpoint: string
+  p256dh: string
+  auth: string
+  createdAt: string
+}
+
 export interface Database {
   user: UserTable
   session: SessionTable
@@ -150,4 +159,5 @@ export interface Database {
   habit_checkin: HabitCheckinTable
   user_achievement_unlock: UserAchievementUnlockTable
   user_preferences: UserPreferencesTable
+  push_subscription: PushSubscriptionTable
 }

@@ -3,7 +3,25 @@
   "name": "tanstack-start-app",
   "compatibility_date": "2025-09-02",
   "compatibility_flags": ["nodejs_compat"],
-  "main": "@tanstack/react-start/server-entry",
+  "main": "./src/worker.ts",
+  "vars": {
+    "VAPID_SUBJECT": "mailto:admin@adatnama.app",
+    "VAPID_PUBLIC_KEY": "BLLN50CkFeTwmlTp-tvfkhxAFh0wDIbddWtsKBurcaX_VazEJPPcd0gQTfaU5pftxhmRvCUsm0xOf2g7NP0Nr_g",
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "REMINDER_DO",
+        "class_name": "ReminderDurableObject",
+      },
+    ],
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["ReminderDurableObject"],
+    },
+  ],
   "d1_databases": [
     {
       "binding": "DB",

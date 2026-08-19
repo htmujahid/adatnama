@@ -1,10 +1,7 @@
 import { eq, useLiveQuery } from "@tanstack/react-db"
 import { Link, useNavigate } from "@tanstack/react-router"
 
-import {
-  HabitForm,
-  reminderTimeToInputValue,
-} from "@/components/habits/habit-form"
+import { HabitForm } from "@/components/habits/habit-form"
 import { HabitNotFound } from "@/components/habits/habit-not-found"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -50,7 +47,7 @@ export function EditHabitCard({ habitId }: { habitId: string }) {
             categoryId: habit.categoryId ?? "",
             days: habit.days,
             target: habit.target,
-            reminderTime: reminderTimeToInputValue(habit.reminderTime),
+            reminderTime: habit.reminderTime ?? "",
             freezesTotal: habit.freezesTotal,
           }}
           submitLabel="Save changes"

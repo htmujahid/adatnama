@@ -50,18 +50,6 @@ export function HabitsList() {
   const { data: categories = [] } = useLiveQuery({
     query: (q) => q.from({ category: categoriesCollection }),
   })
-
-  const usedCategories = Array.from(
-    new Set(
-      habits
-        .map((habit) => habit.categoryId)
-        .filter((id): id is string => id !== null),
-    ),
-  ).map((id) => ({
-    id,
-    label: categories.find((candidate) => candidate.id === id)?.name ?? id,
-  }))
-
   const filtered = habits.filter((habit) => {
     const matchesSearch = habit.name
       .toLowerCase()
@@ -92,9 +80,9 @@ export function HabitsList() {
           </SelectTrigger>
           <SelectContent align="end">
             <SelectItem value="all">All categories</SelectItem>
-            {usedCategories.map((cat) => (
+            {categories.map((cat) => (
               <SelectItem key={cat.id} value={cat.id}>
-                {cat.label}
+                {cat.name}
               </SelectItem>
             ))}
           </SelectContent>

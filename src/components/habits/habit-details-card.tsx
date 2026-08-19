@@ -16,7 +16,11 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { checkinsCollection } from "@/lib/collection/checkins"
 import { useHabitsCollection } from "@/lib/collection/habits"
-import { foldHabitCheckinRows, formatHabitDays } from "@/lib/habits"
+import {
+  foldHabitCheckinRows,
+  formatHabitDays,
+  utcTimeToLocal,
+} from "@/lib/habits"
 
 export function HabitDetailsCard({ habitId }: { habitId: string }) {
   const habitsCollection = useHabitsCollection()
@@ -74,7 +78,9 @@ export function HabitDetailsCard({ habitId }: { habitId: string }) {
               Reminder
             </dt>
             <dd className="mt-1 text-sm font-medium">
-              {habit.reminderTime ?? "No reminder"}
+              {habit.reminderTime
+                ? utcTimeToLocal(habit.reminderTime)
+                : "No reminder"}
             </dd>
           </div>
           <div>

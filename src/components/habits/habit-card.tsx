@@ -10,7 +10,7 @@ import {
 import { CategoryBadge } from "@/components/categories/category-badge"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { formatHabitDays } from "@/lib/habits"
+import { formatHabitDays, utcTimeToLocal } from "@/lib/habits"
 import type { HabitView } from "@/lib/habits"
 
 export function HabitCard({ habit }: { habit: HabitView }) {
@@ -46,7 +46,9 @@ export function HabitCard({ habit }: { habit: HabitView }) {
           </span>
           <span className="flex items-center gap-1.5">
             <BellIcon className="size-3.5" />
-            {habit.reminderTime ?? "No reminder"}
+            {habit.reminderTime
+              ? utcTimeToLocal(habit.reminderTime)
+              : "No reminder"}
           </span>
         </div>
 

@@ -11,7 +11,12 @@ import {
 
 import { ACHIEVEMENT_IDS } from "@/lib/achievement-ids"
 import type { AchievementId } from "@/lib/achievement-ids"
-import { isScheduledOn, lastNDays, reminderMinutes } from "@/lib/habits"
+import {
+  isScheduledOn,
+  lastNDays,
+  reminderMinutes,
+  utcTimeToLocal,
+} from "@/lib/habits"
 import type { HabitDayState } from "@/lib/habits"
 
 export type AchievementContext = {
@@ -157,7 +162,8 @@ export function buildAchievementContext({
     ).length
     if (
       habit.reminderTime !== null &&
-      reminderMinutes(habit.reminderTime) < EARLY_RISER_CUTOFF &&
+      reminderMinutes(utcTimeToLocal(habit.reminderTime)) <
+        EARLY_RISER_CUTOFF &&
       (doneCountByHabitId.get(habit.id) ?? 0) > 0
     ) {
       hasEarlyCheckin = true

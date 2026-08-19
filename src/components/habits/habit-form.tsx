@@ -21,7 +21,13 @@ import {
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
 import type { HabitInput } from "@/lib/collection/habits"
-import { HABIT_DAY_PRESETS, schedulePresetFor, WEEKDAYS } from "@/lib/habits"
+import {
+  HABIT_DAY_PRESETS,
+  localTimeToUtc,
+  schedulePresetFor,
+  utcTimeToLocal,
+  WEEKDAYS,
+} from "@/lib/habits"
 
 export type HabitFormValues = {
   name: string
@@ -49,7 +55,13 @@ export function HabitForm({
   onSubmit: (input: HabitInput) => void | Promise<void>
 }) {
   const form = useForm({
-    defaultValues,
+    defaultValues: {
+      ...defaultValues,
+      // Stored reminderTime is UTC; the <input type="time"> shows local.
+      reminderTime: defaultValues.reminderTime
+        ? utcTimeToLocal(defaultValues.reminderTime)
+        : "",
+    },
     onSubmit: async ({ value }) => {
       await onSubmit({
         name: value.name.trim(),
@@ -57,7 +69,9 @@ export function HabitForm({
         description: value.description.trim(),
         target: value.target.trim(),
         days: value.days,
-        reminderTime: value.reminderTime || null,
+        reminderTime: value.reminderTime
+          ? localTimeToUtc(value.reminderTime)
+          : null,
         freezesTotal: value.freezesTotal,
       })
     },

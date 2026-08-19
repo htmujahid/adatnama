@@ -84,6 +84,40 @@ export function reminderMinutes(time: string): number {
   return Number(match[1]) * 60 + Number(match[2])
 }
 
+function pad2(value: number): string {
+  return String(value).padStart(2, "0")
+}
+
+export function localTimeToUtc(time: string): string {
+  const minutes = reminderMinutes(time)
+  if (!Number.isFinite(minutes)) return time
+  const now = new Date()
+  const local = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    Math.floor(minutes / 60),
+    minutes % 60,
+  )
+  return `${pad2(local.getUTCHours())}:${pad2(local.getUTCMinutes())}`
+}
+
+export function utcTimeToLocal(time: string): string {
+  const minutes = reminderMinutes(time)
+  if (!Number.isFinite(minutes)) return time
+  const now = new Date()
+  const utc = new Date(
+    Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate(),
+      Math.floor(minutes / 60),
+      minutes % 60,
+    ),
+  )
+  return `${pad2(utc.getHours())}:${pad2(utc.getMinutes())}`
+}
+
 export const WEEK_LENGTH = 7
 export const HISTORY_LENGTH = 28
 

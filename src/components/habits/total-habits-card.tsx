@@ -5,11 +5,12 @@ import { StatCard } from "@/components/overview/stat-card"
 import { habitsCollection } from "@/lib/collection/habits"
 
 export function TotalHabitsCard() {
-  const { data: habits = [], isLoading } = useLiveQuery((q) =>
-    q
-      .from({ habit: habitsCollection })
-      .where(({ habit }) => isNull(habit.archivedAt)),
-  )
+  const { data: habits = [], isLoading } = useLiveQuery({
+    query: (q) =>
+      q
+        .from({ habit: habitsCollection })
+        .where(({ habit }) => isNull(habit.archivedAt)),
+  })
 
   return (
     <StatCard

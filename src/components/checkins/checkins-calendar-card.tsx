@@ -21,12 +21,12 @@ import { cn } from "@/lib/utils"
 const CALENDAR_WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
 export function CheckinsCalendarCard() {
-  const { data: habits = [] } = useLiveQuery((q) =>
-    q.from({ habit: habitsCollection }),
-  )
-  const { data: checkins = [] } = useLiveQuery((q) =>
-    q.from({ checkin: checkinsCollection }),
-  )
+  const { data: habits = [] } = useLiveQuery({
+    query: (q) => q.from({ habit: habitsCollection }),
+  })
+  const { data: checkins = [] } = useLiveQuery({
+    query: (q) => q.from({ checkin: checkinsCollection }),
+  })
   const activeHabits = habits.filter((habit) => habit.archivedAt === null)
 
   const today = new Date()

@@ -6,15 +6,15 @@ import { achievementUnlocksCollection } from "@/lib/collection/achievements"
 import { checkinsCollection } from "@/lib/collection/checkins"
 
 export function LevelCard() {
-  const { data: doneCheckins = [], isLoading: checkinsLoading } = useLiveQuery(
-    (q) =>
+  const { data: doneCheckins = [], isLoading: checkinsLoading } = useLiveQuery({
+    query: (q) =>
       q
         .from({ checkin: checkinsCollection })
         .where(({ checkin }) => eq(checkin.status, "done")),
-  )
-  const { data: unlocks = [], isLoading: unlocksLoading } = useLiveQuery((q) =>
-    q.from({ unlock: achievementUnlocksCollection }),
-  )
+  })
+  const { data: unlocks = [], isLoading: unlocksLoading } = useLiveQuery({
+    query: (q) => q.from({ unlock: achievementUnlocksCollection }),
+  })
   const isLoading = checkinsLoading || unlocksLoading
 
   const xp = doneCheckins.length * 10 + unlocks.length * 50

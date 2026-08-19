@@ -9,13 +9,12 @@ import { useCirclesCollection } from "@/lib/collection/circles"
 
 export function EditCircleHeader({ circleId }: { circleId: string }) {
   const circlesCollection = useCirclesCollection()
-  const { data: matches = [], isLoading } = useLiveQuery(
-    (q) =>
+  const { data: matches = [], isLoading } = useLiveQuery({
+    query: (q) =>
       q
         .from({ circle: circlesCollection })
         .where(({ circle }) => eq(circle.slug, circleId)),
-    [circleId],
-  )
+  })
   const circle = matches.at(0)
 
   if (isLoading) {

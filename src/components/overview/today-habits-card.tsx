@@ -131,33 +131,32 @@ export function TodayHabitsCard() {
   const today = new Date()
   const todayKey = dateKey(today)
 
-  const { data: activeHabits = [], isLoading: habitsLoading } = useLiveQuery(
-    (q) =>
+  const { data: activeHabits = [], isLoading: habitsLoading } = useLiveQuery({
+    query: (q) =>
       q
         .from({ habit: habitsCollection })
         .where(({ habit }) => isNull(habit.archivedAt)),
-  )
-  const { data: todayHabitRecords = [] } = useLiveQuery(
-    (q) =>
+  })
+  const { data: todayHabitRecords = [] } = useLiveQuery({
+    query: (q) =>
       q
         .from({ habit: habitsCollection })
         .where(({ habit }) => isNull(habit.archivedAt))
         .fn.where(({ habit }) => isScheduledOn(habit, today)),
-    [todayKey],
-  )
-  const { data: doneCheckins = [], isLoading: checkinsLoading } = useLiveQuery(
-    (q) =>
+    queryKey: [todayKey],
+  })
+  const { data: doneCheckins = [], isLoading: checkinsLoading } = useLiveQuery({
+    query: (q) =>
       q
         .from({ checkin: checkinsCollection })
         .where(({ checkin }) => eq(checkin.status, "done")),
-  )
-  const { data: todayCheckins = [] } = useLiveQuery(
-    (q) =>
+  })
+  const { data: todayCheckins = [] } = useLiveQuery({
+    query: (q) =>
       q
         .from({ checkin: checkinsCollection })
         .where(({ checkin }) => eq(checkin.date, todayKey)),
-    [todayKey],
-  )
+  })
   const isLoading = habitsLoading || checkinsLoading
 
   const doneDates = doneDatesByHabitId(doneCheckins)

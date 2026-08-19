@@ -20,19 +20,20 @@ import { foldHabitCheckinRows, formatHabitDays } from "@/lib/habits"
 
 export function HabitDetailsCard({ habitId }: { habitId: string }) {
   const habitsCollection = useHabitsCollection()
-  const { data: rows = [], isLoading } = useLiveQuery((q) =>
-    q
-      .from({ habit: habitsCollection })
-      .leftJoin(
-        {
-          checkin: q
-            .from({ checkin: checkinsCollection })
-            .where(({ checkin }) => eq(checkin.status, "done")),
-        },
-        ({ habit, checkin }) => eq(checkin.habitId, habit.id),
-      )
-      .where(({ habit }) => eq(habit.id, habitId)),
-  )
+  const { data: rows = [], isLoading } = useLiveQuery({
+    query: (q) =>
+      q
+        .from({ habit: habitsCollection })
+        .leftJoin(
+          {
+            checkin: q
+              .from({ checkin: checkinsCollection })
+              .where(({ checkin }) => eq(checkin.status, "done")),
+          },
+          ({ habit, checkin }) => eq(checkin.habitId, habit.id),
+        )
+        .where(({ habit }) => eq(habit.id, habitId)),
+  })
   const habit = foldHabitCheckinRows(rows, new Date()).at(0)
 
   if (isLoading && !habit) {

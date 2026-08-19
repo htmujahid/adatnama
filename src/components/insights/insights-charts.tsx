@@ -143,26 +143,27 @@ function breakdownDatum(datum: unknown) {
 }
 
 export function InsightsCharts() {
-  const { data: habitRows = [], isLoading: habitsLoading } = useLiveQuery((q) =>
-    q
-      .from({ habit: habitsCollection })
-      .leftJoin(
-        {
-          checkin: q
-            .from({ checkin: checkinsCollection })
-            .where(({ checkin }) => eq(checkin.status, "done")),
-        },
-        ({ habit, checkin }) => eq(checkin.habitId, habit.id),
-      )
-      .where(({ habit }) => isNull(habit.archivedAt)),
-  )
-  const { data: checkins = [], isLoading: checkinsLoading } = useLiveQuery(
-    (q) => q.from({ checkin: checkinsCollection }),
-  )
+  const { data: habitRows = [], isLoading: habitsLoading } = useLiveQuery({
+    query: (q) =>
+      q
+        .from({ habit: habitsCollection })
+        .leftJoin(
+          {
+            checkin: q
+              .from({ checkin: checkinsCollection })
+              .where(({ checkin }) => eq(checkin.status, "done")),
+          },
+          ({ habit, checkin }) => eq(checkin.habitId, habit.id),
+        )
+        .where(({ habit }) => isNull(habit.archivedAt)),
+  })
+  const { data: checkins = [], isLoading: checkinsLoading } = useLiveQuery({
+    query: (q) => q.from({ checkin: checkinsCollection }),
+  })
   const isLoading = habitsLoading || checkinsLoading
-  const { data: categories = [] } = useLiveQuery((q) =>
-    q.from({ category: categoriesCollection }),
-  )
+  const { data: categories = [] } = useLiveQuery({
+    query: (q) => q.from({ category: categoriesCollection }),
+  })
   const todayKey = dateKey(new Date())
   const habits = useMemo(
     () => foldHabitCheckinRows(habitRows, parseISO(todayKey)),

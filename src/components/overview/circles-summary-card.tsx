@@ -29,9 +29,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { circlesCollection } from "@/lib/collection/circles"
 
 export function CirclesSummaryCard() {
-  const { data: circles = [], isLoading } = useLiveQuery((q) =>
-    q.from({ circle: circlesCollection }),
-  )
+  const { data: circles = [], isLoading } = useLiveQuery({
+    query: (q) => q.from({ circle: circlesCollection }),
+  })
 
   return (
     <Card>

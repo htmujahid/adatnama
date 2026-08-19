@@ -32,26 +32,28 @@ export function HabitWeekCard({ habitId }: { habitId: string }) {
   const habitsCollection = useHabitsCollection()
   const collection = useCheckinsCollection()
   const todayKey = dateKey(new Date())
-  const { data: rows = [], isLoading } = useLiveQuery((q) =>
-    q
-      .from({ habit: habitsCollection })
-      .leftJoin(
-        {
-          checkin: q
-            .from({ checkin: checkinsCollection })
-            .where(({ checkin }) => eq(checkin.status, "done")),
-        },
-        ({ habit, checkin }) => eq(checkin.habitId, habit.id),
-      )
-      .where(({ habit }) => eq(habit.id, habitId)),
-  )
-  const { data: todayCheckins = [] } = useLiveQuery((q) =>
-    q
-      .from({ checkin: checkinsCollection })
-      .where(({ checkin }) =>
-        and(eq(checkin.habitId, habitId), eq(checkin.date, todayKey)),
-      ),
-  )
+  const { data: rows = [], isLoading } = useLiveQuery({
+    query: (q) =>
+      q
+        .from({ habit: habitsCollection })
+        .leftJoin(
+          {
+            checkin: q
+              .from({ checkin: checkinsCollection })
+              .where(({ checkin }) => eq(checkin.status, "done")),
+          },
+          ({ habit, checkin }) => eq(checkin.habitId, habit.id),
+        )
+        .where(({ habit }) => eq(habit.id, habitId)),
+  })
+  const { data: todayCheckins = [] } = useLiveQuery({
+    query: (q) =>
+      q
+        .from({ checkin: checkinsCollection })
+        .where(({ checkin }) =>
+          and(eq(checkin.habitId, habitId), eq(checkin.date, todayKey)),
+        ),
+  })
   const habit = foldHabitCheckinRows(rows, new Date()).at(0)
   const todayCheckin = todayCheckins.at(0)
 

@@ -22,9 +22,9 @@ import { useCirclesCollection } from "@/lib/collection/circles"
 
 export function CirclesList() {
   const circlesCollection = useCirclesCollection()
-  const { data: circles = [], isLoading } = useLiveQuery((q) =>
-    q.from({ circle: circlesCollection }),
-  )
+  const { data: circles = [], isLoading } = useLiveQuery({
+    query: (q) => q.from({ circle: circlesCollection }),
+  })
 
   if (isLoading) {
     return (

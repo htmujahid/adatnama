@@ -13,12 +13,13 @@ export function EditHabitCard({ habitId }: { habitId: string }) {
   const navigate = useNavigate()
   const habitsCollection = useHabitsCollection()
   const executor = useOfflineExecutor()
-  const { data: habit, isLoading } = useLiveQuery((q) =>
-    q
-      .from({ habits: habitsCollection })
-      .where(({ habits }) => eq(habits.id, habitId))
-      .findOne(),
-  )
+  const { data: habit, isLoading } = useLiveQuery({
+    query: (q) =>
+      q
+        .from({ habits: habitsCollection })
+        .where(({ habits }) => eq(habits.id, habitId))
+        .findOne(),
+  })
 
   if (isLoading && !habit) {
     return (

@@ -16,12 +16,12 @@ import { habitsCollection } from "@/lib/collection/habits"
 import { dateKey, isScheduledOn } from "@/lib/habits"
 
 export function CheckinsStatsCards() {
-  const { data: habits = [], isLoading: habitsLoading } = useLiveQuery((q) =>
-    q.from({ habit: habitsCollection }),
-  )
-  const { data: checkins = [], isLoading: checkinsLoading } = useLiveQuery(
-    (q) => q.from({ checkin: checkinsCollection }),
-  )
+  const { data: habits = [], isLoading: habitsLoading } = useLiveQuery({
+    query: (q) => q.from({ habit: habitsCollection }),
+  })
+  const { data: checkins = [], isLoading: checkinsLoading } = useLiveQuery({
+    query: (q) => q.from({ checkin: checkinsCollection }),
+  })
   const isLoading = habitsLoading || checkinsLoading
   const activeHabits = habits.filter((habit) => habit.archivedAt === null)
 

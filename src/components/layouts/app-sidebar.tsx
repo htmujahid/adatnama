@@ -97,9 +97,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useHomeUser()
   const router = useRouter()
   const queryClient = useQueryClient()
-  const { data: circles = [], isLoading: circlesLoading } = useLiveQuery((q) =>
-    q.from({ circle: circlesCollection }),
-  )
+  const { data: circles = [], isLoading: circlesLoading } = useLiveQuery({
+    query: (q) => q.from({ circle: circlesCollection }),
+  })
   const origin = typeof window !== "undefined" ? window.location.origin : ""
   const circleNavItems = circles.map((circle) => ({
     id: circle.slug,

@@ -22,12 +22,12 @@ import { dateKey, lastNDays, WEEK_LENGTH } from "@/lib/habits"
 import { cn } from "@/lib/utils"
 
 export function WeeklyActivityCard() {
-  const { data: habits = [] } = useLiveQuery((q) =>
-    q.from({ habit: habitsCollection }),
-  )
-  const { data: checkins = [] } = useLiveQuery((q) =>
-    q.from({ checkin: checkinsCollection }),
-  )
+  const { data: habits = [] } = useLiveQuery({
+    query: (q) => q.from({ habit: habitsCollection }),
+  })
+  const { data: checkins = [] } = useLiveQuery({
+    query: (q) => q.from({ checkin: checkinsCollection }),
+  })
 
   const activeHabits = habits.filter((habit) => habit.archivedAt === null)
   const doneSlots = new Set(

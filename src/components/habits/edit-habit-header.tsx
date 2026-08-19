@@ -9,12 +9,13 @@ import { useHabitsCollection } from "@/lib/collection/habits"
 
 export function EditHabitHeader({ habitId }: { habitId: string }) {
   const habitsCollection = useHabitsCollection()
-  const { data: habit, isLoading } = useLiveQuery((q) =>
-    q
-      .from({ habits: habitsCollection })
-      .where(({ habits }) => eq(habits.id, habitId))
-      .findOne(),
-  )
+  const { data: habit, isLoading } = useLiveQuery({
+    query: (q) =>
+      q
+        .from({ habits: habitsCollection })
+        .where(({ habits }) => eq(habits.id, habitId))
+        .findOne(),
+  })
 
   if (isLoading && !habit) {
     return <Skeleton className="h-8 w-56" />

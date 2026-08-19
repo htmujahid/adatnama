@@ -32,23 +32,24 @@ export function HabitsList() {
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState<string | null>(null)
   const today = new Date()
-  const { data: rows = [], isLoading } = useLiveQuery((q) =>
-    q
-      .from({ habit: habitsCollection })
-      .leftJoin(
-        {
-          checkin: q
-            .from({ checkin: checkinsCollection })
-            .where(({ checkin }) => eq(checkin.status, "done")),
-        },
-        ({ habit, checkin }) => eq(checkin.habitId, habit.id),
-      )
-      .where(({ habit }) => isNull(habit.archivedAt)),
-  )
+  const { data: rows = [], isLoading } = useLiveQuery({
+    query: (q) =>
+      q
+        .from({ habit: habitsCollection })
+        .leftJoin(
+          {
+            checkin: q
+              .from({ checkin: checkinsCollection })
+              .where(({ checkin }) => eq(checkin.status, "done")),
+          },
+          ({ habit, checkin }) => eq(checkin.habitId, habit.id),
+        )
+        .where(({ habit }) => isNull(habit.archivedAt)),
+  })
   const habits = foldHabitCheckinRows(rows, today)
-  const { data: categories = [] } = useLiveQuery((q) =>
-    q.from({ category: categoriesCollection }),
-  )
+  const { data: categories = [] } = useLiveQuery({
+    query: (q) => q.from({ category: categoriesCollection }),
+  })
 
   const usedCategories = Array.from(
     new Set(

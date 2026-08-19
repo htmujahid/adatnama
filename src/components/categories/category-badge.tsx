@@ -12,9 +12,9 @@ export function CategoryBadge({
   categoryId: string
   className?: string
 }) {
-  const { data: categories = [], isLoading } = useLiveQuery((q) =>
-    q.from({ category: categoriesCollection }),
-  )
+  const { data: categories = [], isLoading } = useLiveQuery({
+    query: (q) => q.from({ category: categoriesCollection }),
+  })
   const category = categories.find((c) => c.id === categoryId)
 
   if (isLoading) {

@@ -34,16 +34,17 @@ export function ArchivedHabitsList() {
   const habitsCollection = useHabitsCollection()
   const executor = useOfflineExecutor()
   const today = new Date()
-  const { data: rows = [], isLoading } = useLiveQuery((q) =>
-    q.from({ habit: habitsCollection }).leftJoin(
-      {
-        checkin: q
-          .from({ checkin: checkinsCollection })
-          .where(({ checkin }) => eq(checkin.status, "done")),
-      },
-      ({ habit, checkin }) => eq(checkin.habitId, habit.id),
-    ),
-  )
+  const { data: rows = [], isLoading } = useLiveQuery({
+    query: (q) =>
+      q.from({ habit: habitsCollection }).leftJoin(
+        {
+          checkin: q
+            .from({ checkin: checkinsCollection })
+            .where(({ checkin }) => eq(checkin.status, "done")),
+        },
+        ({ habit, checkin }) => eq(checkin.habitId, habit.id),
+      ),
+  })
   const habits = foldHabitCheckinRows(rows, today)
   const archived = habits.filter((habit) => habit.archivedAt !== null)
   const doneCountByHabitId = new Map<string, number>()

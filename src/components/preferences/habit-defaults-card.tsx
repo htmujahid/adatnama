@@ -28,9 +28,9 @@ export function HabitDefaultsCard() {
   const user = useHomeUser()
   const preferencesCollection = usePreferencesCollection()
   const executor = useOfflineExecutor()
-  const { data: preferenceRows = [], isLoading } = useLiveQuery((q) =>
-    q.from({ preferences: preferencesCollection }),
-  )
+  const { data: preferenceRows = [], isLoading } = useLiveQuery({
+    query: (q) => q.from({ preferences: preferencesCollection }),
+  })
   const record = preferenceRows.find((row) => row.userId === user.id)
   const habitDefaults = habitDefaultsFrom(record)
 

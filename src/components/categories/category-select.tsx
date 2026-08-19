@@ -34,9 +34,9 @@ export function CategorySelect({
   const user = useHomeUser()
   const categoriesCollection = useCategoriesCollection()
   const executor = useOfflineExecutor()
-  const { data: categories = [], isLoading } = useLiveQuery((q) =>
-    q.from({ category: categoriesCollection }),
-  )
+  const { data: categories = [], isLoading } = useLiveQuery({
+    query: (q) => q.from({ category: categoriesCollection }),
+  })
   const [dialogOpen, setDialogOpen] = useState(false)
 
   function handleCreate(input: CategoryInput) {

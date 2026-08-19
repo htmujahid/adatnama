@@ -33,13 +33,14 @@ export function HabitNoteButton({
   const executor = useOfflineExecutor()
   const collection = useCheckinsCollection()
   const todayKey = dateKey(new Date())
-  const { data: todayCheckins = [] } = useLiveQuery((q) =>
-    q
-      .from({ checkin: checkinsCollection })
-      .where(({ checkin }) =>
-        and(eq(checkin.habitId, habitId), eq(checkin.date, todayKey)),
-      ),
-  )
+  const { data: todayCheckins = [] } = useLiveQuery({
+    query: (q) =>
+      q
+        .from({ checkin: checkinsCollection })
+        .where(({ checkin }) =>
+          and(eq(checkin.habitId, habitId), eq(checkin.date, todayKey)),
+        ),
+  })
   const existing = todayCheckins.at(0)
   const note = existing?.note ?? ""
   const [draft, setDraft] = useState(note)

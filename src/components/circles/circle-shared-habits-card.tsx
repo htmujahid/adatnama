@@ -56,17 +56,16 @@ export function CircleSharedHabitsCard({ circleId }: { circleId: string }) {
   const habitsCollection = useHabitsCollection()
   const [pendingId, setPendingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const { data: matches = [] } = useLiveQuery(
-    (q) =>
+  const { data: matches = [] } = useLiveQuery({
+    query: (q) =>
       q
         .from({ circle: circlesCollection })
         .where(({ circle }) => eq(circle.slug, circleId)),
-    [circleId],
-  )
+  })
   const circle = matches.at(0)
-  const { data: ownHabits = [] } = useLiveQuery((q) =>
-    q.from({ habit: habitsCollection }),
-  )
+  const { data: ownHabits = [] } = useLiveQuery({
+    query: (q) => q.from({ habit: habitsCollection }),
+  })
   const { data: members, isLoading } = useQuery({
     ...circleHabitsQueryOptions(circle?.id ?? ""),
     enabled: circle !== undefined,

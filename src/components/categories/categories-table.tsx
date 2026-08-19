@@ -34,9 +34,9 @@ import { useOfflineExecutor } from "@/lib/db/offline"
 export function CategoriesTable() {
   const categoriesCollection = useCategoriesCollection()
   const executor = useOfflineExecutor()
-  const { data: categories = [], isLoading } = useLiveQuery((q) =>
-    q.from({ category: categoriesCollection }),
-  )
+  const { data: categories = [], isLoading } = useLiveQuery({
+    query: (q) => q.from({ category: categoriesCollection }),
+  })
   const [editing, setEditing] = useState<CategoryRecord | undefined>(undefined)
   const [deleting, setDeleting] = useState<CategoryRecord | undefined>(
     undefined,

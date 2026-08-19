@@ -15,19 +15,20 @@ import { habitsCollection } from "@/lib/collection/habits"
 import { foldHabitCheckinRows } from "@/lib/habits"
 
 export function StreaksStatsCards() {
-  const { data: rows = [], isLoading } = useLiveQuery((q) =>
-    q
-      .from({ habit: habitsCollection })
-      .leftJoin(
-        {
-          checkin: q
-            .from({ checkin: checkinsCollection })
-            .where(({ checkin }) => eq(checkin.status, "done")),
-        },
-        ({ habit, checkin }) => eq(checkin.habitId, habit.id),
-      )
-      .where(({ habit }) => isNull(habit.archivedAt)),
-  )
+  const { data: rows = [], isLoading } = useLiveQuery({
+    query: (q) =>
+      q
+        .from({ habit: habitsCollection })
+        .leftJoin(
+          {
+            checkin: q
+              .from({ checkin: checkinsCollection })
+              .where(({ checkin }) => eq(checkin.status, "done")),
+          },
+          ({ habit, checkin }) => eq(checkin.habitId, habit.id),
+        )
+        .where(({ habit }) => isNull(habit.archivedAt)),
+  })
   const habits = foldHabitCheckinRows(rows, new Date())
 
   const streaks = [...habits].sort(

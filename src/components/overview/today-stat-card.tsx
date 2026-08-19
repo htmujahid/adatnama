@@ -10,25 +10,24 @@ export function TodayStatCard() {
   const today = new Date()
   const todayKey = dateKey(today)
 
-  const { data: todayHabits = [], isLoading: habitsLoading } = useLiveQuery(
-    (q) =>
+  const { data: todayHabits = [], isLoading: habitsLoading } = useLiveQuery({
+    query: (q) =>
       q
         .from({ habit: habitsCollection })
         .where(({ habit }) => isNull(habit.archivedAt))
         .fn.where(({ habit }) => isScheduledOn(habit, today)),
-    [todayKey],
-  )
+    queryKey: [todayKey],
+  })
   const { data: doneTodayCheckins = [], isLoading: checkinsLoading } =
-    useLiveQuery(
-      (q) =>
+    useLiveQuery({
+      query: (q) =>
         q
           .from({ checkin: checkinsCollection })
           .where(({ checkin }) =>
             and(eq(checkin.status, "done"), eq(checkin.date, todayKey)),
           )
           .select(({ checkin }) => ({ habitId: checkin.habitId })),
-      [todayKey],
-    )
+    })
   const isLoading = habitsLoading || checkinsLoading
 
   const doneTodayHabitIds = new Set(

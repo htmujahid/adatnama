@@ -34,22 +34,23 @@ export function AchievementsSummaryCard() {
   const today = new Date()
 
   const { data: habitCheckinRows = [], isLoading: habitsLoading } =
-    useLiveQuery((q) =>
-      q.from({ habit: habitsCollection }).leftJoin(
-        {
-          checkin: q
-            .from({ checkin: checkinsCollection })
-            .where(({ checkin }) => eq(checkin.status, "done")),
-        },
-        ({ habit, checkin }) => eq(checkin.habitId, habit.id),
-      ),
-    )
-  const { data: circles = [], isLoading: circlesLoading } = useLiveQuery((q) =>
-    q.from({ circle: circlesCollection }),
-  )
-  const { data: unlocks = [], isLoading: unlocksLoading } = useLiveQuery((q) =>
-    q.from({ unlock: achievementUnlocksCollection }),
-  )
+    useLiveQuery({
+      query: (q) =>
+        q.from({ habit: habitsCollection }).leftJoin(
+          {
+            checkin: q
+              .from({ checkin: checkinsCollection })
+              .where(({ checkin }) => eq(checkin.status, "done")),
+          },
+          ({ habit, checkin }) => eq(checkin.habitId, habit.id),
+        ),
+    })
+  const { data: circles = [], isLoading: circlesLoading } = useLiveQuery({
+    query: (q) => q.from({ circle: circlesCollection }),
+  })
+  const { data: unlocks = [], isLoading: unlocksLoading } = useLiveQuery({
+    query: (q) => q.from({ unlock: achievementUnlocksCollection }),
+  })
   const isLoading = habitsLoading || circlesLoading || unlocksLoading
 
   const habitById = new Map<

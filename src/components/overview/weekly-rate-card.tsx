@@ -8,16 +8,15 @@ import { dateKey, lastNDays, WEEK_LENGTH } from "@/lib/habits"
 
 export function WeeklyRateCard() {
   const weekDateKeys = lastNDays(WEEK_LENGTH, new Date()).map(dateKey)
-  const weekDepKey = weekDateKeys.join(",")
 
-  const { data: activeHabits = [], isLoading: habitsLoading } = useLiveQuery(
-    (q) =>
+  const { data: activeHabits = [], isLoading: habitsLoading } = useLiveQuery({
+    query: (q) =>
       q
         .from({ habit: habitsCollection })
         .where(({ habit }) => isNull(habit.archivedAt)),
-  )
-  const { data: doneCheckins = [], isLoading: checkinsLoading } = useLiveQuery(
-    (q) =>
+  })
+  const { data: doneCheckins = [], isLoading: checkinsLoading } = useLiveQuery({
+    query: (q) =>
       q
         .from({ checkin: checkinsCollection })
         .where(({ checkin }) =>
@@ -27,8 +26,7 @@ export function WeeklyRateCard() {
           habitId: checkin.habitId,
           date: checkin.date,
         })),
-    [weekDepKey],
-  )
+  })
   const isLoading = habitsLoading || checkinsLoading
 
   const doneSlots = new Set(

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import { CategoriesGrid } from "@/components/categories/categories-grid"
+import { CategoriesTable } from "@/components/categories/categories-table"
 import { NewCategoryButton } from "@/components/categories/new-category-button"
 
 export const Route = createFileRoute("/home/categories")({
@@ -23,7 +23,7 @@ function CategoriesPage() {
         <NewCategoryButton />
       </div>
 
-      <CategoriesGrid />
+      <CategoriesTable />
     </div>
   )
 }

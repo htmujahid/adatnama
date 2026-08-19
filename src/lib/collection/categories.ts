@@ -8,7 +8,7 @@ import { listCategories } from "@/actions/categories"
 import { persistence } from "@/lib/db/browser"
 import type { CategoryTable } from "@/lib/db/schema"
 
-export type CategoryRecord = CategoryTable
+export type CategoryRecord = CategoryTable & { habitsCount: number }
 
 export type CategoryInput = {
   name: string
@@ -25,7 +25,7 @@ export const categoriesCollection = collectionOptions("categories", (client) =>
       queryFn: () => listCategories(),
     }),
     persistence,
-    schemaVersion: 1,
+    schemaVersion: 2,
   }),
 )
 

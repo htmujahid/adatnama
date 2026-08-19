@@ -51,6 +51,7 @@ export function CategorySelect({
           userId: user.id,
           name: input.name,
           color: input.color,
+          habitsCount: 0,
           createdAt: now,
           updatedAt: now,
         })

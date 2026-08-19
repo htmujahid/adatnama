@@ -10,17 +10,26 @@ export type CategoryInput = {
   color: string
 }
 
+export type CategoryWithHabitsCount = CategoryTable & { habitsCount: number }
+
+function selectCategoriesWithHabitsCount(userId: string) {
+  return db
+    .selectFrom("category")
+    .leftJoin("habit", "habit.categoryId", "category.id")
+    .selectAll("category")
+    .select((eb) => eb.fn.count<number>("habit.id").as("habitsCount"))
+    .where("category.userId", "=", userId)
+    .groupBy("category.id")
+}
+
 export const listCategories = createServerFn({ method: "GET" }).handler(
-  async () => {
+  async (): Promise<Array<CategoryWithHabitsCount>> => {
     const headers = getRequestHeaders()
     const session = await auth.api.getSession({ headers })
     if (!session) return []
 
-    return db
-      .selectFrom("category")
-      .selectAll()
-      .where("userId", "=", session.user.id)
-      .orderBy("name")
+    return selectCategoriesWithHabitsCount(session.user.id)
+      .orderBy("category.name")
       .execute()
   },
 )
@@ -54,7 +63,11 @@ export const createCategory = createServerFn({ method: "POST" })
       )
       .execute()
 
-    return { error: null, category }
+    const result = await selectCategoriesWithHabitsCount(session.user.id)
+      .where("category.id", "=", data.id)
+      .executeTakeFirstOrThrow()
+
+    return { error: null, category: result }
   })
 
 export const updateCategory = createServerFn({ method: "POST" })
@@ -66,7 +79,7 @@ export const updateCategory = createServerFn({ method: "POST" })
       return { error: { message: "You must be signed in." }, category: null }
     }
 
-    const result = await db
+    const updated = await db
       .updateTable("category")
       .set({
         name: data.name,
@@ -78,9 +91,14 @@ export const updateCategory = createServerFn({ method: "POST" })
       .returningAll()
       .executeTakeFirst()
 
-    if (!result) {
+    if (!updated) {
       return { error: { message: "Category not found." }, category: null }
     }
+
+    const result = await selectCategoriesWithHabitsCount(session.user.id)
+      .where("category.id", "=", data.id)
+      .executeTakeFirstOrThrow()
+
     return { error: null, category: result }
   })
 

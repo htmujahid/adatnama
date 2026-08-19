@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { and, eq, useLiveQuery } from "@tanstack/react-db"
 import { NotebookPenIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -11,7 +12,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { Textarea } from "@/components/ui/textarea"
-import { useHabitCheckins } from "@/hooks/use-habit-checkins"
+import { setCheckinNote } from "@/lib/checkins"
+import {
+  checkinsCollection,
+  useCheckinsCollection,
+} from "@/lib/collection/checkins"
+import { useOfflineExecutor } from "@/lib/db/offline"
+import { dateKey } from "@/lib/habits"
 import { cn } from "@/lib/utils"
 
 export function HabitNoteButton({
@@ -23,13 +30,23 @@ export function HabitNoteButton({
   habitName: string
   className?: string
 }) {
-  const { todayByHabitId, setCheckinNote } = useHabitCheckins()
-  const note = todayByHabitId.get(habitId)?.note ?? ""
+  const executor = useOfflineExecutor()
+  const collection = useCheckinsCollection()
+  const todayKey = dateKey(new Date())
+  const { data: todayCheckins = [] } = useLiveQuery((q) =>
+    q
+      .from({ checkin: checkinsCollection })
+      .where(({ checkin }) =>
+        and(eq(checkin.habitId, habitId), eq(checkin.date, todayKey)),
+      ),
+  )
+  const existing = todayCheckins.at(0)
+  const note = existing?.note ?? ""
   const [draft, setDraft] = useState(note)
   const [open, setOpen] = useState(false)
 
   function save() {
-    setCheckinNote(habitId, draft.trim())
+    setCheckinNote({ executor, collection, todayKey }, habitId, existing, draft)
     setOpen(false)
   }
 
@@ -87,7 +104,12 @@ export function HabitNoteButton({
               variant="ghost"
               size="sm"
               onClick={() => {
-                setCheckinNote(habitId, "")
+                setCheckinNote(
+                  { executor, collection, todayKey },
+                  habitId,
+                  existing,
+                  "",
+                )
                 setDraft("")
                 setOpen(false)
               }}

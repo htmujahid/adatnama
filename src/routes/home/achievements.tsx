@@ -1,4 +1,5 @@
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { eq, safeRandomUUID, useLiveQuery } from "@tanstack/react-db"
 import { createFileRoute } from "@tanstack/react-router"
 import { differenceInCalendarDays, parseISO } from "date-fns"
 import {
@@ -27,7 +28,17 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useAchievements } from "@/hooks/use-achievements"
+import { useHomeUser } from "@/hooks/use-home-user"
+import {
+  ACHIEVEMENT_DEFINITIONS,
+  buildAchievementContext,
+} from "@/lib/achievements"
+import { useAchievementUnlocksCollection } from "@/lib/collection/achievements"
+import { checkinsCollection } from "@/lib/collection/checkins"
+import { circlesCollection } from "@/lib/collection/circles"
+import { habitsCollection } from "@/lib/collection/habits"
+import { useOfflineExecutor } from "@/lib/db/offline"
+import { dateKey, foldHabitCheckinRows } from "@/lib/habits"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/home/achievements")({
@@ -49,9 +60,93 @@ function unlockedLabel(unlockedAt: string | null): string {
   return daysAgo === 0 ? "Unlocked today" : `Unlocked ${daysAgo}d ago`
 }
 
+const attemptedUnlocks = new Set<string>()
+
 function AchievementsPage() {
   const [filter, setFilter] = useState<Filter>("all")
-  const { achievements, unlockedCount, isLoading } = useAchievements()
+  const user = useHomeUser()
+  const executor = useOfflineExecutor()
+  const unlocksCollection = useAchievementUnlocksCollection()
+  const todayKey = dateKey(new Date())
+
+  const { data: habitCheckinRows = [], isLoading: habitsLoading } =
+    useLiveQuery((q) =>
+      q.from({ habit: habitsCollection }).leftJoin(
+        {
+          checkin: q
+            .from({ checkin: checkinsCollection })
+            .where(({ checkin }) => eq(checkin.status, "done")),
+        },
+        ({ habit, checkin }) => eq(checkin.habitId, habit.id),
+      ),
+    )
+  const { data: circles = [], isLoading: circlesLoading } = useLiveQuery((q) =>
+    q.from({ circle: circlesCollection }),
+  )
+  const { data: unlocks = [], isLoading: unlocksLoading } = useLiveQuery((q) =>
+    q.from({ unlock: unlocksCollection }),
+  )
+  const isLoading = habitsLoading || circlesLoading || unlocksLoading
+
+  const achievements = useMemo(() => {
+    const today = parseISO(todayKey)
+    const habits = foldHabitCheckinRows(habitCheckinRows, today)
+    const doneCountByHabitId = new Map<string, number>()
+    for (const { habit, checkin } of habitCheckinRows) {
+      if (!checkin) continue
+      doneCountByHabitId.set(
+        habit.id,
+        (doneCountByHabitId.get(habit.id) ?? 0) + 1,
+      )
+    }
+    const context = buildAchievementContext({
+      habits,
+      doneCountByHabitId,
+      circleCount: circles.length,
+      today,
+    })
+    return ACHIEVEMENT_DEFINITIONS.map(({ compute, ...definition }) => {
+      const { progress, target, achieved } = compute(context)
+      const unlock = unlocks.find(
+        (candidate) => candidate.achievementId === definition.id,
+      )
+      return {
+        ...definition,
+        progress,
+        target,
+        unlocked: unlock !== undefined || achieved,
+        unlockedAt: unlock?.unlockedAt ?? null,
+      }
+    })
+  }, [habitCheckinRows, circles, unlocks, todayKey])
+
+  useEffect(() => {
+    if (isLoading || !executor) return
+    for (const achievement of achievements) {
+      if (
+        !achievement.unlocked ||
+        achievement.unlockedAt !== null ||
+        attemptedUnlocks.has(achievement.id)
+      ) {
+        continue
+      }
+      attemptedUnlocks.add(achievement.id)
+      executor
+        .createOfflineTransaction({ mutationFnName: "achievements.unlock" })
+        .mutate(() => {
+          unlocksCollection.insert({
+            id: safeRandomUUID(),
+            userId: user.id,
+            achievementId: achievement.id,
+            unlockedAt: new Date().toISOString(),
+          })
+        })
+    }
+  }, [achievements, isLoading, executor, user.id, unlocksCollection])
+
+  const unlockedCount = achievements.filter(
+    (achievement) => achievement.unlocked,
+  ).length
 
   const completionRate =
     achievements.length > 0

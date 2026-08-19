@@ -23,9 +23,14 @@ import {
   ItemTitle,
 } from "@/components/ui/item"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useHabitCheckins } from "@/hooks/use-habit-checkins"
-import { checkinsCollection } from "@/lib/collection/checkins"
+import { toggleCheckin } from "@/lib/checkins"
+import {
+  checkinsCollection,
+  useCheckinsCollection,
+} from "@/lib/collection/checkins"
+import type { CheckinRecord } from "@/lib/collection/checkins"
 import { habitsCollection } from "@/lib/collection/habits"
+import { useOfflineExecutor } from "@/lib/db/offline"
 import {
   computeHabitStats,
   dateKey,
@@ -61,21 +66,32 @@ function WeekDots({ week }: { week: ReadonlyArray<HabitDayState> }) {
   )
 }
 
-function TodayHabitItem({ habit }: { habit: TodayHabit }) {
-  const { todayByHabitId, toggleCheckin } = useHabitCheckins()
-  const note = todayByHabitId.get(habit.id)?.note ?? ""
+function TodayHabitItem({
+  habit,
+  checkin,
+}: {
+  habit: TodayHabit
+  checkin: CheckinRecord | undefined
+}) {
+  const executor = useOfflineExecutor()
+  const collection = useCheckinsCollection()
+  const todayKey = dateKey(new Date())
+  const note = checkin?.note ?? ""
   const done = habit.doneToday
+
+  const toggle = () =>
+    toggleCheckin({ executor, collection, todayKey }, habit.id, checkin)
 
   return (
     <Item
       variant="outline"
-      onClick={() => toggleCheckin(habit.id)}
+      onClick={toggle}
       className="cursor-pointer select-none transition-colors hover:bg-muted/60 active:bg-muted"
     >
       <ItemMedia>
         <Checkbox
           checked={done}
-          onCheckedChange={() => toggleCheckin(habit.id)}
+          onCheckedChange={toggle}
           onClick={(event) => {
             event.stopPropagation()
           }}
@@ -126,6 +142,13 @@ export function TodayHabitsCard() {
       q
         .from({ checkin: checkinsCollection })
         .where(({ checkin }) => eq(checkin.status, "done")),
+  )
+  const { data: todayCheckins = [] } = useLiveQuery(
+    (q) =>
+      q
+        .from({ checkin: checkinsCollection })
+        .where(({ checkin }) => eq(checkin.date, todayKey)),
+    [todayKey],
   )
   const isLoading = habitsLoading || checkinsLoading
 
@@ -178,7 +201,13 @@ export function TodayHabitsCard() {
         ) : (
           <ItemGroup>
             {todayHabits.map((habit) => (
-              <TodayHabitItem key={habit.id} habit={habit} />
+              <TodayHabitItem
+                key={habit.id}
+                habit={habit}
+                checkin={todayCheckins.find(
+                  (checkin) => checkin.habitId === habit.id,
+                )}
+              />
             ))}
           </ItemGroup>
         )}

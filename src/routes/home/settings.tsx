@@ -1,3 +1,4 @@
+import { useLiveQuery } from "@tanstack/react-db"
 import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router"
 import {
@@ -35,12 +36,20 @@ import {
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
-import { usePreferences } from "@/hooks/use-preferences"
-import type { NotificationPreferences } from "@/hooks/use-preferences"
+import { useHomeUser } from "@/hooks/use-home-user"
 import { useThemeMode } from "@/hooks/use-theme-mode"
 import type { ThemeMode } from "@/hooks/use-theme-mode"
 import { authClient } from "@/lib/auth-client"
+import { usePreferencesCollection } from "@/lib/collection/preferences"
+import type { PreferencesRecord } from "@/lib/collection/preferences"
+import { useOfflineExecutor } from "@/lib/db/offline"
 import { HABIT_DAY_PRESETS, schedulePresetFor } from "@/lib/habits"
+import {
+  habitDefaultsFrom,
+  notificationsFrom,
+  savePreferences,
+} from "@/lib/preferences"
+import type { HabitDefaults, NotificationPreferences } from "@/lib/preferences"
 import { sessionQueryOptions } from "@/lib/query/auth"
 
 export const Route = createFileRoute("/home/settings")({
@@ -81,15 +90,48 @@ const NOTIFICATION_OPTIONS = [
 
 function SettingsPage() {
   const { mode, setMode } = useThemeMode()
-  const {
-    habitDefaults,
-    notifications,
-    isLoading,
-    updateHabitDefaults,
-    setNotificationPreference,
-  } = usePreferences()
+  const user = useHomeUser()
+  const preferencesCollection = usePreferencesCollection()
+  const executor = useOfflineExecutor()
+  const { data: preferenceRows = [], isLoading } = useLiveQuery((q) =>
+    q.from({ preferences: preferencesCollection }),
+  )
+  const record = preferenceRows.find((row) => row.userId === user.id)
+  const habitDefaults = habitDefaultsFrom(record)
+  const notifications = notificationsFrom(record)
   const router = useRouter()
   const queryClient = useQueryClient()
+
+  function save(changes: Partial<Omit<PreferencesRecord, "userId">>) {
+    savePreferences({
+      executor,
+      collection: preferencesCollection,
+      userId: user.id,
+      record,
+      changes,
+    })
+  }
+
+  function updateHabitDefaults(input: HabitDefaults) {
+    save({
+      defaultCategoryId: input.category,
+      defaultSchedulePreset:
+        schedulePresetFor(input.days) ?? HABIT_DAY_PRESETS[0].id,
+      defaultFreezesTotal: input.freezesTotal,
+    })
+  }
+
+  function setNotificationPreference(
+    key: keyof NotificationPreferences,
+    value: boolean,
+  ) {
+    const field = {
+      reminders: "remindersEnabled",
+      weeklySummary: "weeklySummaryEnabled",
+      circleActivity: "circleActivityEnabled",
+    } as const
+    save({ [field[key]]: value ? 1 : 0 })
+  }
 
   const handleSignOut = async () => {
     await authClient.signOut()

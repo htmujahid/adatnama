@@ -1,4 +1,4 @@
-import { safeRandomUUID } from "@tanstack/react-db"
+import { safeRandomUUID, useLiveQuery } from "@tanstack/react-db"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { ListChecksIcon } from "lucide-react"
 
@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useHomeUser } from "@/hooks/use-home-user"
-import { usePreferences } from "@/hooks/use-preferences"
 import { useHabitsCollection } from "@/lib/collection/habits"
+import { preferencesCollection } from "@/lib/collection/preferences"
 import { useOfflineExecutor } from "@/lib/db/offline"
+import { habitDefaultsFrom } from "@/lib/preferences"
 
 export const Route = createFileRoute("/home/habits/new")({
   component: NewHabitPage,
@@ -20,7 +21,12 @@ function NewHabitPage() {
   const user = useHomeUser()
   const habitsCollection = useHabitsCollection()
   const executor = useOfflineExecutor()
-  const { habitDefaults, isLoading } = usePreferences()
+  const { data: preferenceRows = [], isLoading } = useLiveQuery((q) =>
+    q.from({ preferences: preferencesCollection }),
+  )
+  const habitDefaults = habitDefaultsFrom(
+    preferenceRows.find((row) => row.userId === user.id),
+  )
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">

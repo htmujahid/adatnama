@@ -1,3 +1,4 @@
+import { eq, useLiveQuery } from "@tanstack/react-db"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { ListChecksIcon } from "lucide-react"
 
@@ -8,7 +9,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useHabit } from "@/hooks/use-habits"
 import { useHabitsCollection } from "@/lib/collection/habits"
 import { useOfflineExecutor } from "@/lib/db/offline"
 
@@ -19,9 +19,14 @@ export const Route = createFileRoute("/home/habits/$habitId/edit")({
 function EditHabitPage() {
   const { habitId } = Route.useParams()
   const navigate = useNavigate()
-  const { habit, isLoading } = useHabit(habitId)
   const habitsCollection = useHabitsCollection()
   const executor = useOfflineExecutor()
+  const { data: habit, isLoading } = useLiveQuery((q) =>
+    q
+      .from({ habits: habitsCollection })
+      .where(({ habits }) => eq(habits.id, habitId))
+      .findOne(),
+  )
 
   if (isLoading && !habit) {
     return (

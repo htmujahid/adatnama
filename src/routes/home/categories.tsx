@@ -26,10 +26,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useHabits } from "@/hooks/use-habits"
 import { useHomeUser } from "@/hooks/use-home-user"
 import type { CategoryInput, CategoryRecord } from "@/lib/collection/categories"
 import { useCategoriesCollection } from "@/lib/collection/categories"
+import { habitsCollection } from "@/lib/collection/habits"
 import { useOfflineExecutor } from "@/lib/db/offline"
 
 export const Route = createFileRoute("/home/categories")({
@@ -43,7 +43,9 @@ function CategoriesPage() {
   const { data: categories = [], isLoading: categoriesLoading } = useLiveQuery(
     (q) => q.from({ category: categoriesCollection }),
   )
-  const { habits } = useHabits()
+  const { data: habits = [] } = useLiveQuery((q) =>
+    q.from({ habit: habitsCollection }),
+  )
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editing, setEditing] = useState<CategoryRecord | undefined>(undefined)
 

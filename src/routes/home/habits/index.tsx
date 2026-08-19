@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useLiveQuery } from "@tanstack/react-db"
+import { eq, isNull, useLiveQuery } from "@tanstack/react-db"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import {
   ArchiveIcon,
@@ -33,9 +33,10 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useActiveHabits } from "@/hooks/use-habits"
 import { categoriesCollection } from "@/lib/collection/categories"
-import { formatHabitDays } from "@/lib/habits"
+import { checkinsCollection } from "@/lib/collection/checkins"
+import { habitsCollection } from "@/lib/collection/habits"
+import { foldHabitCheckinRows, formatHabitDays } from "@/lib/habits"
 
 export const Route = createFileRoute("/home/habits/")({
   component: HabitsPage,
@@ -44,7 +45,21 @@ export const Route = createFileRoute("/home/habits/")({
 function HabitsPage() {
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState<string | null>(null)
-  const { habits, isLoading } = useActiveHabits()
+  const today = new Date()
+  const { data: rows = [], isLoading } = useLiveQuery((q) =>
+    q
+      .from({ habit: habitsCollection })
+      .leftJoin(
+        {
+          checkin: q
+            .from({ checkin: checkinsCollection })
+            .where(({ checkin }) => eq(checkin.status, "done")),
+        },
+        ({ habit, checkin }) => eq(checkin.habitId, habit.id),
+      )
+      .where(({ habit }) => isNull(habit.archivedAt)),
+  )
+  const habits = foldHabitCheckinRows(rows, today)
   const { data: categories = [] } = useLiveQuery((q) =>
     q.from({ category: categoriesCollection }),
   )

@@ -26,7 +26,7 @@ import { scaleOrdinal } from "@tanstack/charts/scales/ordinal"
 import { scalePoint } from "@tanstack/charts/scales/point"
 import { tooltip } from "@tanstack/charts/tooltip"
 import { portal } from "@tanstack/charts/tooltip/portal"
-import { useLiveQuery } from "@tanstack/react-db"
+import { eq, isNull, useLiveQuery } from "@tanstack/react-db"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { curveLinearClosed, curveMonotoneX } from "d3-shape"
 import {
@@ -47,13 +47,15 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useActiveHabits } from "@/hooks/use-habits"
-import type { HabitView } from "@/hooks/use-habits"
 import { categoriesCollection } from "@/lib/collection/categories"
+import { checkinsCollection } from "@/lib/collection/checkins"
 import type { CheckinRecord } from "@/lib/collection/checkins"
+import { habitsCollection } from "@/lib/collection/habits"
+import type { HabitView } from "@/lib/habits"
 import {
   computeHabitStats,
   dateKey,
+  foldHabitCheckinRows,
   HEATMAP_LEVEL_COLORS,
   heatmapLevelFor,
   isScheduledOn,
@@ -167,11 +169,31 @@ function ChartCard({
 }
 
 function InsightsPage() {
-  const { habits, checkins, isLoading } = useActiveHabits()
+  const { data: habitRows = [], isLoading: habitsLoading } = useLiveQuery((q) =>
+    q
+      .from({ habit: habitsCollection })
+      .leftJoin(
+        {
+          checkin: q
+            .from({ checkin: checkinsCollection })
+            .where(({ checkin }) => eq(checkin.status, "done")),
+        },
+        ({ habit, checkin }) => eq(checkin.habitId, habit.id),
+      )
+      .where(({ habit }) => isNull(habit.archivedAt)),
+  )
+  const { data: checkins = [], isLoading: checkinsLoading } = useLiveQuery(
+    (q) => q.from({ checkin: checkinsCollection }),
+  )
+  const isLoading = habitsLoading || checkinsLoading
   const { data: categories = [] } = useLiveQuery((q) =>
     q.from({ category: categoriesCollection }),
   )
   const todayKey = dateKey(new Date())
+  const habits = useMemo(
+    () => foldHabitCheckinRows(habitRows, parseISO(todayKey)),
+    [habitRows, todayKey],
+  )
 
   const data = useMemo(() => {
     const today = parseISO(todayKey)

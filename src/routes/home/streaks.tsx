@@ -1,3 +1,4 @@
+import { eq, isNull, useLiveQuery } from "@tanstack/react-db"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import {
   CalendarDaysIcon,
@@ -29,7 +30,9 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useActiveHabits } from "@/hooks/use-habits"
+import { checkinsCollection } from "@/lib/collection/checkins"
+import { habitsCollection } from "@/lib/collection/habits"
+import { foldHabitCheckinRows } from "@/lib/habits"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/home/streaks")({
@@ -37,7 +40,20 @@ export const Route = createFileRoute("/home/streaks")({
 })
 
 function StreaksPage() {
-  const { habits, isLoading } = useActiveHabits()
+  const { data: rows = [], isLoading } = useLiveQuery((q) =>
+    q
+      .from({ habit: habitsCollection })
+      .leftJoin(
+        {
+          checkin: q
+            .from({ checkin: checkinsCollection })
+            .where(({ checkin }) => eq(checkin.status, "done")),
+        },
+        ({ habit, checkin }) => eq(checkin.habitId, habit.id),
+      )
+      .where(({ habit }) => isNull(habit.archivedAt)),
+  )
+  const habits = foldHabitCheckinRows(rows, new Date())
 
   const streaks = [...habits].sort(
     (a, b) => b.streak - a.streak || b.longestStreak - a.longestStreak,

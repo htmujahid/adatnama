@@ -1,3 +1,4 @@
+import { useLiveQuery } from "@tanstack/react-db"
 import { createFileRoute } from "@tanstack/react-router"
 import {
   differenceInCalendarDays,
@@ -31,7 +32,8 @@ import {
   ItemTitle,
 } from "@/components/ui/item"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useHabits } from "@/hooks/use-habits"
+import { checkinsCollection } from "@/lib/collection/checkins"
+import { habitsCollection } from "@/lib/collection/habits"
 import {
   dateKey,
   HEATMAP_LEVEL_COLORS,
@@ -48,7 +50,13 @@ export const Route = createFileRoute("/home/checkins")({
 const CALENDAR_WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
 function CheckInsPage() {
-  const { habits, checkins, isLoading } = useHabits()
+  const { data: habits = [], isLoading: habitsLoading } = useLiveQuery((q) =>
+    q.from({ habit: habitsCollection }),
+  )
+  const { data: checkins = [], isLoading: checkinsLoading } = useLiveQuery(
+    (q) => q.from({ checkin: checkinsCollection }),
+  )
+  const isLoading = habitsLoading || checkinsLoading
   const activeHabits = habits.filter((habit) => habit.archivedAt === null)
 
   const today = new Date()

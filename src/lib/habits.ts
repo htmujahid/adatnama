@@ -8,6 +8,8 @@ import {
   subDays,
 } from "date-fns"
 
+import type { HabitRecord } from "@/lib/collection/habits"
+
 export type HabitDayState = "done" | "missed" | "frozen" | "today"
 
 export const WEEKDAYS = [
@@ -87,6 +89,8 @@ export function reminderMinutes(time: string): number {
 export const WEEK_LENGTH = 7
 export const HISTORY_LENGTH = 28
 
+export type HabitView = HabitRecord & HabitStats
+
 export type HabitStats = {
   doneToday: boolean
   streak: number
@@ -123,6 +127,37 @@ export function doneDatesByHabitId(
     dates.add(checkin.date)
   }
   return map
+}
+
+const EMPTY_DONE_DATES: ReadonlySet<string> = new Set()
+
+export function foldHabitCheckinRows<T extends ScheduledHabit & { id: string }>(
+  rows: ReadonlyArray<{
+    habit: T
+    checkin: { date: string } | null | undefined
+  }>,
+  today: Date,
+): Array<T & HabitStats> {
+  const habitById = new Map<string, T>()
+  const doneDates = new Map<string, Set<string>>()
+  for (const { habit, checkin } of rows) {
+    habitById.set(habit.id, habit)
+    if (!checkin) continue
+    let dates = doneDates.get(habit.id)
+    if (!dates) {
+      dates = new Set()
+      doneDates.set(habit.id, dates)
+    }
+    dates.add(checkin.date)
+  }
+  return Array.from(habitById.values(), (record) => ({
+    ...record,
+    ...computeHabitStats(
+      record,
+      doneDates.get(record.id) ?? EMPTY_DONE_DATES,
+      today,
+    ),
+  }))
 }
 
 export function computeHabitStats(

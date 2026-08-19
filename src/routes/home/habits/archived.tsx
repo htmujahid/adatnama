@@ -1,3 +1,4 @@
+import { eq, useLiveQuery } from "@tanstack/react-db"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { format, parseISO } from "date-fns"
 import {
@@ -19,19 +20,39 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useHabits } from "@/hooks/use-habits"
+import { checkinsCollection } from "@/lib/collection/checkins"
 import { useHabitsCollection } from "@/lib/collection/habits"
 import { useOfflineExecutor } from "@/lib/db/offline"
+import { foldHabitCheckinRows } from "@/lib/habits"
 
 export const Route = createFileRoute("/home/habits/archived")({
   component: ArchivedHabitsPage,
 })
 
 function ArchivedHabitsPage() {
-  const { habits, checkins, isLoading } = useHabits()
   const habitsCollection = useHabitsCollection()
   const executor = useOfflineExecutor()
+  const today = new Date()
+  const { data: rows = [], isLoading } = useLiveQuery((q) =>
+    q.from({ habit: habitsCollection }).leftJoin(
+      {
+        checkin: q
+          .from({ checkin: checkinsCollection })
+          .where(({ checkin }) => eq(checkin.status, "done")),
+      },
+      ({ habit, checkin }) => eq(checkin.habitId, habit.id),
+    ),
+  )
+  const habits = foldHabitCheckinRows(rows, today)
   const archived = habits.filter((habit) => habit.archivedAt !== null)
+  const doneCountByHabitId = new Map<string, number>()
+  for (const { habit, checkin } of rows) {
+    if (!checkin) continue
+    doneCountByHabitId.set(
+      habit.id,
+      (doneCountByHabitId.get(habit.id) ?? 0) + 1,
+    )
+  }
 
   function restore(habitId: string) {
     if (!executor) return
@@ -100,10 +121,7 @@ function ArchivedHabitsPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {archived.map((habit) => {
-            const daysTracked = checkins.filter(
-              (checkin) =>
-                checkin.habitId === habit.id && checkin.status === "done",
-            ).length
+            const daysTracked = doneCountByHabitId.get(habit.id) ?? 0
 
             return (
               <Card key={habit.id} className="opacity-80">

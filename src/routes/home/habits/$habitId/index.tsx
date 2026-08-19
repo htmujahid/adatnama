@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { and, eq, useLiveQuery } from "@tanstack/react-db"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { format } from "date-fns"
 import {
@@ -46,12 +47,21 @@ import {
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
-import { useHabitCheckins } from "@/hooks/use-habit-checkins"
-import { useHabit } from "@/hooks/use-habits"
-import type { HabitView } from "@/hooks/use-habits"
+import { toggleCheckin } from "@/lib/checkins"
+import {
+  checkinsCollection,
+  useCheckinsCollection,
+} from "@/lib/collection/checkins"
 import { useHabitsCollection } from "@/lib/collection/habits"
 import { useOfflineExecutor } from "@/lib/db/offline"
-import { formatHabitDays, lastNDays, WEEK_LENGTH } from "@/lib/habits"
+import {
+  dateKey,
+  foldHabitCheckinRows,
+  formatHabitDays,
+  lastNDays,
+  WEEK_LENGTH,
+} from "@/lib/habits"
+import type { HabitView } from "@/lib/habits"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/home/habits/$habitId/")({
@@ -173,14 +183,40 @@ function ArchiveHabitDialog({
 
 function HabitDetailPage() {
   const { habitId } = Route.useParams()
-  const { habit, isLoading } = useHabit(habitId)
-  const { todayByHabitId, toggleCheckin } = useHabitCheckins()
+  const executor = useOfflineExecutor()
+  const habitsCollection = useHabitsCollection()
+  const collection = useCheckinsCollection()
+  const todayKey = dateKey(new Date())
+  const { data: rows = [], isLoading } = useLiveQuery((q) =>
+    q
+      .from({ habit: habitsCollection })
+      .leftJoin(
+        {
+          checkin: q
+            .from({ checkin: checkinsCollection })
+            .where(({ checkin }) => eq(checkin.status, "done")),
+        },
+        ({ habit, checkin }) => eq(checkin.habitId, habit.id),
+      )
+      .where(({ habit }) => eq(habit.id, habitId)),
+  )
+  const { data: todayCheckins = [] } = useLiveQuery((q) =>
+    q
+      .from({ checkin: checkinsCollection })
+      .where(({ checkin }) =>
+        and(eq(checkin.habitId, habitId), eq(checkin.date, todayKey)),
+      ),
+  )
   const [archiveOpen, setArchiveOpen] = useState(false)
+  const habit = foldHabitCheckinRows(rows, new Date()).at(0)
+  const todayCheckin = todayCheckins.at(0)
 
   if (isLoading && !habit) return <HabitDetailSkeleton />
   if (!habit) return <HabitNotFound />
 
-  const note = todayByHabitId.get(habit.id)?.note ?? ""
+  const toggle = () =>
+    toggleCheckin({ executor, collection, todayKey }, habit.id, todayCheckin)
+  const note = todayCheckin?.note ?? ""
   const done = habit.doneToday
   const status = habitStatus(habit)
   const statusMeta = STATUS_META[status]
@@ -386,7 +422,7 @@ function HabitDetailPage() {
                     {isToday ? (
                       <button
                         type="button"
-                        onClick={() => toggleCheckin(habit.id)}
+                        onClick={toggle}
                         aria-pressed={done}
                         aria-label={
                           done ? "Mark today as not done" : "Mark today as done"

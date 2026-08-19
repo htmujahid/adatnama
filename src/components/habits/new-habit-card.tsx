@@ -75,6 +75,7 @@ export function NewHabitCard() {
                     startedAt: now,
                     archivedAt: null,
                     archivedNote: null,
+                    sourceHabitId: null,
                     createdAt: now,
                     updatedAt: now,
                   })

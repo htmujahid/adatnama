@@ -99,8 +99,16 @@ export interface HabitTable {
   startedAt: string
   archivedAt: string | null
   archivedNote: string | null
+  sourceHabitId: string | null
   createdAt: string
   updatedAt: string
+}
+
+export interface CircleHabitTable {
+  id: string
+  organizationId: string
+  habitId: string
+  createdAt: string
 }
 
 export interface HabitScheduleDayTable {
@@ -153,6 +161,7 @@ export interface Database {
   habit: HabitTable
   habit_schedule_day: HabitScheduleDayTable
   habit_checkin: HabitCheckinTable
+  circle_habit: CircleHabitTable
   user_achievement_unlock: UserAchievementUnlockTable
   user_preferences: UserPreferencesTable
   push_subscription: PushSubscriptionTable

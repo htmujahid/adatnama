@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 
+import { HabitCirclesCard } from "@/components/habits/habit-circles-card"
 import { HabitDetailHeader } from "@/components/habits/habit-detail-header"
 import { HabitDetailsCard } from "@/components/habits/habit-details-card"
 import { HabitHistoryCard } from "@/components/habits/habit-history-card"
@@ -27,6 +28,8 @@ function HabitDetailPage() {
         <HabitWeekCard habitId={habitId} />
         <HabitHistoryCard habitId={habitId} />
       </div>
+
+      <HabitCirclesCard habitId={habitId} />
     </div>
   )
 }

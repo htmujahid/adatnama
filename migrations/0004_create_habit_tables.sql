@@ -10,19 +10,20 @@ CREATE TABLE "category" (
 CREATE INDEX "category_userId_idx" ON "category" ("userId");
 
 CREATE TABLE "habit" (
-  "id"           text NOT NULL PRIMARY KEY,
-  "userId"       text NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
-  "categoryId"   text REFERENCES "category" ("id") ON DELETE SET NULL,
-  "name"         text NOT NULL,
-  "description"  text NOT NULL,
-  "target"       text NOT NULL,
-  "reminderTime" text,
-  "freezesTotal" integer NOT NULL,
-  "startedAt"    date NOT NULL,
-  "archivedAt"   date,
-  "archivedNote" text,
-  "createdAt"    date NOT NULL,
-  "updatedAt"    date NOT NULL
+  "id"            text NOT NULL PRIMARY KEY,
+  "userId"        text NOT NULL REFERENCES "user" ("id") ON DELETE CASCADE,
+  "categoryId"    text REFERENCES "category" ("id") ON DELETE SET NULL,
+  "name"          text NOT NULL,
+  "description"   text NOT NULL,
+  "target"        text NOT NULL,
+  "reminderTime"  text,
+  "freezesTotal"  integer NOT NULL,
+  "startedAt"     date NOT NULL,
+  "archivedAt"    date,
+  "archivedNote"  text,
+  "sourceHabitId" text,
+  "createdAt"     date NOT NULL,
+  "updatedAt"     date NOT NULL
 );
 
 CREATE INDEX "habit_userId_idx" ON "habit" ("userId");
@@ -47,3 +48,13 @@ CREATE TABLE "habit_checkin" (
 );
 
 CREATE UNIQUE INDEX "habit_checkin_habitId_date_idx" ON "habit_checkin" ("habitId", "date");
+
+CREATE TABLE "circle_habit" (
+  "id"             text NOT NULL PRIMARY KEY,
+  "organizationId" text NOT NULL REFERENCES "organization" ("id") ON DELETE CASCADE,
+  "habitId"        text NOT NULL REFERENCES "habit" ("id") ON DELETE CASCADE,
+  "createdAt"      text NOT NULL
+);
+
+CREATE UNIQUE INDEX "circle_habit_organizationId_habitId_idx" ON "circle_habit" ("organizationId", "habitId");
+CREATE INDEX "circle_habit_habitId_idx" ON "circle_habit" ("habitId");

@@ -71,8 +71,9 @@ export const listHabits = createServerFn({ method: "GET" }).handler(
           'name', "name", 'description', "description", 'target', "target",
           'reminderTime', "reminderTime", 'freezesTotal', "freezesTotal",
           'startedAt', "startedAt", 'archivedAt', "archivedAt",
-          'archivedNote', "archivedNote", 'createdAt', "createdAt",
-          'updatedAt', "updatedAt", 'days', json(${daysJson})
+          'archivedNote', "archivedNote", 'sourceHabitId', "sourceHabitId",
+          'createdAt', "createdAt", 'updatedAt', "updatedAt",
+          'days', json(${daysJson})
         ) order by "createdAt"), '[]')`.as("payload"),
       )
       .where("userId", "=", session.user.id)

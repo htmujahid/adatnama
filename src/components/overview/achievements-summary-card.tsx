@@ -1,5 +1,6 @@
 import { eq, useLiveQuery } from "@tanstack/react-db"
 import { Link } from "@tanstack/react-router"
+import { TrophyIcon } from "lucide-react"
 
 import {
   Card,
@@ -9,6 +10,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   ACHIEVEMENT_DEFINITIONS,
@@ -113,9 +121,20 @@ export function AchievementsSummaryCard() {
             ))}
           </div>
         ) : unlockedAchievements.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">
-            No achievements unlocked yet. Keep building your habits!
-          </p>
+          <Empty className="gap-2 p-4">
+            <EmptyHeader className="gap-1">
+              <EmptyMedia
+                variant="icon"
+                className="mb-1 size-8 [&_svg:not([class*='size-'])]:size-4"
+              >
+                <TrophyIcon />
+              </EmptyMedia>
+              <EmptyTitle className="text-sm">No achievements yet</EmptyTitle>
+              <EmptyDescription className="text-xs">
+                Keep building your habits to unlock badges.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         ) : (
           <div className="min-w-0 overflow-x-auto">
             <div className="flex gap-3 pb-1">

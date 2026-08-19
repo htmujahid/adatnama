@@ -19,6 +19,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { Progress } from "@/components/ui/progress"
 import {
   Select,
@@ -255,11 +262,17 @@ function AchievementsPage() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <Card>
-          <CardContent className="py-10 text-center text-sm text-muted-foreground">
-            No achievements match this filter.
-          </CardContent>
-        </Card>
+        <Empty className="border border-dashed">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <TrophyIcon />
+            </EmptyMedia>
+            <EmptyTitle>No achievements found</EmptyTitle>
+            <EmptyDescription>
+              No achievements match this filter.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((achievement) => (

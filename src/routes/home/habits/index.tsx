@@ -24,6 +24,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -206,19 +214,17 @@ function HabitsPage() {
           ))}
         </div>
       ) : habits.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-14 text-center">
-            <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
-              <ListChecksIcon className="size-5" />
-            </div>
-            <div>
-              <p className="text-sm font-medium">
-                You aren't tracking any habits yet.
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Create your first habit to start building streaks.
-              </p>
-            </div>
+        <Empty className="border border-dashed">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ListChecksIcon />
+            </EmptyMedia>
+            <EmptyTitle>No habits yet</EmptyTitle>
+            <EmptyDescription>
+              Create your first habit to start building streaks.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
             <Button
               size="sm"
               nativeButton={false}
@@ -227,14 +233,18 @@ function HabitsPage() {
               <PlusIcon />
               New habit
             </Button>
-          </CardContent>
-        </Card>
+          </EmptyContent>
+        </Empty>
       ) : filtered.length === 0 ? (
-        <Card>
-          <CardContent className="py-10 text-center text-sm text-muted-foreground">
-            No habits match "{search}".
-          </CardContent>
-        </Card>
+        <Empty className="border border-dashed">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <SearchIcon />
+            </EmptyMedia>
+            <EmptyTitle>No matching habits</EmptyTitle>
+            <EmptyDescription>No habits match "{search}".</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((habit) => (

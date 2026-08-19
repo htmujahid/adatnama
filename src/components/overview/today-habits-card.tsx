@@ -14,6 +14,14 @@ import {
 } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
+import {
   Item,
   ItemActions,
   ItemContent,
@@ -180,24 +188,36 @@ export function TodayHabitsCard() {
             ))}
           </div>
         ) : todayHabits.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 py-10 text-center">
-            <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
-              <ListChecksIcon className="size-5" />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              {activeHabits.length > 0
-                ? "No habits are scheduled for today."
-                : "You aren't tracking any habits yet."}
-            </p>
-            <Button
-              size="sm"
-              nativeButton={false}
-              render={<Link to="/home/habits/new" />}
-            >
-              <PlusIcon />
-              New habit
-            </Button>
-          </div>
+          <Empty className="gap-3 p-4">
+            <EmptyHeader className="gap-1">
+              <EmptyMedia
+                variant="icon"
+                className="mb-1 size-8 [&_svg:not([class*='size-'])]:size-4"
+              >
+                <ListChecksIcon />
+              </EmptyMedia>
+              <EmptyTitle className="text-sm">
+                {activeHabits.length > 0
+                  ? "Nothing scheduled today"
+                  : "No habits yet"}
+              </EmptyTitle>
+              <EmptyDescription className="text-xs">
+                {activeHabits.length > 0
+                  ? "No habits are scheduled for today."
+                  : "You aren't tracking any habits yet."}
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button
+                size="sm"
+                nativeButton={false}
+                render={<Link to="/home/habits/new" />}
+              >
+                <PlusIcon />
+                New habit
+              </Button>
+            </EmptyContent>
+          </Empty>
         ) : (
           <ItemGroup>
             {todayHabits.map((habit) => (

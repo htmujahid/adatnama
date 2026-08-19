@@ -1,5 +1,6 @@
 import { useLiveQuery } from "@tanstack/react-db"
 import { format } from "date-fns"
+import { ChartColumnIcon } from "lucide-react"
 
 import {
   Card,
@@ -8,6 +9,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { checkinsCollection } from "@/lib/collection/checkins"
 import { habitsCollection } from "@/lib/collection/habits"
 import { dateKey, lastNDays, WEEK_LENGTH } from "@/lib/habits"
@@ -52,40 +60,59 @@ export function WeeklyActivityCard() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex h-24 items-end justify-between gap-1.5">
-          {weeklyDailyCounts.map((day, index) => {
-            const isToday = index === weeklyDailyCounts.length - 1
-            return (
-              <div
-                key={day.date}
-                className="flex flex-1 flex-col items-center gap-1.5"
+        {weeklyCheckins === 0 ? (
+          <Empty className="gap-2 p-4">
+            <EmptyHeader className="gap-1">
+              <EmptyMedia
+                variant="icon"
+                className="mb-1 size-8 [&_svg:not([class*='size-'])]:size-4"
               >
-                <div className="flex h-20 w-full items-end">
-                  <div
-                    title={`${day.date}: ${day.count} of ${activeHabits.length} habits`}
-                    className={cn(
-                      "w-full rounded-t-sm",
-                      isToday ? "bg-primary" : "bg-primary/60",
-                    )}
-                    style={{
-                      height: `${activeHabits.length > 0 ? (day.count / activeHabits.length) * 100 : 0}%`,
-                    }}
-                  />
-                </div>
-                <span
-                  className={cn(
-                    "text-xs",
-                    isToday
-                      ? "font-semibold text-foreground"
-                      : "text-muted-foreground",
-                  )}
+                <ChartColumnIcon />
+              </EmptyMedia>
+              <EmptyTitle className="text-sm">No activity this week</EmptyTitle>
+              <EmptyDescription className="text-xs">
+                {activeHabits.length > 0
+                  ? "Check in on a habit to see your week fill up."
+                  : "Create a habit to start tracking your week."}
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
+          <div className="flex h-24 items-end justify-between gap-1.5">
+            {weeklyDailyCounts.map((day, index) => {
+              const isToday = index === weeklyDailyCounts.length - 1
+              return (
+                <div
+                  key={day.date}
+                  className="flex flex-1 flex-col items-center gap-1.5"
                 >
-                  {day.date.split(" ")[1]}
-                </span>
-              </div>
-            )
-          })}
-        </div>
+                  <div className="flex h-20 w-full items-end">
+                    <div
+                      title={`${day.date}: ${day.count} of ${activeHabits.length} habits`}
+                      className={cn(
+                        "w-full rounded-t-sm",
+                        isToday ? "bg-primary" : "bg-primary/60",
+                      )}
+                      style={{
+                        height: `${activeHabits.length > 0 ? (day.count / activeHabits.length) * 100 : 0}%`,
+                      }}
+                    />
+                  </div>
+                  <span
+                    className={cn(
+                      "text-xs",
+                      isToday
+                        ? "font-semibold text-foreground"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    {day.date.split(" ")[1]}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </CardContent>
     </Card>
   )

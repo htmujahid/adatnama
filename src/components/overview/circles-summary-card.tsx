@@ -1,5 +1,6 @@
 import { useLiveQuery } from "@tanstack/react-db"
 import { Link } from "@tanstack/react-router"
+import { UsersIcon } from "lucide-react"
 
 import { CircleColorDot } from "@/components/circles/circle-color-dot"
 import {
@@ -10,6 +11,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import {
   Item,
   ItemContent,
@@ -46,9 +54,20 @@ export function CirclesSummaryCard() {
             <Skeleton className="h-10 w-full" />
           </div>
         ) : circles.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            You haven't joined a circle yet.
-          </p>
+          <Empty className="gap-2 p-4">
+            <EmptyHeader className="gap-1">
+              <EmptyMedia
+                variant="icon"
+                className="mb-1 size-8 [&_svg:not([class*='size-'])]:size-4"
+              >
+                <UsersIcon />
+              </EmptyMedia>
+              <EmptyTitle className="text-sm">No circles yet</EmptyTitle>
+              <EmptyDescription className="text-xs">
+                You haven't joined a circle yet.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         ) : (
           <ItemGroup>
             {circles.map((circle) => (

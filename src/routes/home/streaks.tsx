@@ -29,6 +29,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import { checkinsCollection } from "@/lib/collection/checkins"
 import { habitsCollection } from "@/lib/collection/habits"
@@ -143,17 +151,17 @@ function StreaksPage() {
           ))}
         </div>
       ) : streaks.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-14 text-center">
-            <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
-              <FlameIcon className="size-5" />
-            </div>
-            <div>
-              <p className="text-sm font-medium">No streaks to show yet.</p>
-              <p className="text-sm text-muted-foreground">
-                Create a habit and check in to start your first streak.
-              </p>
-            </div>
+        <Empty className="border border-dashed">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <FlameIcon />
+            </EmptyMedia>
+            <EmptyTitle>No streaks yet</EmptyTitle>
+            <EmptyDescription>
+              Create a habit and check in to start your first streak.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
             <Button
               size="sm"
               nativeButton={false}
@@ -162,8 +170,8 @@ function StreaksPage() {
               <PlusIcon />
               New habit
             </Button>
-          </CardContent>
-        </Card>
+          </EmptyContent>
+        </Empty>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {streaks.map((habit) => {

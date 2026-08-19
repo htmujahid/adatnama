@@ -24,6 +24,13 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
+import {
   Item,
   ItemContent,
   ItemDescription,
@@ -284,9 +291,20 @@ function CheckInsPage() {
                 ))}
               </div>
             ) : weekActivity.length === 0 ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">
-                No check-ins in the last 7 days yet.
-              </p>
+              <Empty className="gap-2 p-4">
+                <EmptyHeader className="gap-1">
+                  <EmptyMedia
+                    variant="icon"
+                    className="mb-1 size-8 [&_svg:not([class*='size-'])]:size-4"
+                  >
+                    <CalendarCheckIcon />
+                  </EmptyMedia>
+                  <EmptyTitle className="text-sm">No check-ins yet</EmptyTitle>
+                  <EmptyDescription className="text-xs">
+                    No check-ins in the last 7 days yet.
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
             ) : (
               <div className="max-h-[420px] overflow-y-auto pr-1">
                 <ItemGroup>

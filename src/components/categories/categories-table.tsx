@@ -10,6 +10,14 @@ import {
 import { CreateCategoryDialog } from "@/components/categories/create-category-dialog"
 import { DeleteCategoryDialog } from "@/components/categories/delete-category-dialog"
 import { NewCategoryButton } from "@/components/categories/new-category-button"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -143,20 +151,20 @@ export function CategoriesTable() {
             ) : (
               <TableRow className="hover:bg-transparent">
                 <TableCell colSpan={5}>
-                  <div className="flex flex-col items-center gap-3 py-14 text-center">
-                    <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                      <TagIcon className="size-5" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">
-                        You don't have any categories yet.
-                      </p>
-                      <p className="text-sm text-muted-foreground">
+                  <Empty className="p-6">
+                    <EmptyHeader>
+                      <EmptyMedia variant="icon">
+                        <TagIcon />
+                      </EmptyMedia>
+                      <EmptyTitle>No categories yet</EmptyTitle>
+                      <EmptyDescription>
                         Create your first one to start organizing your habits.
-                      </p>
-                    </div>
-                    <NewCategoryButton />
-                  </div>
+                      </EmptyDescription>
+                    </EmptyHeader>
+                    <EmptyContent>
+                      <NewCategoryButton />
+                    </EmptyContent>
+                  </Empty>
                 </TableCell>
               </TableRow>
             )}

@@ -46,6 +46,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import { categoriesCollection } from "@/lib/collection/categories"
 import { checkinsCollection } from "@/lib/collection/checkins"
@@ -762,17 +770,17 @@ function InsightsPage() {
             Trends and patterns across your habits.
           </p>
         </div>
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-14 text-center">
-            <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
-              <ChartColumnIcon className="size-5" />
-            </div>
-            <div>
-              <p className="text-sm font-medium">No insights yet.</p>
-              <p className="text-sm text-muted-foreground">
-                Create a habit and check in for a few days to see trends here.
-              </p>
-            </div>
+        <Empty className="border border-dashed">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ChartColumnIcon />
+            </EmptyMedia>
+            <EmptyTitle>No insights yet</EmptyTitle>
+            <EmptyDescription>
+              Create a habit and check in for a few days to see trends here.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
             <Button
               size="sm"
               nativeButton={false}
@@ -781,8 +789,8 @@ function InsightsPage() {
               <PlusIcon />
               New habit
             </Button>
-          </CardContent>
-        </Card>
+          </EmptyContent>
+        </Empty>
       </div>
     )
   }

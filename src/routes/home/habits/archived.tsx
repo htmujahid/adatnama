@@ -19,6 +19,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
 import { checkinsCollection } from "@/lib/collection/checkins"
 import { useHabitsCollection } from "@/lib/collection/habits"
@@ -113,11 +120,17 @@ function ArchivedHabitsPage() {
           ))}
         </div>
       ) : archived.length === 0 ? (
-        <Card>
-          <CardContent className="py-10 text-center text-sm text-muted-foreground">
-            You haven't archived any habits yet.
-          </CardContent>
-        </Card>
+        <Empty className="border border-dashed">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ArchiveIcon />
+            </EmptyMedia>
+            <EmptyTitle>No archived habits</EmptyTitle>
+            <EmptyDescription>
+              You haven't archived any habits yet.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {archived.map((habit) => {

@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useLiveQuery } from "@tanstack/react-db"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { PlusIcon, UserPlusIcon } from "lucide-react"
+import { PlusIcon, UserPlusIcon, UsersIcon } from "lucide-react"
 
 import { joinCircleByCode } from "@/actions/circles"
 import { CircleColorDot } from "@/components/circles/circle-color-dot"
@@ -23,6 +23,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty"
 import {
   Field,
   FieldError,
@@ -194,16 +201,17 @@ function CirclesPage() {
       </div>
 
       {circles.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-1 py-10 text-center">
-            <p className="text-sm font-medium">
-              You haven't joined a circle yet.
-            </p>
-            <p className="text-sm text-muted-foreground">
+        <Empty className="border border-dashed">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <UsersIcon />
+            </EmptyMedia>
+            <EmptyTitle>No circles yet</EmptyTitle>
+            <EmptyDescription>
               Create one, or use "Join a circle" with an invite code.
-            </p>
-          </CardContent>
-        </Card>
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {circles.map((circle) => (

@@ -2,17 +2,15 @@ import { NonRetriableError } from "@tanstack/offline-transactions"
 import type { OfflineConfig } from "@tanstack/offline-transactions"
 
 import { upsertPreferences } from "@/actions/preferences"
-import type {
-  PreferencesCollection,
-  PreferencesRecord,
-} from "@/lib/collection/preferences"
+import type { PreferencesCollection } from "@/lib/collection/preferences"
+import type { UserPreferencesTable } from "@/lib/db/schema"
 
 async function upsertFromMutation(mutation: {
   collection: unknown
   modified: unknown
 }) {
   const collection = mutation.collection as PreferencesCollection
-  const modified = mutation.modified as PreferencesRecord
+  const modified = mutation.modified as UserPreferencesTable
   const result = await upsertPreferences({
     data: {
       timezone: modified.timezone,

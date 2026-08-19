@@ -8,12 +8,10 @@ import { listAchievementUnlocks } from "@/actions/achievements"
 import { persistence } from "@/lib/db/browser"
 import type { UserAchievementUnlockTable } from "@/lib/db/schema"
 
-export type AchievementUnlockRecord = UserAchievementUnlockTable
-
 export const achievementUnlocksCollection = collectionOptions(
   "achievement-unlocks",
   (client) =>
-    persistedCollectionOptions<AchievementUnlockRecord, string>({
+    persistedCollectionOptions<UserAchievementUnlockTable, string>({
       ...queryCollectionOptions({
         id: "achievement-unlocks",
         queryKey: ["achievement-unlocks"],

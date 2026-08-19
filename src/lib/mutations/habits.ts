@@ -8,9 +8,10 @@ import {
   restoreHabit,
   updateHabit,
 } from "@/actions/habits"
-import type { HabitRecord, HabitsCollection } from "@/lib/collection/habits"
+import type { HabitRow } from "@/actions/habits"
+import type { HabitsCollection } from "@/lib/collection/habits"
 
-function habitInputFrom(modified: HabitRecord) {
+function habitInputFrom(modified: HabitRow) {
   return {
     categoryId: modified.categoryId,
     name: modified.name,
@@ -26,7 +27,7 @@ export const habitMutationFns: OfflineConfig["mutationFns"] = {
   "habits.create": async ({ transaction }) => {
     const mutation = transaction.mutations[0]
     const collection = mutation.collection as unknown as HabitsCollection
-    const modified = mutation.modified as unknown as HabitRecord
+    const modified = mutation.modified as unknown as HabitRow
     const result = await createHabit({
       data: {
         id: modified.id,
@@ -42,7 +43,7 @@ export const habitMutationFns: OfflineConfig["mutationFns"] = {
   "habits.update": async ({ transaction }) => {
     const mutation = transaction.mutations[0]
     const collection = mutation.collection as unknown as HabitsCollection
-    const modified = mutation.modified as unknown as HabitRecord
+    const modified = mutation.modified as unknown as HabitRow
     const result = await updateHabit({
       data: { id: String(mutation.key), ...habitInputFrom(modified) },
     })
@@ -54,7 +55,7 @@ export const habitMutationFns: OfflineConfig["mutationFns"] = {
   "habits.archive": async ({ transaction }) => {
     const mutation = transaction.mutations[0]
     const collection = mutation.collection as unknown as HabitsCollection
-    const modified = mutation.modified as unknown as HabitRecord
+    const modified = mutation.modified as unknown as HabitRow
     const result = await archiveHabit({
       data: { id: String(mutation.key), note: modified.archivedNote },
     })

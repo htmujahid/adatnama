@@ -8,7 +8,7 @@ import {
   subDays,
 } from "date-fns"
 
-import type { HabitRecord } from "@/lib/collection/habits"
+import type { HabitRow } from "@/actions/habits"
 
 export type HabitDayState = "done" | "missed" | "frozen" | "today"
 
@@ -89,7 +89,7 @@ export function reminderMinutes(time: string): number {
 export const WEEK_LENGTH = 7
 export const HISTORY_LENGTH = 28
 
-export type HabitView = HabitRecord & HabitStats
+export type HabitView = HabitRow & HabitStats
 
 export type HabitStats = {
   doneToday: boolean

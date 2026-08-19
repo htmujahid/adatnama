@@ -8,12 +8,10 @@ import { listPreferences } from "@/actions/preferences"
 import { persistence } from "@/lib/db/browser"
 import type { UserPreferencesTable } from "@/lib/db/schema"
 
-export type PreferencesRecord = UserPreferencesTable
-
 export const preferencesCollection = collectionOptions(
   "preferences",
   (client) =>
-    persistedCollectionOptions<PreferencesRecord, string>({
+    persistedCollectionOptions<UserPreferencesTable, string>({
       ...queryCollectionOptions({
         id: "preferences",
         queryKey: ["preferences"],

@@ -8,8 +8,6 @@ import { listCircles } from "@/actions/circles"
 import type { CircleMember } from "@/actions/circles"
 import { persistence } from "@/lib/db/browser"
 
-export type { CircleMember } from "@/actions/circles"
-
 export type CircleRecord = {
   id: string
   name: string

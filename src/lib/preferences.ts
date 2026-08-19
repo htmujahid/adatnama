@@ -1,9 +1,7 @@
 import type { OfflineExecutor } from "@tanstack/offline-transactions"
 
-import type {
-  PreferencesCollection,
-  PreferencesRecord,
-} from "@/lib/collection/preferences"
+import type { PreferencesCollection } from "@/lib/collection/preferences"
+import type { UserPreferencesTable } from "@/lib/db/schema"
 import { HABIT_DAY_PRESETS } from "@/lib/habits"
 
 export type HabitDefaults = {
@@ -19,7 +17,7 @@ export type NotificationPreferences = {
 }
 
 export const PREFERENCES_FALLBACK: Omit<
-  PreferencesRecord,
+  UserPreferencesTable,
   "userId" | "timezone"
 > = {
   defaultCategoryId: null,
@@ -38,7 +36,7 @@ export function presetDays(presetId: string): ReadonlyArray<number> {
 }
 
 export function habitDefaultsFrom(
-  record: PreferencesRecord | undefined,
+  record: UserPreferencesTable | undefined,
 ): HabitDefaults {
   return {
     category:
@@ -53,7 +51,7 @@ export function habitDefaultsFrom(
 }
 
 export function notificationsFrom(
-  record: PreferencesRecord | undefined,
+  record: UserPreferencesTable | undefined,
 ): NotificationPreferences {
   return {
     reminders:
@@ -77,8 +75,8 @@ export function savePreferences({
   executor: OfflineExecutor | undefined
   collection: PreferencesCollection
   userId: string
-  record: PreferencesRecord | undefined
-  changes: Partial<Omit<PreferencesRecord, "userId">>
+  record: UserPreferencesTable | undefined
+  changes: Partial<Omit<UserPreferencesTable, "userId">>
 }) {
   if (!executor) return
   if (record) {

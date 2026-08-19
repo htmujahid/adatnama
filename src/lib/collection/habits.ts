@@ -8,8 +8,6 @@ import { listHabits } from "@/actions/habits"
 import type { HabitRow } from "@/actions/habits"
 import { persistence } from "@/lib/db/browser"
 
-export type HabitRecord = HabitRow
-
 export type HabitInput = {
   name: string
   description: string
@@ -21,7 +19,7 @@ export type HabitInput = {
 }
 
 export const habitsCollection = collectionOptions("habits", (client) =>
-  persistedCollectionOptions<HabitRecord, string>({
+  persistedCollectionOptions<HabitRow, string>({
     ...queryCollectionOptions({
       id: "habits",
       queryKey: ["habits"],

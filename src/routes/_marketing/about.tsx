@@ -8,24 +8,34 @@ export const Route = createFileRoute("/_marketing/about")({
 
 const PRINCIPLES = [
   {
-    title: "Checking in is instant",
+    title: "The daily part has to be effortless",
     description:
-      "A check-in updates your streak the moment you tap it. No page reload, no waiting for the count to catch up.",
+      "If checking in takes more than a moment, it stops happening. Today's habits are the first thing you see, and marking one done is a single tap.",
   },
   {
-    title: "Type-safe end to end",
+    title: "One bad day shouldn't erase a good month",
     description:
-      "Routes, params, loaders, and queries are all inferred. The same schema that defines a habit types every check-in against it.",
+      "Strict streaks punish exactly the people who need encouragement. Freezes cover the occasional miss automatically, so the streak measures commitment, not perfection.",
   },
   {
-    title: "Server-first, then reactive",
+    title: "The record should be honest",
     description:
-      "Data is fetched on the server and hydrated into a client cache that stays live. Pages render instantly and update on their own.",
+      "You check in on the day itself, not three days later from memory. Frozen and missed days are shown for what they are. A history you can trust is the only kind worth keeping.",
   },
   {
-    title: "Edge-native by default",
+    title: "Habits fit around your life, not the other way",
     description:
-      "The whole app deploys to Cloudflare Workers, so your habits and their streaks are tracked close to wherever you check in from.",
+      "Not everything is an every-day habit. Gym three times a week, a family call on weekends — each habit runs on its own schedule, and only those days count.",
+  },
+  {
+    title: "It's easier together",
+    description:
+      "A friend who can see your streak is a powerful reason to keep it. Circles keep that social pressure friendly, private, and limited to the habits you choose to share.",
+  },
+  {
+    title: "It should work wherever you are",
+    description:
+      "A habit tracker you can't open on a plane or in a basement gym is a tracker with holes in it. Your habits live on your device and sync when you're back online.",
   },
 ]
 
@@ -39,17 +49,19 @@ function AboutPage() {
               About Adatnama
             </h1>
             <p className="mt-4 text-lg text-muted-foreground">
-              Adatnama is a streak and habit tracker built on TanStack Start and
-              deployed to Cloudflare. Add a habit, check in daily, and Adatnama
-              turns that into a running streak: a current count, a longest
-              count, and a freeze you can spend when a day slips.
+              Adatnama is a daily habit tracker built around a simple loop: you
+              do the thing, you tap once, and the streak grows. Whether it's a
+              morning run, twenty pages before bed, or calling your parents on
+              Sundays, it turns showing up into something you can see.
             </p>
             <p className="mt-4 text-lg text-muted-foreground">
-              Streaks work because the feedback is immediate: you do the thing,
-              the count goes up, and losing it feels like something worth
-              protecting. Adatnama exists to keep that loop tight, so a check-in
-              updates your streak instantly, with no gap between doing the habit
-              and seeing it counted.
+              Streaks work because the feedback is immediate and losing one
+              stings. But most trackers make that sting too sharp — one missed
+              day and weeks of effort reset to zero, which is usually the moment
+              people quit. Adatnama keeps the streak motivating and takes the
+              cruelty out: freezes absorb the occasional bad day, schedules only
+              expect a habit on the days you planned it, and the history always
+              tells you the truth about how it went.
             </p>
           </div>
         </div>
@@ -57,9 +69,14 @@ function AboutPage() {
 
       <section className="border-b border-border bg-muted/30">
         <div className="mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-          <h2 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
-            Principles
-          </h2>
+          <div className="max-w-2xl">
+            <h2 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
+              What we believe about habits
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              Every feature in the app comes from one of these.
+            </p>
+          </div>
           <div className="mt-10 grid gap-x-12 gap-y-10 sm:grid-cols-2">
             {PRINCIPLES.map((principle, index) => (
               <div
@@ -81,19 +98,24 @@ function AboutPage() {
 
       <section>
         <div className="mx-auto flex w-full max-w-7xl flex-col items-start justify-between gap-6 px-4 py-20 sm:px-6 lg:flex-row lg:items-center lg:px-8">
-          <h2 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
-            Curious what it can do?
-          </h2>
+          <div>
+            <h2 className="font-heading text-2xl font-semibold tracking-tight sm:text-3xl">
+              Sound like your kind of tracker?
+            </h2>
+            <p className="mt-2 max-w-xl text-muted-foreground">
+              Start with one habit. The rest can wait until tomorrow.
+            </p>
+          </div>
           <div className="flex flex-wrap items-center gap-3">
-            <Button nativeButton={false} render={<Link to="/features" />}>
-              Browse the features
+            <Button nativeButton={false} render={<Link to="/login" />}>
+              Get started
             </Button>
             <Button
               variant="outline"
               nativeButton={false}
-              render={<Link to="/status" />}
+              render={<Link to="/features" />}
             >
-              Check the live status page
+              Browse the features
             </Button>
           </div>
         </div>

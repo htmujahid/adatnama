@@ -16,7 +16,9 @@ import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as MarketingIndexRouteImport } from './routes/_marketing/index'
 import { Route as MarketingAboutRouteImport } from './routes/_marketing/about'
 import { Route as MarketingFeaturesRouteImport } from './routes/_marketing/features'
+import { Route as MarketingPrivacyRouteImport } from './routes/_marketing/privacy'
 import { Route as MarketingStatusRouteImport } from './routes/_marketing/status'
+import { Route as MarketingTermsRouteImport } from './routes/_marketing/terms'
 import { Route as ApiStatusRouteImport } from './routes/api/status'
 import { Route as HomeIndexRouteImport } from './routes/home/index'
 import { Route as HomeAchievementsRouteImport } from './routes/home/achievements'
@@ -73,9 +75,19 @@ const MarketingFeaturesRoute = MarketingFeaturesRouteImport.update({
   path: '/features',
   getParentRoute: () => MarketingRouteRoute,
 } as any)
+const MarketingPrivacyRoute = MarketingPrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => MarketingRouteRoute,
+} as any)
 const MarketingStatusRoute = MarketingStatusRouteImport.update({
   id: '/status',
   path: '/status',
+  getParentRoute: () => MarketingRouteRoute,
+} as any)
+const MarketingTermsRoute = MarketingTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => MarketingRouteRoute,
 } as any)
 const ApiStatusRoute = ApiStatusRouteImport.update({
@@ -197,7 +209,9 @@ export interface FileRoutesByFullPath {
   '/login': typeof AuthLoginRoute
   '/about': typeof MarketingAboutRoute
   '/features': typeof MarketingFeaturesRoute
+  '/privacy': typeof MarketingPrivacyRoute
   '/status': typeof MarketingStatusRoute
+  '/terms': typeof MarketingTermsRoute
   '/api/status': typeof ApiStatusRoute
   '/home/achievements': typeof HomeAchievementsRoute
   '/home/categories': typeof HomeCategoriesRoute
@@ -226,7 +240,9 @@ export interface FileRoutesByTo {
   '/login': typeof AuthLoginRoute
   '/about': typeof MarketingAboutRoute
   '/features': typeof MarketingFeaturesRoute
+  '/privacy': typeof MarketingPrivacyRoute
   '/status': typeof MarketingStatusRoute
+  '/terms': typeof MarketingTermsRoute
   '/api/status': typeof ApiStatusRoute
   '/home/achievements': typeof HomeAchievementsRoute
   '/home/categories': typeof HomeCategoriesRoute
@@ -256,7 +272,9 @@ export interface FileRoutesById {
   '/_auth/login': typeof AuthLoginRoute
   '/_marketing/about': typeof MarketingAboutRoute
   '/_marketing/features': typeof MarketingFeaturesRoute
+  '/_marketing/privacy': typeof MarketingPrivacyRoute
   '/_marketing/status': typeof MarketingStatusRoute
+  '/_marketing/terms': typeof MarketingTermsRoute
   '/api/status': typeof ApiStatusRoute
   '/home/achievements': typeof HomeAchievementsRoute
   '/home/categories': typeof HomeCategoriesRoute
@@ -289,7 +307,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/about'
     | '/features'
+    | '/privacy'
     | '/status'
+    | '/terms'
     | '/api/status'
     | '/home/achievements'
     | '/home/categories'
@@ -318,7 +338,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/about'
     | '/features'
+    | '/privacy'
     | '/status'
+    | '/terms'
     | '/api/status'
     | '/home/achievements'
     | '/home/categories'
@@ -347,7 +369,9 @@ export interface FileRouteTypes {
     | '/_auth/login'
     | '/_marketing/about'
     | '/_marketing/features'
+    | '/_marketing/privacy'
     | '/_marketing/status'
+    | '/_marketing/terms'
     | '/api/status'
     | '/home/achievements'
     | '/home/categories'
@@ -432,11 +456,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketingFeaturesRouteImport
       parentRoute: typeof MarketingRouteRoute
     }
+    '/_marketing/privacy': {
+      id: '/_marketing/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof MarketingPrivacyRouteImport
+      parentRoute: typeof MarketingRouteRoute
+    }
     '/_marketing/status': {
       id: '/_marketing/status'
       path: '/status'
       fullPath: '/status'
       preLoaderRoute: typeof MarketingStatusRouteImport
+      parentRoute: typeof MarketingRouteRoute
+    }
+    '/_marketing/terms': {
+      id: '/_marketing/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof MarketingTermsRouteImport
       parentRoute: typeof MarketingRouteRoute
     }
     '/api/status': {
@@ -611,14 +649,18 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
 interface MarketingRouteRouteChildren {
   MarketingAboutRoute: typeof MarketingAboutRoute
   MarketingFeaturesRoute: typeof MarketingFeaturesRoute
+  MarketingPrivacyRoute: typeof MarketingPrivacyRoute
   MarketingStatusRoute: typeof MarketingStatusRoute
+  MarketingTermsRoute: typeof MarketingTermsRoute
   MarketingIndexRoute: typeof MarketingIndexRoute
 }
 
 const MarketingRouteRouteChildren: MarketingRouteRouteChildren = {
   MarketingAboutRoute: MarketingAboutRoute,
   MarketingFeaturesRoute: MarketingFeaturesRoute,
+  MarketingPrivacyRoute: MarketingPrivacyRoute,
   MarketingStatusRoute: MarketingStatusRoute,
+  MarketingTermsRoute: MarketingTermsRoute,
   MarketingIndexRoute: MarketingIndexRoute,
 }
 

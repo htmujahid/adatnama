@@ -15,6 +15,13 @@ const FOOTER_GROUPS = [
     title: "Company",
     links: [{ to: "/about", label: "About" }],
   },
+  {
+    title: "Legal",
+    links: [
+      { to: "/terms", label: "Terms of Service" },
+      { to: "/privacy", label: "Privacy Policy" },
+    ],
+  },
 ] as const
 
 export function Footer() {

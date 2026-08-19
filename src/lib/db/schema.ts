@@ -78,6 +78,13 @@ export interface InvitationTable {
   inviterId: string
 }
 
+export interface RateLimitTable {
+  id: string
+  key: string
+  count: number
+  lastRequest: number
+}
+
 export interface CategoryTable {
   id: string
   userId: string
@@ -157,6 +164,7 @@ export interface Database {
   organization: OrganizationTable
   member: MemberTable
   invitation: InvitationTable
+  rateLimit: RateLimitTable
   category: CategoryTable
   habit: HabitTable
   habit_schedule_day: HabitScheduleDayTable

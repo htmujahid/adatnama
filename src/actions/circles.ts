@@ -191,6 +191,12 @@ export const regenerateJoinCode = createServerFn({ method: "POST" })
 export const previewCircleByCode = createServerFn({ method: "GET" })
   .validator((data: { code: string }) => data)
   .handler(async ({ data }) => {
+    const headers = getRequestHeaders()
+    const session = await auth.api.getSession({ headers })
+    if (!session) {
+      return { circle: null }
+    }
+
     const code = data.code.trim().toUpperCase()
     const circle = await db
       .selectFrom("organization")

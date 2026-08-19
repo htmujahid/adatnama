@@ -246,11 +246,14 @@ export class ReminderDurableObject extends DurableObject<Env> {
         return instant <= now && now - instant <= ALARM_LATE_WINDOW_MS
       })
 
+      const deadSubscriptionIds = new Set<string>()
       for (const habit of due) {
         for (const subscription of state.subscriptions) {
+          if (deadSubscriptionIds.has(subscription.id)) continue
           try {
             const response = await sendReminderPush(subscription, habit)
             if (response.status === 404 || response.status === 410) {
+              deadSubscriptionIds.add(subscription.id)
               await db
                 .deleteFrom("push_subscription")
                 .where("id", "=", subscription.id)
@@ -261,9 +264,12 @@ export class ReminderDurableObject extends DurableObject<Env> {
           }
         }
       }
+      state.subscriptions = state.subscriptions.filter(
+        (subscription) => !deadSubscriptionIds.has(subscription.id),
+      )
     }
 
-    await this.applySchedule(await loadReminderState(userId))
+    await this.applySchedule(state)
   }
 
   private async applySchedule(state: ReminderState): Promise<void> {
@@ -294,6 +300,16 @@ export class ReminderDurableObject extends DurableObject<Env> {
 
 export async function syncReminderSchedule(userId: string): Promise<void> {
   try {
+    const subscription = await db
+      .selectFrom("push_subscription")
+      .select("id")
+      .where("userId", "=", userId)
+      .limit(1)
+      .executeTakeFirst()
+    // Without subscriptions there is nothing to deliver; a stale alarm
+    // self-clears on its next firing via applySchedule.
+    if (!subscription) return
+
     const stub = env.REMINDER_DO.get(env.REMINDER_DO.idFromName(userId))
     await stub.schedule(userId)
   } catch (error) {

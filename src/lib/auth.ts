@@ -12,6 +12,15 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60,
+    },
+  },
+  rateLimit: {
+    storage: "database",
+  },
   socialProviders: {
     google: {
       clientId: env.GOOGLE_CLIENT_ID,

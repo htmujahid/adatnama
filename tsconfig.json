@@ -10,7 +10,6 @@
     "node_modules",
     "dist",
     "src/components/ui",
-    "src/components/reui",
     "src/lib/utils.ts",
     "src/routeTree.gen.ts"
   ],

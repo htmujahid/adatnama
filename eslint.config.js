@@ -17,7 +17,6 @@ export default [
   {
     ignores: [
       "src/components/ui",
-      "src/components/reui",
       "src/lib/utils.ts",
       "eslint.config.js",
       "prettier.config.js",

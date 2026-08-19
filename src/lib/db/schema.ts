@@ -119,15 +119,6 @@ export interface HabitCheckinTable {
   updatedAt: string
 }
 
-export interface AchievementTable {
-  id: string
-  name: string
-  description: string
-  icon: string
-  target: number | null
-  createdAt: string
-}
-
 export interface UserAchievementUnlockTable {
   id: string
   userId: string
@@ -158,7 +149,6 @@ export interface Database {
   habit: HabitTable
   habit_schedule_day: HabitScheduleDayTable
   habit_checkin: HabitCheckinTable
-  achievement: AchievementTable
   user_achievement_unlock: UserAchievementUnlockTable
   user_preferences: UserPreferencesTable
 }

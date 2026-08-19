@@ -9,6 +9,8 @@ import {
   UsersIcon,
 } from "lucide-react"
 
+import { ACHIEVEMENT_IDS } from "@/lib/achievement-ids"
+import type { AchievementId } from "@/lib/achievement-ids"
 import { isScheduledOn, lastNDays, reminderMinutes } from "@/lib/habits"
 import type { HabitDayState } from "@/lib/habits"
 
@@ -28,7 +30,7 @@ export type AchievementProgress = {
 }
 
 export type AchievementDefinition = {
-  id: string
+  id: AchievementId
   name: string
   description: string
   icon: typeof FlagIcon
@@ -43,23 +45,23 @@ function thresholdProgress(value: number, target: number): AchievementProgress {
   }
 }
 
-export const ACHIEVEMENT_DEFINITIONS: ReadonlyArray<AchievementDefinition> = [
-  {
-    id: "first-step",
+const DEFINITION_BY_ID: Record<
+  AchievementId,
+  Omit<AchievementDefinition, "id">
+> = {
+  "first-step": {
     name: "First step",
     description: "Complete your first check-in",
     icon: FlagIcon,
     compute: (context) => thresholdProgress(context.totalDone, 1),
   },
-  {
-    id: "week-warrior",
+  "week-warrior": {
     name: "Week warrior",
     description: "Hit a 7-day streak",
     icon: FlameIcon,
     compute: (context) => thresholdProgress(context.bestStreak, 7),
   },
-  {
-    id: "consistent",
+  consistent: {
     name: "Consistent",
     description: "Score 80%+ completion in a week",
     icon: TargetIcon,
@@ -71,36 +73,31 @@ export const ACHIEVEMENT_DEFINITIONS: ReadonlyArray<AchievementDefinition> = [
       return thresholdProgress(rate, 80)
     },
   },
-  {
-    id: "team-player",
+  "team-player": {
     name: "Team player",
     description: "Join a circle",
     icon: UsersIcon,
     compute: (context) => thresholdProgress(context.circleCount, 1),
   },
-  {
-    id: "early-riser",
+  "early-riser": {
     name: "Early riser",
     description: "Complete a habit with a reminder before 7 AM",
     icon: SunriseIcon,
     compute: (context) => thresholdProgress(context.hasEarlyCheckin ? 1 : 0, 1),
   },
-  {
-    id: "month-master",
+  "month-master": {
     name: "Month master",
     description: "Hit a 30-day streak",
     icon: TrophyIcon,
     compute: (context) => thresholdProgress(context.bestStreak, 30),
   },
-  {
-    id: "century-club",
+  "century-club": {
     name: "Century club",
     description: "Hit a 100-day streak",
     icon: GemIcon,
     compute: (context) => thresholdProgress(context.bestStreak, 100),
   },
-  {
-    id: "perfect-week",
+  "perfect-week": {
     name: "Perfect week",
     description: "Every habit, every day for a week",
     icon: SparklesIcon,
@@ -112,7 +109,10 @@ export const ACHIEVEMENT_DEFINITIONS: ReadonlyArray<AchievementDefinition> = [
         context.weeklyDone >= context.weeklyScheduled,
     }),
   },
-]
+}
+
+export const ACHIEVEMENT_DEFINITIONS: ReadonlyArray<AchievementDefinition> =
+  ACHIEVEMENT_IDS.map((id) => ({ id, ...DEFINITION_BY_ID[id] }))
 
 type HabitForContext = {
   days: ReadonlyArray<number>

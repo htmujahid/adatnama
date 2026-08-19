@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start"
 import { getRequestHeaders } from "@tanstack/react-start/server"
 
+import { isAchievementId } from "@/lib/achievement-ids"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 
@@ -30,12 +31,7 @@ export const unlockAchievement = createServerFn({ method: "POST" })
       return { error: { message: "You must be signed in." }, unlock: null }
     }
 
-    const achievement = await db
-      .selectFrom("achievement")
-      .select("id")
-      .where("id", "=", data.achievementId)
-      .executeTakeFirst()
-    if (!achievement) {
+    if (!isAchievementId(data.achievementId)) {
       return { error: { message: "Achievement not found." }, unlock: null }
     }
 

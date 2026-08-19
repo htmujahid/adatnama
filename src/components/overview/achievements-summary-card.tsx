@@ -1,3 +1,4 @@
+import { eq, useLiveQuery } from "@tanstack/react-db"
 import { Link } from "@tanstack/react-router"
 import { LockIcon } from "lucide-react"
 
@@ -10,11 +11,85 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useAchievements } from "@/hooks/use-achievements"
+import {
+  ACHIEVEMENT_DEFINITIONS,
+  buildAchievementContext,
+} from "@/lib/achievements"
+import { achievementUnlocksCollection } from "@/lib/collection/achievements"
+import { checkinsCollection } from "@/lib/collection/checkins"
+import { circlesCollection } from "@/lib/collection/circles"
+import { habitsCollection } from "@/lib/collection/habits"
+import { computeHabitStats } from "@/lib/habits"
 import { cn } from "@/lib/utils"
 
+const EMPTY_DONE_DATES: ReadonlySet<string> = new Set()
+
 export function AchievementsSummaryCard() {
-  const { achievements, unlockedCount, isLoading } = useAchievements()
+  const today = new Date()
+
+  const { data: habitCheckinRows = [], isLoading: habitsLoading } =
+    useLiveQuery((q) =>
+      q.from({ habit: habitsCollection }).leftJoin(
+        {
+          checkin: q
+            .from({ checkin: checkinsCollection })
+            .where(({ checkin }) => eq(checkin.status, "done")),
+        },
+        ({ habit, checkin }) => eq(checkin.habitId, habit.id),
+      ),
+    )
+  const { data: circles = [], isLoading: circlesLoading } = useLiveQuery((q) =>
+    q.from({ circle: circlesCollection }),
+  )
+  const { data: unlocks = [], isLoading: unlocksLoading } = useLiveQuery((q) =>
+    q.from({ unlock: achievementUnlocksCollection }),
+  )
+  const isLoading = habitsLoading || circlesLoading || unlocksLoading
+
+  const habitById = new Map<
+    string,
+    (typeof habitCheckinRows)[number]["habit"]
+  >()
+  const doneDates = new Map<string, Set<string>>()
+  for (const { habit, checkin } of habitCheckinRows) {
+    habitById.set(habit.id, habit)
+    if (!checkin) continue
+    let dates = doneDates.get(habit.id)
+    if (!dates) {
+      dates = new Set()
+      doneDates.set(habit.id, dates)
+    }
+    dates.add(checkin.date)
+  }
+  const doneCountByHabitId = new Map<string, number>()
+  for (const [habitId, dates] of doneDates) {
+    doneCountByHabitId.set(habitId, dates.size)
+  }
+  const habits = Array.from(habitById.values(), (record) => ({
+    ...record,
+    ...computeHabitStats(
+      record,
+      doneDates.get(record.id) ?? EMPTY_DONE_DATES,
+      today,
+    ),
+  }))
+  const context = buildAchievementContext({
+    habits,
+    doneCountByHabitId,
+    circleCount: circles.length,
+    today,
+  })
+  const achievements = ACHIEVEMENT_DEFINITIONS.map(
+    ({ compute, ...definition }) => ({
+      ...definition,
+      unlocked:
+        compute(context).achieved ||
+        unlocks.some((unlock) => unlock.achievementId === definition.id),
+    }),
+  )
+  const unlockedCount = achievements.filter(
+    (achievement) => achievement.unlocked,
+  ).length
 
   return (
     <Card className="lg:col-span-2">

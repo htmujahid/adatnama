@@ -36,7 +36,7 @@ import { Input } from "@/components/ui/input"
 import { Item, ItemActions, ItemContent, ItemTitle } from "@/components/ui/item"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useHomeUser } from "@/hooks/use-home-user"
-import { circlesCollection } from "@/lib/collection/circles"
+import { useCirclesCollection } from "@/lib/collection/circles"
 import { useOfflineExecutor } from "@/lib/db/offline"
 
 export const Route = createFileRoute("/home/circles/$circleId/")({
@@ -60,6 +60,7 @@ function InviteCard({
   joinCode: string
   canRegenerate: boolean
 }) {
+  const circlesCollection = useCirclesCollection()
   const [copied, setCopied] = useState(false)
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -147,6 +148,7 @@ function MemberRow({
   canManage: boolean
   isSelf: boolean
 }) {
+  const circlesCollection = useCirclesCollection()
   const roles = memberRoles(role)
   const isOwner = roles.includes("owner")
   const isAdmin = roles.includes("admin")
@@ -238,6 +240,7 @@ function CircleDetailSkeleton() {
 function CircleDetailPage() {
   const { circleId } = Route.useParams()
   const navigate = useNavigate()
+  const circlesCollection = useCirclesCollection()
   const executor = useOfflineExecutor()
   const user = useHomeUser()
   const { data: matches = [], isLoading: circleLoading } = useLiveQuery(

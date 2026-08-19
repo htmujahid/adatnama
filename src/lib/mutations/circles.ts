@@ -8,9 +8,7 @@ import {
   updateCircle,
   updateMemberRole,
 } from "@/actions/circles"
-import type { CircleRecord, circlesCollection } from "@/lib/collection/circles"
-
-type CirclesCollection = typeof circlesCollection
+import type { CircleRecord, CirclesCollection } from "@/lib/collection/circles"
 
 export const circleMutationFns: OfflineConfig["mutationFns"] = {
   "circles.create": async ({ transaction }) => {

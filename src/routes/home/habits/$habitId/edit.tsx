@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useHabit } from "@/hooks/use-habits"
-import { habitsCollection } from "@/lib/collection/habits"
+import { useHabitsCollection } from "@/lib/collection/habits"
 import { useOfflineExecutor } from "@/lib/db/offline"
 
 export const Route = createFileRoute("/home/habits/$habitId/edit")({
@@ -20,6 +20,7 @@ function EditHabitPage() {
   const { habitId } = Route.useParams()
   const navigate = useNavigate()
   const { habit, isLoading } = useHabit(habitId)
+  const habitsCollection = useHabitsCollection()
   const executor = useOfflineExecutor()
 
   if (isLoading && !habit) {

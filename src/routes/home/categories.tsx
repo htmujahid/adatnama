@@ -29,7 +29,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useHabits } from "@/hooks/use-habits"
 import { useHomeUser } from "@/hooks/use-home-user"
 import type { CategoryInput, CategoryRecord } from "@/lib/collection/categories"
-import { categoriesCollection } from "@/lib/collection/categories"
+import { useCategoriesCollection } from "@/lib/collection/categories"
 import { useOfflineExecutor } from "@/lib/db/offline"
 
 export const Route = createFileRoute("/home/categories")({
@@ -38,6 +38,7 @@ export const Route = createFileRoute("/home/categories")({
 
 function CategoriesPage() {
   const user = useHomeUser()
+  const categoriesCollection = useCategoriesCollection()
   const executor = useOfflineExecutor()
   const { data: categories = [], isLoading: categoriesLoading } = useLiveQuery(
     (q) => q.from({ category: categoriesCollection }),

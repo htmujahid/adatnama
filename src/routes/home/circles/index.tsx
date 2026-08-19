@@ -32,7 +32,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
-import { circlesCollection } from "@/lib/collection/circles"
+import { useCirclesCollection } from "@/lib/collection/circles"
 
 export const Route = createFileRoute("/home/circles/")({
   component: CirclesPage,
@@ -152,6 +152,7 @@ function CirclesPageSkeleton() {
 
 function CirclesPage() {
   const navigate = useNavigate()
+  const circlesCollection = useCirclesCollection()
   const { data: circles = [], isLoading: circlesLoading } = useLiveQuery((q) =>
     q.from({ circle: circlesCollection }),
   )

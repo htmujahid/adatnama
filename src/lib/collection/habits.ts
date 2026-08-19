@@ -1,12 +1,12 @@
 import { collectionOptions } from "@tanstack/db"
 import { persistedCollectionOptions } from "@tanstack/db-sqlite-persistence-core"
-import type { PersistedCollectionPersistence } from "@tanstack/db-sqlite-persistence-core"
 import { queryCollectionOptions } from "@tanstack/query-db-collection"
+import { useDbClient } from "@tanstack/react-db"
 import type { QueryClient } from "@tanstack/react-query"
 
 import { listHabits } from "@/actions/habits"
 import type { HabitRow } from "@/actions/habits"
-import { db } from "@/lib/db/browser"
+import { persistence } from "@/lib/db/browser"
 
 export type HabitRecord = HabitRow
 
@@ -20,7 +20,7 @@ export type HabitInput = {
   freezesTotal: number
 }
 
-export const habitsCollectionOptions = collectionOptions("habits", (client) =>
+export const habitsCollection = collectionOptions("habits", (client) =>
   persistedCollectionOptions<HabitRecord, string>({
     ...queryCollectionOptions({
       id: "habits",
@@ -29,10 +29,13 @@ export const habitsCollectionOptions = collectionOptions("habits", (client) =>
       getKey: (habit) => habit.id,
       queryFn: () => listHabits(),
     }),
-    persistence:
-      client.requireDependency<PersistedCollectionPersistence>("persistence"),
+    persistence,
     schemaVersion: 1,
   }),
 )
 
-export const habitsCollection = db.collection(habitsCollectionOptions)
+export function useHabitsCollection() {
+  return useDbClient().collection(habitsCollection)
+}
+
+export type HabitsCollection = ReturnType<typeof useHabitsCollection>

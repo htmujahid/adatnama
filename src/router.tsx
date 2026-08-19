@@ -1,6 +1,8 @@
+import { DbClient } from "@tanstack/react-db"
 import { QueryClient } from "@tanstack/react-query"
 import { createRouter as createTanStackRouter } from "@tanstack/react-router"
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query"
+import { routerWithDbClient } from "@tanstack/react-router-with-db"
 
 import { RouterError } from "@/components/router/error"
 import { RouterNotFound } from "@/components/router/not-found"
@@ -16,10 +18,11 @@ export function getRouter() {
       },
     },
   })
+  const dbClient = new DbClient({ queryClient })
 
   const router = createTanStackRouter({
     routeTree,
-    context: { queryClient },
+    context: { queryClient, dbClient },
     scrollRestoration: true,
     defaultPreload: "intent",
     defaultPreloadStaleTime: 0,
@@ -32,7 +35,7 @@ export function getRouter() {
     queryClient,
   })
 
-  return router
+  return routerWithDbClient(router, dbClient)
 }
 
 declare module "@tanstack/react-router" {

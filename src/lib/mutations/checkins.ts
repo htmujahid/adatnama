@@ -4,10 +4,8 @@ import type { OfflineConfig } from "@tanstack/offline-transactions"
 import { deleteCheckin, upsertCheckin } from "@/actions/checkins"
 import type {
   CheckinRecord,
-  checkinsCollection,
+  CheckinsCollection,
 } from "@/lib/collection/checkins"
-
-type CheckinsCollection = typeof checkinsCollection
 
 async function upsertFromMutation(mutation: {
   collection: unknown

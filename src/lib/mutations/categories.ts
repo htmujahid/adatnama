@@ -7,11 +7,9 @@ import {
   updateCategory,
 } from "@/actions/categories"
 import type {
-  categoriesCollection,
+  CategoriesCollection,
   CategoryRecord,
 } from "@/lib/collection/categories"
-
-type CategoriesCollection = typeof categoriesCollection
 
 export const categoryMutationFns: OfflineConfig["mutationFns"] = {
   "categories.create": async ({ transaction }) => {

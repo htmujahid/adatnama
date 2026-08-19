@@ -1,3 +1,4 @@
+import type { DbClient } from "@tanstack/react-db"
 import { TanStackDevtools } from "@tanstack/react-devtools"
 import type { QueryClient } from "@tanstack/react-query"
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools"
@@ -18,6 +19,7 @@ const THEME_INIT_SCRIPT = `(function(){try{var stored=window.localStorage.getIte
 
 interface RouterContext {
   queryClient: QueryClient
+  dbClient: DbClient
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({

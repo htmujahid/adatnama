@@ -1,16 +1,16 @@
 import { collectionOptions } from "@tanstack/db"
 import { persistedCollectionOptions } from "@tanstack/db-sqlite-persistence-core"
-import type { PersistedCollectionPersistence } from "@tanstack/db-sqlite-persistence-core"
 import { queryCollectionOptions } from "@tanstack/query-db-collection"
+import { useDbClient } from "@tanstack/react-db"
 import type { QueryClient } from "@tanstack/react-query"
 
 import { listAchievementUnlocks } from "@/actions/achievements"
-import { db } from "@/lib/db/browser"
+import { persistence } from "@/lib/db/browser"
 import type { UserAchievementUnlockTable } from "@/lib/db/schema"
 
 export type AchievementUnlockRecord = UserAchievementUnlockTable
 
-export const achievementUnlocksCollectionOptions = collectionOptions(
+export const achievementUnlocksCollection = collectionOptions(
   "achievement-unlocks",
   (client) =>
     persistedCollectionOptions<AchievementUnlockRecord, string>({
@@ -21,12 +21,15 @@ export const achievementUnlocksCollectionOptions = collectionOptions(
         getKey: (unlock) => unlock.id,
         queryFn: () => listAchievementUnlocks(),
       }),
-      persistence:
-        client.requireDependency<PersistedCollectionPersistence>("persistence"),
+      persistence,
       schemaVersion: 1,
     }),
 )
 
-export const achievementUnlocksCollection = db.collection(
-  achievementUnlocksCollectionOptions,
-)
+export function useAchievementUnlocksCollection() {
+  return useDbClient().collection(achievementUnlocksCollection)
+}
+
+export type AchievementUnlocksCollection = ReturnType<
+  typeof useAchievementUnlocksCollection
+>

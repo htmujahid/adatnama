@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { FieldError } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
-import { circlesCollection } from "@/lib/collection/circles"
+import { useCirclesCollection } from "@/lib/collection/circles"
 import { circlePreviewQueryOptions } from "@/lib/query/circles"
 
 export const Route = createFileRoute("/home/circles/join/$code")({
@@ -24,6 +24,7 @@ export const Route = createFileRoute("/home/circles/join/$code")({
 function JoinCirclePage() {
   const { code } = Route.useParams()
   const navigate = useNavigate()
+  const circlesCollection = useCirclesCollection()
   const { data } = useSuspenseQuery(circlePreviewQueryOptions(code))
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)

@@ -9,7 +9,7 @@ import {
   buildAchievementContext,
 } from "@/lib/achievements"
 import type { AchievementDefinition } from "@/lib/achievements"
-import { achievementUnlocksCollection } from "@/lib/collection/achievements"
+import { useAchievementUnlocksCollection } from "@/lib/collection/achievements"
 import { circlesCollection } from "@/lib/collection/circles"
 import { useOfflineExecutor } from "@/lib/db/offline"
 import { dateKey } from "@/lib/habits"
@@ -29,6 +29,7 @@ export function useAchievements(): {
   isLoading: boolean
 } {
   const user = useHomeUser()
+  const achievementUnlocksCollection = useAchievementUnlocksCollection()
   const { habits, checkins, isLoading: habitsLoading } = useHabits()
   const executor = useOfflineExecutor()
   const { data: circles = [], isLoading: circlesLoading } = useLiveQuery((q) =>

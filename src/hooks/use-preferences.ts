@@ -1,7 +1,7 @@
 import { useLiveQuery } from "@tanstack/react-db"
 
 import { useHomeUser } from "@/hooks/use-home-user"
-import { preferencesCollection } from "@/lib/collection/preferences"
+import { usePreferencesCollection } from "@/lib/collection/preferences"
 import type { PreferencesRecord } from "@/lib/collection/preferences"
 import { useOfflineExecutor } from "@/lib/db/offline"
 import { HABIT_DAY_PRESETS, schedulePresetFor } from "@/lib/habits"
@@ -36,6 +36,7 @@ function presetDays(presetId: string): ReadonlyArray<number> {
 
 export function usePreferences() {
   const user = useHomeUser()
+  const preferencesCollection = usePreferencesCollection()
   const executor = useOfflineExecutor()
   const { data: rows = [], isLoading } = useLiveQuery((q) =>
     q.from({ preferences: preferencesCollection }),

@@ -6,7 +6,7 @@ import { CircleForm } from "@/components/circles/circle-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { useHomeUser } from "@/hooks/use-home-user"
-import { circlesCollection } from "@/lib/collection/circles"
+import { useCirclesCollection } from "@/lib/collection/circles"
 import { PRESET_COLORS } from "@/lib/colors"
 import { useOfflineExecutor } from "@/lib/db/offline"
 import { slugify } from "@/lib/slug"
@@ -17,6 +17,7 @@ export const Route = createFileRoute("/home/circles/new")({
 
 function NewCirclePage() {
   const navigate = useNavigate()
+  const circlesCollection = useCirclesCollection()
   const executor = useOfflineExecutor()
   const user = useHomeUser()
 

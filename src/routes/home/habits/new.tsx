@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useHomeUser } from "@/hooks/use-home-user"
 import { usePreferences } from "@/hooks/use-preferences"
-import { habitsCollection } from "@/lib/collection/habits"
+import { useHabitsCollection } from "@/lib/collection/habits"
 import { useOfflineExecutor } from "@/lib/db/offline"
 
 export const Route = createFileRoute("/home/habits/new")({
@@ -18,6 +18,7 @@ export const Route = createFileRoute("/home/habits/new")({
 function NewHabitPage() {
   const navigate = useNavigate()
   const user = useHomeUser()
+  const habitsCollection = useHabitsCollection()
   const executor = useOfflineExecutor()
   const { habitDefaults, isLoading } = usePreferences()
 

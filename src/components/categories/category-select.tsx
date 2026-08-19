@@ -15,7 +15,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { useHomeUser } from "@/hooks/use-home-user"
 import type { CategoryInput } from "@/lib/collection/categories"
-import { categoriesCollection } from "@/lib/collection/categories"
+import { useCategoriesCollection } from "@/lib/collection/categories"
 import { useOfflineExecutor } from "@/lib/db/offline"
 
 const CREATE_VALUE = "__create__"
@@ -32,6 +32,7 @@ export function CategorySelect({
   className?: string
 }) {
   const user = useHomeUser()
+  const categoriesCollection = useCategoriesCollection()
   const executor = useOfflineExecutor()
   const { data: categories = [], isLoading } = useLiveQuery((q) =>
     q.from({ category: categoriesCollection }),

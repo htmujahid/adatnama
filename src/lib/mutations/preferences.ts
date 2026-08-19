@@ -3,11 +3,9 @@ import type { OfflineConfig } from "@tanstack/offline-transactions"
 
 import { upsertPreferences } from "@/actions/preferences"
 import type {
-  preferencesCollection,
+  PreferencesCollection,
   PreferencesRecord,
 } from "@/lib/collection/preferences"
-
-type PreferencesCollection = typeof preferencesCollection
 
 async function upsertFromMutation(mutation: {
   collection: unknown

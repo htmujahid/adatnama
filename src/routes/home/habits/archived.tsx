@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useHabits } from "@/hooks/use-habits"
-import { habitsCollection } from "@/lib/collection/habits"
+import { useHabitsCollection } from "@/lib/collection/habits"
 import { useOfflineExecutor } from "@/lib/db/offline"
 
 export const Route = createFileRoute("/home/habits/archived")({
@@ -29,6 +29,7 @@ export const Route = createFileRoute("/home/habits/archived")({
 
 function ArchivedHabitsPage() {
   const { habits, checkins, isLoading } = useHabits()
+  const habitsCollection = useHabitsCollection()
   const executor = useOfflineExecutor()
   const archived = habits.filter((habit) => habit.archivedAt !== null)
 

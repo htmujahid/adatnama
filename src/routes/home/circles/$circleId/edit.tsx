@@ -6,7 +6,7 @@ import { CircleForm } from "@/components/circles/circle-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { circlesCollection } from "@/lib/collection/circles"
+import { useCirclesCollection } from "@/lib/collection/circles"
 import { useOfflineExecutor } from "@/lib/db/offline"
 
 export const Route = createFileRoute("/home/circles/$circleId/edit")({
@@ -31,6 +31,7 @@ function EditCircleSkeleton() {
 function EditCirclePage() {
   const { circleId } = Route.useParams()
   const navigate = useNavigate()
+  const circlesCollection = useCirclesCollection()
   const executor = useOfflineExecutor()
   const { data: matches = [], isLoading } = useLiveQuery(
     (q) =>

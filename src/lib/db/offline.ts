@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react"
-import type { OfflineExecutor } from "@tanstack/offline-transactions"
 import { startOfflineExecutor } from "@tanstack/offline-transactions"
+import type { OfflineExecutor } from "@tanstack/offline-transactions"
+import { useDbClient } from "@tanstack/react-db"
+import type { DbClient } from "@tanstack/react-db"
 
 import { achievementUnlocksCollection } from "@/lib/collection/achievements"
 import { categoriesCollection } from "@/lib/collection/categories"
@@ -17,15 +19,17 @@ import { preferencesMutationFns } from "@/lib/mutations/preferences"
 
 let executorPromise: Promise<OfflineExecutor> | null = null
 
-async function createOfflineExecutor(): Promise<OfflineExecutor> {
+async function createOfflineExecutor(
+  client: DbClient,
+): Promise<OfflineExecutor> {
   const executor = startOfflineExecutor({
     collections: {
-      categories: categoriesCollection,
-      circles: circlesCollection,
-      habits: habitsCollection,
-      checkins: checkinsCollection,
-      achievementUnlocks: achievementUnlocksCollection,
-      preferences: preferencesCollection,
+      categories: client.collection(categoriesCollection),
+      circles: client.collection(circlesCollection),
+      habits: client.collection(habitsCollection),
+      checkins: client.collection(checkinsCollection),
+      achievementUnlocks: client.collection(achievementUnlocksCollection),
+      preferences: client.collection(preferencesCollection),
     },
     mutationFns: {
       ...categoryMutationFns,
@@ -40,28 +44,29 @@ async function createOfflineExecutor(): Promise<OfflineExecutor> {
   return executor
 }
 
-export function getOfflineExecutor(): Promise<OfflineExecutor> {
+export function getOfflineExecutor(client: DbClient): Promise<OfflineExecutor> {
   if (typeof window === "undefined") {
     throw new Error("Offline transactions are only available in the browser.")
   }
   if (!executorPromise) {
-    executorPromise = createOfflineExecutor()
+    executorPromise = createOfflineExecutor(client)
   }
   return executorPromise
 }
 
 export function useOfflineExecutor(): OfflineExecutor | undefined {
+  const client = useDbClient()
   const [executor, setExecutor] = useState<OfflineExecutor>()
 
   useEffect(() => {
     let cancelled = false
-    getOfflineExecutor().then((next) => {
+    getOfflineExecutor(client).then((next) => {
       if (!cancelled) setExecutor(next)
     })
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [client])
 
   return executor
 }

@@ -1,12 +1,13 @@
 import { useMemo } from "react"
 import { safeRandomUUID, useLiveQuery } from "@tanstack/react-db"
 
-import { checkinsCollection } from "@/lib/collection/checkins"
+import { useCheckinsCollection } from "@/lib/collection/checkins"
 import type { CheckinRecord } from "@/lib/collection/checkins"
 import { useOfflineExecutor } from "@/lib/db/offline"
 import { dateKey } from "@/lib/habits"
 
 export function useHabitCheckins() {
+  const checkinsCollection = useCheckinsCollection()
   const executor = useOfflineExecutor()
   const { data: checkins = [], isLoading } = useLiveQuery((q) =>
     q.from({ checkin: checkinsCollection }),

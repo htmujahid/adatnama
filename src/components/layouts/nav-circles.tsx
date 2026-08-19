@@ -29,7 +29,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
-import { circlesCollection } from "@/lib/collection/circles"
+import { useCirclesCollection } from "@/lib/collection/circles"
 import { useOfflineExecutor } from "@/lib/db/offline"
 
 export type NavCircleItem = {
@@ -58,6 +58,7 @@ export function NavCirclesSkeleton() {
 
 export function NavCircles({ circles }: { circles: Array<NavCircleItem> }) {
   const { isMobile } = useSidebar()
+  const circlesCollection = useCirclesCollection()
   const executor = useOfflineExecutor()
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const { circleId: activeCircleId } = useParams({ strict: false })

@@ -1,12 +1,12 @@
 import { collectionOptions } from "@tanstack/db"
 import { persistedCollectionOptions } from "@tanstack/db-sqlite-persistence-core"
-import type { PersistedCollectionPersistence } from "@tanstack/db-sqlite-persistence-core"
 import { queryCollectionOptions } from "@tanstack/query-db-collection"
+import { useDbClient } from "@tanstack/react-db"
 import type { QueryClient } from "@tanstack/react-query"
 
 import { listCircles } from "@/actions/circles"
 import type { CircleMember } from "@/actions/circles"
-import { db } from "@/lib/db/browser"
+import { persistence } from "@/lib/db/browser"
 
 export type { CircleMember } from "@/actions/circles"
 
@@ -20,7 +20,7 @@ export type CircleRecord = {
   members: Array<CircleMember>
 }
 
-export const circlesCollectionOptions = collectionOptions("circles", (client) =>
+export const circlesCollection = collectionOptions("circles", (client) =>
   persistedCollectionOptions<CircleRecord, string>({
     ...queryCollectionOptions({
       id: "circles",
@@ -29,10 +29,13 @@ export const circlesCollectionOptions = collectionOptions("circles", (client) =>
       getKey: (circle) => circle.id,
       queryFn: () => listCircles(),
     }),
-    persistence:
-      client.requireDependency<PersistedCollectionPersistence>("persistence"),
+    persistence,
     schemaVersion: 2,
   }),
 )
 
-export const circlesCollection = db.collection(circlesCollectionOptions)
+export function useCirclesCollection() {
+  return useDbClient().collection(circlesCollection)
+}
+
+export type CirclesCollection = ReturnType<typeof useCirclesCollection>

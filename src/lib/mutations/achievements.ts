@@ -2,7 +2,10 @@ import { NonRetriableError } from "@tanstack/offline-transactions"
 import type { OfflineConfig } from "@tanstack/offline-transactions"
 
 import { unlockAchievement } from "@/actions/achievements"
-import type { AchievementUnlockRecord, achievementUnlocksCollection  } from "@/lib/collection/achievements"
+import type {
+  AchievementUnlockRecord,
+  achievementUnlocksCollection,
+} from "@/lib/collection/achievements"
 
 type AchievementUnlocksCollection = typeof achievementUnlocksCollection
 

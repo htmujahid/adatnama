@@ -14,7 +14,10 @@ import {
   TrendingUpIcon,
 } from "lucide-react"
 
-import { NavCircles, NavCirclesSkeleton } from "@/components/layouts/nav-circles"
+import {
+  NavCircles,
+  NavCirclesSkeleton,
+} from "@/components/layouts/nav-circles"
 import { NavMain } from "@/components/layouts/nav-main"
 import { NavUser } from "@/components/layouts/nav-user"
 import {

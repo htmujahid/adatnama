@@ -2,7 +2,10 @@ import { NonRetriableError } from "@tanstack/offline-transactions"
 import type { OfflineConfig } from "@tanstack/offline-transactions"
 
 import { upsertPreferences } from "@/actions/preferences"
-import type { PreferencesRecord, preferencesCollection  } from "@/lib/collection/preferences"
+import type {
+  preferencesCollection,
+  PreferencesRecord,
+} from "@/lib/collection/preferences"
 
 type PreferencesCollection = typeof preferencesCollection
 

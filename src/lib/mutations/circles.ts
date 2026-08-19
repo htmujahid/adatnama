@@ -8,7 +8,7 @@ import {
   updateCircle,
   updateMemberRole,
 } from "@/actions/circles"
-import type { CircleRecord, circlesCollection  } from "@/lib/collection/circles"
+import type { CircleRecord, circlesCollection } from "@/lib/collection/circles"
 
 type CirclesCollection = typeof circlesCollection
 

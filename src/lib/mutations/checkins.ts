@@ -2,7 +2,10 @@ import { NonRetriableError } from "@tanstack/offline-transactions"
 import type { OfflineConfig } from "@tanstack/offline-transactions"
 
 import { deleteCheckin, upsertCheckin } from "@/actions/checkins"
-import type { CheckinRecord, checkinsCollection  } from "@/lib/collection/checkins"
+import type {
+  CheckinRecord,
+  checkinsCollection,
+} from "@/lib/collection/checkins"
 
 type CheckinsCollection = typeof checkinsCollection
 

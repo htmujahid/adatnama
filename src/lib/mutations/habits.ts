@@ -8,7 +8,7 @@ import {
   restoreHabit,
   updateHabit,
 } from "@/actions/habits"
-import type { HabitRecord, habitsCollection  } from "@/lib/collection/habits"
+import type { HabitRecord, habitsCollection } from "@/lib/collection/habits"
 
 type HabitsCollection = typeof habitsCollection
 

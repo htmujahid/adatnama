@@ -6,7 +6,10 @@ import {
   deleteCategory,
   updateCategory,
 } from "@/actions/categories"
-import type { CategoryRecord, categoriesCollection  } from "@/lib/collection/categories"
+import type {
+  categoriesCollection,
+  CategoryRecord,
+} from "@/lib/collection/categories"
 
 type CategoriesCollection = typeof categoriesCollection
 

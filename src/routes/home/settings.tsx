@@ -40,8 +40,8 @@ import type { NotificationPreferences } from "@/hooks/use-preferences"
 import { useThemeMode } from "@/hooks/use-theme-mode"
 import type { ThemeMode } from "@/hooks/use-theme-mode"
 import { authClient } from "@/lib/auth-client"
-import { sessionQueryOptions } from "@/lib/query/auth"
 import { HABIT_DAY_PRESETS, schedulePresetFor } from "@/lib/habits"
+import { sessionQueryOptions } from "@/lib/query/auth"
 
 export const Route = createFileRoute("/home/settings")({
   component: SettingsPage,

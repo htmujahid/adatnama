@@ -14,7 +14,6 @@ async function upsertFromMutation(mutation: {
   const result = await upsertPreferences({
     data: {
       timezone: modified.timezone,
-      defaultCategoryId: modified.defaultCategoryId,
       defaultSchedulePreset: modified.defaultSchedulePreset,
       defaultFreezesTotal: modified.defaultFreezesTotal,
       remindersEnabled: modified.remindersEnabled,

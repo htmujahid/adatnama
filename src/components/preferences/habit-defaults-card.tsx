@@ -41,7 +41,6 @@ export function HabitDefaultsCard() {
       userId: user.id,
       record,
       changes: {
-        defaultCategoryId: input.category,
         defaultSchedulePreset:
           schedulePresetFor(input.days) ?? HABIT_DAY_PRESETS[0].id,
         defaultFreezesTotal: input.freezesTotal,

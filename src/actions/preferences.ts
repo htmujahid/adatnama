@@ -6,7 +6,6 @@ import { db } from "@/lib/db"
 
 export type PreferencesInput = {
   timezone: string
-  defaultCategoryId: string | null
   defaultSchedulePreset: string
   defaultFreezesTotal: number
   remindersEnabled: number
@@ -40,7 +39,6 @@ export const upsertPreferences = createServerFn({ method: "POST" })
     const preferences = {
       userId: session.user.id,
       timezone: data.timezone,
-      defaultCategoryId: data.defaultCategoryId,
       defaultSchedulePreset: data.defaultSchedulePreset,
       defaultFreezesTotal: data.defaultFreezesTotal,
       remindersEnabled: data.remindersEnabled,
@@ -53,7 +51,6 @@ export const upsertPreferences = createServerFn({ method: "POST" })
       .onConflict((oc) =>
         oc.column("userId").doUpdateSet({
           timezone: preferences.timezone,
-          defaultCategoryId: preferences.defaultCategoryId,
           defaultSchedulePreset: preferences.defaultSchedulePreset,
           defaultFreezesTotal: preferences.defaultFreezesTotal,
           remindersEnabled: preferences.remindersEnabled,

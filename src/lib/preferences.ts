@@ -5,7 +5,6 @@ import type { UserPreferencesTable } from "@/lib/db/schema"
 import { HABIT_DAY_PRESETS } from "@/lib/habits"
 
 export type HabitDefaults = {
-  category: string | null
   days: ReadonlyArray<number>
   freezesTotal: number
 }
@@ -20,7 +19,6 @@ export const PREFERENCES_FALLBACK: Omit<
   UserPreferencesTable,
   "userId" | "timezone"
 > = {
-  defaultCategoryId: null,
   defaultSchedulePreset: HABIT_DAY_PRESETS[0].id,
   defaultFreezesTotal: 2,
   remindersEnabled: 1,
@@ -39,8 +37,6 @@ export function habitDefaultsFrom(
   record: UserPreferencesTable | undefined,
 ): HabitDefaults {
   return {
-    category:
-      record?.defaultCategoryId ?? PREFERENCES_FALLBACK.defaultCategoryId,
     days: presetDays(
       record?.defaultSchedulePreset ??
         PREFERENCES_FALLBACK.defaultSchedulePreset,

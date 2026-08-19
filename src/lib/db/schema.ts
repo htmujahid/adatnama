@@ -129,7 +129,6 @@ export interface UserAchievementUnlockTable {
 export interface UserPreferencesTable {
   userId: string
   timezone: string
-  defaultCategoryId: string | null
   defaultSchedulePreset: string
   defaultFreezesTotal: number
   remindersEnabled: number

@@ -64,7 +64,7 @@ function NewHabitPage() {
               defaultValues={{
                 name: "",
                 description: "",
-                categoryId: habitDefaults.category ?? "",
+                categoryId: "",
                 days: habitDefaults.days,
                 target: "",
                 reminderTime: "",

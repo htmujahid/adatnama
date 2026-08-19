@@ -9,7 +9,7 @@ import {
   SunIcon,
 } from "lucide-react"
 
-import { CategorySelect } from "@/components/categories/category-select"
+import { ClearLocalDataCard } from "@/components/settings/clear-local-data-card"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -177,26 +177,14 @@ function SettingsPage() {
             Applied automatically whenever you create a new habit.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-3">
+        <CardContent className="grid gap-4 sm:grid-cols-2">
           {isLoading ? (
             <>
-              <Skeleton className="h-16 w-full" />
               <Skeleton className="h-16 w-full" />
               <Skeleton className="h-16 w-full" />
             </>
           ) : (
             <>
-              <Field>
-                <FieldLabel htmlFor="default-category">Category</FieldLabel>
-                <CategorySelect
-                  id="default-category"
-                  value={habitDefaults.category ?? ""}
-                  onChange={(value) =>
-                    updateHabitDefaults({ ...habitDefaults, category: value })
-                  }
-                />
-              </Field>
-
               <Field>
                 <FieldLabel htmlFor="default-frequency">
                   Default schedule
@@ -302,6 +290,8 @@ function SettingsPage() {
           </Button>
         </CardFooter>
       </Card>
+
+      <ClearLocalDataCard />
 
       <Card size="sm">
         <CardHeader>

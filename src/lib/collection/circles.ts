@@ -30,7 +30,7 @@ export const circlesCollection = collectionOptions("circles", (client) =>
       queryFn: () => listCircles(),
     }),
     persistence,
-    schemaVersion: 2,
+    schemaVersion: 1,
   }),
 )
 

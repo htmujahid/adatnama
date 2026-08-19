@@ -25,7 +25,7 @@ export const categoriesCollection = collectionOptions("categories", (client) =>
       queryFn: () => listCategories(),
     }),
     persistence,
-    schemaVersion: 2,
+    schemaVersion: 1,
   }),
 )
 

@@ -6,6 +6,7 @@ import {
   sortFn_basic,
   tableFeatures,
 } from "@tanstack/react-table"
+import { format } from "date-fns"
 import {
   ArrowUpDownIcon,
   MoreHorizontalIcon,
@@ -86,6 +87,44 @@ export function createCategoriesTableColumns({
           </span>
         )
       },
+    }),
+    columnHelper.accessor("createdAt", {
+      sortFn: "basic",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="-ml-2.5"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Created
+          <ArrowUpDownIcon data-icon="inline-end" />
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">
+          {format(new Date(row.original.createdAt), "MMM d, yyyy")}
+        </span>
+      ),
+    }),
+    columnHelper.accessor("updatedAt", {
+      sortFn: "basic",
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="-ml-2.5"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Updated
+          <ArrowUpDownIcon data-icon="inline-end" />
+        </Button>
+      ),
+      cell: ({ row }) => (
+        <span className="text-muted-foreground">
+          {format(new Date(row.original.updatedAt), "MMM d, yyyy")}
+        </span>
+      ),
     }),
     columnHelper.display({
       id: "actions",

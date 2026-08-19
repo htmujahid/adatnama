@@ -80,6 +80,8 @@ export function CategoriesTable() {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Habits</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead>Updated</TableHead>
               <TableHead />
             </TableRow>
           </TableHeader>
@@ -94,6 +96,12 @@ export function CategoriesTable() {
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-4 w-16" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-20" />
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-4 w-20" />
                 </TableCell>
                 <TableCell />
               </TableRow>
@@ -134,7 +142,7 @@ export function CategoriesTable() {
               ))
             ) : (
               <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={3}>
+                <TableCell colSpan={5}>
                   <div className="flex flex-col items-center gap-3 py-14 text-center">
                     <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
                       <TagIcon className="size-5" />

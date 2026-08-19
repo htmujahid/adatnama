@@ -81,8 +81,8 @@ const data = {
   ],
   navSecondary: [
     {
-      title: "Settings",
-      url: "/home/settings",
+      title: "Preferences",
+      url: "/home/preferences",
       icon: Settings2Icon,
     },
     {

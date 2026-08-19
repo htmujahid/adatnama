@@ -29,7 +29,7 @@ function ProfilePage() {
   )
 
   return (
-    <div className="flex w-full max-w-3xl flex-col gap-4">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
       <Card size="sm">
         <CardHeader>
           <CardTitle>Profile picture</CardTitle>

@@ -1,3 +1,4 @@
+import { DbClient } from "@tanstack/db"
 import { QueryClient } from "@tanstack/react-query"
 
 if (typeof window === "undefined") {
@@ -20,7 +21,7 @@ const coordinator = new BrowserCollectionCoordinator({
   dbName: "adatnama",
 })
 
-export const persistence = createBrowserWASQLitePersistence({
+const persistence = createBrowserWASQLitePersistence({
   database,
   coordinator,
 })
@@ -31,4 +32,13 @@ export const persistence = createBrowserWASQLitePersistence({
  * of the router's SSR-integrated one — keeps them off its cache/staleTime
  * defaults, which are tuned for SSR dehydration, not local persistence.
  */
-export const collectionsQueryClient = new QueryClient()
+const collectionsQueryClient = new QueryClient()
+
+/**
+ * Collection descriptors in src/lib/collection/ resolve these keys via
+ * client.requireDependency("queryClient" | "persistence").
+ */
+export const db = new DbClient({
+  queryClient: collectionsQueryClient,
+  persistence,
+})

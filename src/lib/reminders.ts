@@ -20,7 +20,6 @@ type ReminderHabit = {
 
 type ReminderState = {
   timezone: string
-  enabled: boolean
   habits: Array<ReminderHabit>
   doneToday: Set<string>
   subscriptions: Array<PushSubscriptionTable>
@@ -137,11 +136,6 @@ function nextReminderInstant(
 }
 
 async function loadReminderState(userId: string): Promise<ReminderState> {
-  const preferences = await db
-    .selectFrom("user_preferences")
-    .select(["remindersEnabled"])
-    .where("userId", "=", userId)
-    .executeTakeFirst()
   const subscriptions = await db
     .selectFrom("push_subscription")
     .selectAll()
@@ -187,7 +181,6 @@ async function loadReminderState(userId: string): Promise<ReminderState> {
 
   return {
     timezone,
-    enabled: (preferences?.remindersEnabled ?? 1) === 1,
     habits,
     doneToday: new Set(doneRows.map((row) => row.habitId)),
     subscriptions,
@@ -242,7 +235,7 @@ export class ReminderDurableObject extends DurableObject<Env> {
     if (!userId) return
     const state = await loadReminderState(userId)
 
-    if (state.enabled && state.subscriptions.length > 0) {
+    if (state.subscriptions.length > 0) {
       const now = Date.now()
       const today = wallDayPlus(wallClockAt(now, state.timezone), 0)
       const due = state.habits.filter((habit) => {
@@ -274,11 +267,7 @@ export class ReminderDurableObject extends DurableObject<Env> {
   }
 
   private async applySchedule(state: ReminderState): Promise<void> {
-    if (
-      !state.enabled ||
-      state.subscriptions.length === 0 ||
-      state.habits.length === 0
-    ) {
+    if (state.subscriptions.length === 0 || state.habits.length === 0) {
       await this.ctx.storage.deleteAlarm()
       return
     }

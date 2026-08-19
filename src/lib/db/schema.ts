@@ -130,9 +130,6 @@ export interface UserPreferencesTable {
   userId: string
   defaultSchedulePreset: string
   defaultFreezesTotal: number
-  remindersEnabled: number
-  weeklySummaryEnabled: number
-  circleActivityEnabled: number
 }
 
 export interface PushSubscriptionTable {

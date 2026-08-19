@@ -9,18 +9,9 @@ export type HabitDefaults = {
   freezesTotal: number
 }
 
-export type NotificationPreferences = {
-  reminders: boolean
-  weeklySummary: boolean
-  circleActivity: boolean
-}
-
 export const PREFERENCES_FALLBACK: Omit<UserPreferencesTable, "userId"> = {
   defaultSchedulePreset: HABIT_DAY_PRESETS[0].id,
   defaultFreezesTotal: 2,
-  remindersEnabled: 1,
-  weeklySummaryEnabled: 1,
-  circleActivityEnabled: 0,
 }
 
 export function presetDays(presetId: string): ReadonlyArray<number> {
@@ -40,21 +31,6 @@ export function habitDefaultsFrom(
     ),
     freezesTotal:
       record?.defaultFreezesTotal ?? PREFERENCES_FALLBACK.defaultFreezesTotal,
-  }
-}
-
-export function notificationsFrom(
-  record: UserPreferencesTable | undefined,
-): NotificationPreferences {
-  return {
-    reminders:
-      (record?.remindersEnabled ?? PREFERENCES_FALLBACK.remindersEnabled) === 1,
-    weeklySummary:
-      (record?.weeklySummaryEnabled ??
-        PREFERENCES_FALLBACK.weeklySummaryEnabled) === 1,
-    circleActivity:
-      (record?.circleActivityEnabled ??
-        PREFERENCES_FALLBACK.circleActivityEnabled) === 1,
   }
 }
 

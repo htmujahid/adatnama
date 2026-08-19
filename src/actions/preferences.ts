@@ -8,9 +8,6 @@ import { syncReminderSchedule } from "@/lib/reminders"
 export type PreferencesInput = {
   defaultSchedulePreset: string
   defaultFreezesTotal: number
-  remindersEnabled: number
-  weeklySummaryEnabled: number
-  circleActivityEnabled: number
 }
 
 export const listPreferences = createServerFn({ method: "GET" }).handler(
@@ -40,9 +37,6 @@ export const upsertPreferences = createServerFn({ method: "POST" })
       userId: session.user.id,
       defaultSchedulePreset: data.defaultSchedulePreset,
       defaultFreezesTotal: data.defaultFreezesTotal,
-      remindersEnabled: data.remindersEnabled,
-      weeklySummaryEnabled: data.weeklySummaryEnabled,
-      circleActivityEnabled: data.circleActivityEnabled,
     }
     await db
       .insertInto("user_preferences")
@@ -51,9 +45,6 @@ export const upsertPreferences = createServerFn({ method: "POST" })
         oc.column("userId").doUpdateSet({
           defaultSchedulePreset: preferences.defaultSchedulePreset,
           defaultFreezesTotal: preferences.defaultFreezesTotal,
-          remindersEnabled: preferences.remindersEnabled,
-          weeklySummaryEnabled: preferences.weeklySummaryEnabled,
-          circleActivityEnabled: preferences.circleActivityEnabled,
         }),
       )
       .execute()

@@ -15,9 +15,6 @@ async function upsertFromMutation(mutation: {
     data: {
       defaultSchedulePreset: modified.defaultSchedulePreset,
       defaultFreezesTotal: modified.defaultFreezesTotal,
-      remindersEnabled: modified.remindersEnabled,
-      weeklySummaryEnabled: modified.weeklySummaryEnabled,
-      circleActivityEnabled: modified.circleActivityEnabled,
     },
   })
   if (result.error) {

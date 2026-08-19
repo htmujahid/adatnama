@@ -6,6 +6,7 @@ import { useNavigate, useRouter } from "@tanstack/react-router"
 import { Button } from "@/components/ui/button"
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -101,6 +102,9 @@ export function LoginForm() {
             )}
             Continue with Google
           </Button>
+          <FieldDescription className="text-center">
+            Signs you in, or creates an account if you&apos;re new.
+          </FieldDescription>
         </Field>
 
         <FieldSeparator>Or continue with</FieldSeparator>

@@ -6,7 +6,7 @@ export const sessionQueryOptions = () =>
   queryOptions({
     queryKey: ["session"],
     queryFn: () => getSession(),
-    staleTime: 0,
+    staleTime: 15 * 60_000,
     gcTime: Number.POSITIVE_INFINITY,
   })
 

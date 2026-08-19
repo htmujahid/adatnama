@@ -3,6 +3,7 @@ import { useLiveQuery } from "@tanstack/react-db"
 import { useTable } from "@tanstack/react-table"
 import { TagIcon } from "lucide-react"
 
+import type { CategoryTableRow } from "@/components/categories/categories-table-columns"
 import {
   categoriesTableFeatures,
   createCategoriesTableColumns,
@@ -27,18 +28,37 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import type { CategoryInput, CategoryRecord } from "@/lib/collection/categories"
+import type { CategoryInput } from "@/lib/collection/categories"
 import { useCategoriesCollection } from "@/lib/collection/categories"
+import { useHabitsCollection } from "@/lib/collection/habits"
 import { useOfflineExecutor } from "@/lib/db/offline"
 
 export function CategoriesTable() {
   const categoriesCollection = useCategoriesCollection()
+  const habitsCollection = useHabitsCollection()
   const executor = useOfflineExecutor()
   const { data: categories = [], isLoading } = useLiveQuery({
     query: (q) => q.from({ category: categoriesCollection }),
   })
-  const [editing, setEditing] = useState<CategoryRecord | undefined>(undefined)
-  const [deleting, setDeleting] = useState<CategoryRecord | undefined>(
+  const { data: habits = [] } = useLiveQuery({
+    query: (q) => q.from({ habit: habitsCollection }),
+  })
+  const habitsCountByCategory = new Map<string, number>()
+  for (const habit of habits) {
+    if (!habit.categoryId) continue
+    habitsCountByCategory.set(
+      habit.categoryId,
+      (habitsCountByCategory.get(habit.categoryId) ?? 0) + 1,
+    )
+  }
+  const rows = categories.map((category) => ({
+    ...category,
+    habitsCount: habitsCountByCategory.get(category.id) ?? 0,
+  }))
+  const [editing, setEditing] = useState<CategoryTableRow | undefined>(
+    undefined,
+  )
+  const [deleting, setDeleting] = useState<CategoryTableRow | undefined>(
     undefined,
   )
 
@@ -74,7 +94,7 @@ export function CategoriesTable() {
   const table = useTable({
     features: categoriesTableFeatures,
     columns,
-    data: categories,
+    data: rows,
     initialState: {
       sorting: [{ id: "name", desc: false }],
     },

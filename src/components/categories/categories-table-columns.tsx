@@ -24,6 +24,8 @@ import {
 } from "@/components/ui/dropdown-menu"
 import type { CategoryRecord } from "@/lib/collection/categories"
 
+export type CategoryTableRow = CategoryRecord & { habitsCount: number }
+
 export const categoriesTableFeatures = tableFeatures({
   rowSortingFeature,
   sortedRowModel: createSortedRowModel(),
@@ -32,15 +34,15 @@ export const categoriesTableFeatures = tableFeatures({
 
 const columnHelper = createColumnHelper<
   typeof categoriesTableFeatures,
-  CategoryRecord
+  CategoryTableRow
 >()
 
 export function createCategoriesTableColumns({
   onEdit,
   onDelete,
 }: {
-  onEdit: (category: CategoryRecord) => void
-  onDelete: (category: CategoryRecord) => void
+  onEdit: (category: CategoryTableRow) => void
+  onDelete: (category: CategoryTableRow) => void
 }) {
   return columnHelper.columns([
     columnHelper.accessor("name", {

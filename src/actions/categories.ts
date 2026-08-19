@@ -10,26 +10,17 @@ export type CategoryInput = {
   color: string
 }
 
-export type CategoryWithHabitsCount = CategoryTable & { habitsCount: number }
-
-function selectCategoriesWithHabitsCount(userId: string) {
-  return db
-    .selectFrom("category")
-    .leftJoin("habit", "habit.categoryId", "category.id")
-    .selectAll("category")
-    .select((eb) => eb.fn.count<number>("habit.id").as("habitsCount"))
-    .where("category.userId", "=", userId)
-    .groupBy("category.id")
-}
-
 export const listCategories = createServerFn({ method: "GET" }).handler(
-  async (): Promise<Array<CategoryWithHabitsCount>> => {
+  async (): Promise<Array<CategoryTable>> => {
     const headers = getRequestHeaders()
     const session = await auth.api.getSession({ headers })
     if (!session) return []
 
-    return selectCategoriesWithHabitsCount(session.user.id)
-      .orderBy("category.name")
+    return db
+      .selectFrom("category")
+      .selectAll()
+      .where("userId", "=", session.user.id)
+      .orderBy("name")
       .execute()
   },
 )
@@ -44,30 +35,26 @@ export const createCategory = createServerFn({ method: "POST" })
     }
 
     const now = new Date().toISOString()
-    const category: CategoryTable = {
-      id: data.id,
-      userId: session.user.id,
-      name: data.name,
-      color: data.color,
-      createdAt: now,
-      updatedAt: now,
-    }
-    await db
+    const category = await db
       .insertInto("category")
-      .values(category)
+      .values({
+        id: data.id,
+        userId: session.user.id,
+        name: data.name,
+        color: data.color,
+        createdAt: now,
+        updatedAt: now,
+      })
       .onConflict((oc) =>
         oc.column("id").doUpdateSet({
-          name: category.name,
-          color: category.color,
+          name: data.name,
+          color: data.color,
         }),
       )
-      .execute()
-
-    const result = await selectCategoriesWithHabitsCount(session.user.id)
-      .where("category.id", "=", data.id)
+      .returningAll()
       .executeTakeFirstOrThrow()
 
-    return { error: null, category: result }
+    return { error: null, category }
   })
 
 export const updateCategory = createServerFn({ method: "POST" })
@@ -95,11 +82,7 @@ export const updateCategory = createServerFn({ method: "POST" })
       return { error: { message: "Category not found." }, category: null }
     }
 
-    const result = await selectCategoriesWithHabitsCount(session.user.id)
-      .where("category.id", "=", data.id)
-      .executeTakeFirstOrThrow()
-
-    return { error: null, category: result }
+    return { error: null, category: updated }
   })
 
 export const deleteCategory = createServerFn({ method: "POST" })

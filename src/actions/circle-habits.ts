@@ -4,24 +4,26 @@ import { sql } from "kysely"
 
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { dateKey } from "@/lib/habits"
 import { syncReminderSchedule } from "@/lib/reminders"
 
-export type CircleSharedHabit = {
+export type CircleSharedHabitRow = {
   id: string
+  userId: string
   name: string
   description: string
   target: string
   reminderTime: string | null
-  days: Array<number>
-  streak: number
-  doneToday: number
+  freezesTotal: number
+  startedAt: string
+  ownerName: string
+  sharedAt: string
+  memberSince: string
 }
 
-export type CircleMemberHabits = {
-  ownerUserId: string
-  ownerName: string
-  habits: Array<CircleSharedHabit>
+export type CircleHabitsPayload = {
+  habits: Array<CircleSharedHabitRow>
+  days: Array<{ habitId: string; dayOfWeek: number }>
+  checkins: Array<{ habitId: string; date: string }>
 }
 
 export const listCircleHabits = createServerFn({ method: "GET" })
@@ -30,94 +32,70 @@ export const listCircleHabits = createServerFn({ method: "GET" })
     const headers = getRequestHeaders()
     const session = await auth.api.getSession({ headers })
     if (!session) {
-      return { error: { message: "You must be signed in." }, members: null }
+      return { error: { message: "You must be signed in." }, payload: null }
     }
 
-    const todayKey = dateKey(new Date())
-    const result = await sql<{ payload: string | null }>`
-      WITH RECURSIVE
-        shared AS (
-          SELECT h."id", h."userId", h."name", h."description", h."target",
-                 h."reminderTime", h."freezesTotal", h."startedAt",
-                 u."name" AS "ownerName", ch."createdAt" AS "sharedAt",
-                 om."createdAt" AS "memberSince"
-          FROM "circle_habit" ch
-          INNER JOIN "habit" h ON h."id" = ch."habitId" AND h."archivedAt" IS NULL
-          INNER JOIN "user" u ON u."id" = h."userId"
-          INNER JOIN "member" om ON om."organizationId" = ch."organizationId" AND om."userId" = h."userId"
-          WHERE ch."organizationId" = ${data.organizationId}
-        ),
-        fold("habitId", "freezesTotal", "d", "streak", "freezesUsed") AS (
-          SELECT s."id", s."freezesTotal",
-                 date(min(substr(s."startedAt", 1, 10), ${todayKey}), '-1 day'),
-                 0, 0
-          FROM shared s
-          UNION ALL
-          SELECT f."habitId", f."freezesTotal", date(f."d", '+1 day'),
-            CASE
-              WHEN EXISTS (SELECT 1 FROM "habit_checkin" c WHERE c."habitId" = f."habitId" AND c."date" = date(f."d", '+1 day') AND c."status" = 'done')
-                THEN f."streak" + 1
-              WHEN EXISTS (SELECT 1 FROM "habit_schedule_day" sd WHERE sd."habitId" = f."habitId" AND sd."dayOfWeek" = CAST(strftime('%w', date(f."d", '+1 day')) AS INTEGER))
-                AND date(f."d", '+1 day') <> ${todayKey}
-                THEN CASE WHEN f."streak" > 0 AND f."freezesUsed" < f."freezesTotal" THEN f."streak" ELSE 0 END
-              ELSE f."streak"
-            END,
-            CASE
-              WHEN EXISTS (SELECT 1 FROM "habit_checkin" c WHERE c."habitId" = f."habitId" AND c."date" = date(f."d", '+1 day') AND c."status" = 'done')
-                THEN f."freezesUsed"
-              WHEN EXISTS (SELECT 1 FROM "habit_schedule_day" sd WHERE sd."habitId" = f."habitId" AND sd."dayOfWeek" = CAST(strftime('%w', date(f."d", '+1 day')) AS INTEGER))
-                AND date(f."d", '+1 day') <> ${todayKey}
-                THEN CASE WHEN f."streak" > 0 AND f."freezesUsed" < f."freezesTotal" THEN f."freezesUsed" + 1 ELSE 0 END
-              ELSE f."freezesUsed"
-            END
-          FROM fold f
-          WHERE f."d" < ${todayKey}
-        )
-      SELECT CASE
-        WHEN EXISTS (SELECT 1 FROM "member" m WHERE m."organizationId" = ${data.organizationId} AND m."userId" = ${session.user.id})
-        THEN (
-          SELECT coalesce(json_group_array(json_object(
-            'ownerUserId', o."userId",
-            'ownerName', o."ownerName",
-            'habits', json((
-              SELECT coalesce(json_group_array(json_object(
-                'id', s."id",
-                'name', s."name",
-                'description', s."description",
-                'target', s."target",
-                'reminderTime', s."reminderTime",
-                'days', json((
-                  SELECT coalesce(json_group_array("dayOfWeek" ORDER BY "dayOfWeek"), '[]')
-                  FROM "habit_schedule_day"
-                  WHERE "habitId" = s."id"
-                )),
-                'streak', coalesce((SELECT f."streak" FROM fold f WHERE f."habitId" = s."id" AND f."d" = ${todayKey}), 0),
-                'doneToday', EXISTS (SELECT 1 FROM "habit_checkin" c WHERE c."habitId" = s."id" AND c."date" = ${todayKey} AND c."status" = 'done')
-              ) ORDER BY s."sharedAt"), '[]')
-              FROM shared s
-              WHERE s."userId" = o."userId"
-            ))
-          ) ORDER BY o."memberSince"), '[]')
-          FROM (
-            SELECT DISTINCT "userId", "ownerName", "memberSince"
-            FROM shared
-          ) o
-        )
-        ELSE NULL
-      END AS "payload"
-    `.execute(db)
-
-    const payload = result.rows[0]?.payload ?? null
-    if (payload === null) {
+    const membership = await db
+      .selectFrom("member")
+      .select("id")
+      .where("organizationId", "=", data.organizationId)
+      .where("userId", "=", session.user.id)
+      .executeTakeFirst()
+    if (!membership) {
       return {
         error: { message: "You are not a member of this circle." },
-        members: null,
+        payload: null,
       }
     }
-    return {
-      error: null,
-      members: JSON.parse(payload) as Array<CircleMemberHabits>,
+
+    const habits = await db
+      .selectFrom("circle_habit")
+      .innerJoin("habit", "habit.id", "circle_habit.habitId")
+      .innerJoin("user", "user.id", "habit.userId")
+      .innerJoin("member as owner", (join) =>
+        join
+          .onRef("owner.organizationId", "=", "circle_habit.organizationId")
+          .onRef("owner.userId", "=", "habit.userId"),
+      )
+      .select([
+        "habit.id",
+        "habit.userId",
+        "habit.name",
+        "habit.description",
+        "habit.target",
+        "habit.reminderTime",
+        "habit.freezesTotal",
+        "habit.startedAt",
+        "user.name as ownerName",
+        "circle_habit.createdAt as sharedAt",
+        "owner.createdAt as memberSince",
+      ])
+      .where("circle_habit.organizationId", "=", data.organizationId)
+      .where("habit.archivedAt", "is", null)
+      .execute()
+
+    if (habits.length === 0) {
+      const payload: CircleHabitsPayload = { habits, days: [], checkins: [] }
+      return { error: null, payload }
     }
+
+    const habitIds = habits.map((habit) => habit.id)
+    const [days, checkins] = await Promise.all([
+      db
+        .selectFrom("habit_schedule_day")
+        .select(["habitId", "dayOfWeek"])
+        .where("habitId", "in", habitIds)
+        .execute(),
+      db
+        .selectFrom("habit_checkin")
+        .select(["habitId", "date"])
+        .where("habitId", "in", habitIds)
+        .where("status", "=", "done")
+        .execute(),
+    ])
+
+    const payload: CircleHabitsPayload = { habits, days, checkins }
+    return { error: null, payload }
   })
 
 export const listHabitShares = createServerFn({ method: "GET" })
@@ -127,13 +105,14 @@ export const listHabitShares = createServerFn({ method: "GET" })
     const session = await auth.api.getSession({ headers })
     if (!session) return []
 
-    const result = await sql<{ payload: string }>`
-      SELECT coalesce(json_group_array(ch."organizationId"), '[]') AS "payload"
-      FROM "circle_habit" ch
-      INNER JOIN "habit" h ON h."id" = ch."habitId"
-      WHERE ch."habitId" = ${data.habitId} AND h."userId" = ${session.user.id}
-    `.execute(db)
-    return JSON.parse(result.rows[0]?.payload ?? "[]") as Array<string>
+    const rows = await db
+      .selectFrom("circle_habit")
+      .innerJoin("habit", "habit.id", "circle_habit.habitId")
+      .select("circle_habit.organizationId")
+      .where("circle_habit.habitId", "=", data.habitId)
+      .where("habit.userId", "=", session.user.id)
+      .execute()
+    return rows.map((row) => row.organizationId)
   })
 
 export const shareHabitToCircle = createServerFn({ method: "POST" })

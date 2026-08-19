@@ -1,5 +1,6 @@
 import { Trash2Icon } from "lucide-react"
 
+import type { CategoryTableRow } from "@/components/categories/categories-table-columns"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,7 +12,6 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import type { CategoryRecord } from "@/lib/collection/categories"
 
 export function DeleteCategoryDialog({
   open,
@@ -21,7 +21,7 @@ export function DeleteCategoryDialog({
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
-  category?: CategoryRecord
+  category?: CategoryTableRow
   onDeleted: () => void
 }) {
   return (

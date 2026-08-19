@@ -125,7 +125,7 @@ export function CircleSharedHabitsCard({ circleId }: { circleId: string }) {
           members.map((member) => {
             const isMine = member.ownerUserId === user.id
             const doneCount = member.habits.filter(
-              (habit) => habit.doneToday === 1,
+              (habit) => habit.doneToday,
             ).length
             return (
               <div key={member.ownerUserId} className="flex flex-col gap-2">
@@ -154,7 +154,7 @@ export function CircleSharedHabitsCard({ circleId }: { circleId: string }) {
                         <ItemContent>
                           <div className="flex items-center gap-2">
                             <ItemTitle>{habit.name}</ItemTitle>
-                            {habit.doneToday === 1 && (
+                            {habit.doneToday && (
                               <Badge variant="secondary">
                                 <CircleCheckIcon />
                                 Today

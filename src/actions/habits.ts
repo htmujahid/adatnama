@@ -19,29 +19,24 @@ export type HabitInput = {
 
 export type HabitRow = HabitTable & { days: Array<number> }
 
-const daysJson = sql<string>`(
-  select coalesce(json_group_array("dayOfWeek" order by "dayOfWeek"), '[]')
-  from "habit_schedule_day"
-  where "habit_schedule_day"."habitId" = "habit"."id"
-)`
-
-function parseDays(days: string): Array<number> {
-  return JSON.parse(days) as Array<number>
-}
-
 async function selectHabit(
   id: string,
   userId: string,
 ): Promise<HabitRow | null> {
   const row = await db
     .selectFrom("habit")
-    .selectAll("habit")
-    .select(daysJson.as("days"))
+    .selectAll()
     .where("id", "=", id)
     .where("userId", "=", userId)
     .executeTakeFirst()
   if (!row) return null
-  return { ...row, days: parseDays(row.days) }
+  const days = await db
+    .selectFrom("habit_schedule_day")
+    .select("dayOfWeek")
+    .where("habitId", "=", id)
+    .orderBy("dayOfWeek")
+    .execute()
+  return { ...row, days: days.map((day) => day.dayOfWeek) }
 }
 
 async function replaceScheduleDays(habitId: string, days: Array<number>) {
@@ -63,23 +58,32 @@ export const listHabits = createServerFn({ method: "GET" }).handler(
     const session = await auth.api.getSession({ headers })
     if (!session) return []
 
-    const result = await db
+    const habits = await db
       .selectFrom("habit")
-      .select(
-        sql<string>`coalesce(json_group_array(json_object(
-          'id', "id", 'userId', "userId", 'categoryId', "categoryId",
-          'name', "name", 'description', "description", 'target', "target",
-          'reminderTime', "reminderTime", 'freezesTotal', "freezesTotal",
-          'startedAt', "startedAt", 'archivedAt', "archivedAt",
-          'archivedNote', "archivedNote", 'sourceHabitId', "sourceHabitId",
-          'createdAt', "createdAt", 'updatedAt', "updatedAt",
-          'days', json(${daysJson})
-        ) order by "createdAt"), '[]')`.as("payload"),
-      )
+      .selectAll()
       .where("userId", "=", session.user.id)
-      .executeTakeFirst()
+      .orderBy("createdAt")
+      .execute()
+    if (habits.length === 0) return []
 
-    return JSON.parse(result?.payload ?? "[]") as Array<HabitRow>
+    const days = await db
+      .selectFrom("habit_schedule_day")
+      .innerJoin("habit", "habit.id", "habit_schedule_day.habitId")
+      .select(["habit_schedule_day.habitId", "habit_schedule_day.dayOfWeek"])
+      .where("habit.userId", "=", session.user.id)
+      .orderBy("habit_schedule_day.dayOfWeek")
+      .execute()
+    const daysByHabit = new Map<string, Array<number>>()
+    for (const day of days) {
+      const list = daysByHabit.get(day.habitId) ?? []
+      list.push(day.dayOfWeek)
+      daysByHabit.set(day.habitId, list)
+    }
+
+    return habits.map((habit) => ({
+      ...habit,
+      days: daysByHabit.get(habit.id) ?? [],
+    }))
   },
 )
 

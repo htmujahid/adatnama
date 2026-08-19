@@ -53,45 +53,52 @@ export const listCircles = createServerFn({ method: "GET" }).handler(
     const session = await auth.api.getSession({ headers })
     if (!session) return []
 
-    const result = await db
+    const circles = await db
       .selectFrom("organization")
       .innerJoin("member as selfMember", (join) =>
         join
           .onRef("selfMember.organizationId", "=", "organization.id")
           .on("selfMember.userId", "=", session.user.id),
       )
-      .select(
-        sql<string>`coalesce(json_group_array(json_object(
-          'id', "organization"."id",
-          'name', "organization"."name",
-          'slug', "organization"."slug",
-          'description', "organization"."description",
-          'color', "organization"."color",
-          'joinCode', "organization"."joinCode",
-          'members', json((
-            select coalesce(json_group_array(json_object(
-              'id', "member"."id",
-              'userId', "member"."userId",
-              'role', "member"."role",
-              'name', "user"."name"
-            ) order by "member"."createdAt"), '[]')
-            from "member"
-            inner join "user" on "user"."id" = "member"."userId"
-            where "member"."organizationId" = "organization"."id"
-          ))
-        )), '[]')`.as("payload"),
-      )
-      .executeTakeFirst()
+      .select([
+        "organization.id",
+        "organization.name",
+        "organization.slug",
+        "organization.description",
+        "organization.color",
+        "organization.joinCode",
+      ])
+      .execute()
+    if (circles.length === 0) return []
 
-    return JSON.parse(result?.payload ?? "[]") as Array<{
-      id: string
-      name: string
-      slug: string
-      description: string
-      color: string
-      joinCode: string
-      members: Array<CircleMember>
-    }>
+    const members = await db
+      .selectFrom("member")
+      .innerJoin("user", "user.id", "member.userId")
+      .select([
+        "member.id",
+        "member.organizationId",
+        "member.userId",
+        "member.role",
+        "user.name",
+      ])
+      .where(
+        "member.organizationId",
+        "in",
+        circles.map((circle) => circle.id),
+      )
+      .orderBy("member.createdAt")
+      .execute()
+    const membersByCircle = new Map<string, Array<CircleMember>>()
+    for (const { organizationId, ...member } of members) {
+      const list = membersByCircle.get(organizationId) ?? []
+      list.push(member)
+      membersByCircle.set(organizationId, list)
+    }
+
+    return circles.map((circle) => ({
+      ...circle,
+      members: membersByCircle.get(circle.id) ?? [],
+    }))
   },
 )
 

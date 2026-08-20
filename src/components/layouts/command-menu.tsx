@@ -82,7 +82,7 @@ export function CommandMenu() {
             setOpen(true)
           }
         }}
-        className="w-9 shrink-0 cursor-pointer sm:w-56"
+        className="w-8 h-8 shrink-0 cursor-pointer sm:w-56"
       >
         <InputGroupInput
           placeholder="Search or jump to..."

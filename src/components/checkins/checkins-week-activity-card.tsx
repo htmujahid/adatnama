@@ -67,14 +67,14 @@ export function CheckinsWeekActivityCard() {
     .sort((a, b) => a.daysAgo - b.daysAgo || a.habit.localeCompare(b.habit))
 
   return (
-    <Card>
+    <Card className="min-h-0 lg:h-full">
       <CardHeader>
         <CardTitle>This week's activity</CardTitle>
         <CardDescription>Every check-in, last 7 days</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-h-0 flex-1 lg:relative lg:px-0">
         {isLoading ? (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 px-(--card-spacing)">
             {Array.from({ length: 4 }, (_, index) => (
               <Skeleton key={index} className="h-12 w-full" />
             ))}
@@ -95,7 +95,7 @@ export function CheckinsWeekActivityCard() {
             </EmptyHeader>
           </Empty>
         ) : (
-          <div className="max-h-[420px] overflow-y-auto pr-1">
+          <div className="overflow-y-auto lg:absolute lg:inset-0 lg:px-(--card-spacing)">
             <ItemGroup>
               {weekActivity.map((event) => (
                 <Item key={event.id} variant="outline" size="sm">

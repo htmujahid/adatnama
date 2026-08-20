@@ -155,7 +155,11 @@ export function AchievementsList() {
           onValueChange={(value) => setFilter(value as Filter)}
         >
           <SelectTrigger size="sm" className="w-44">
-            <SelectValue />
+            <SelectValue>
+              {(selected: Filter | null) =>
+                selected ? FILTER_LABELS[selected] : FILTER_LABELS[filter]
+              }
+            </SelectValue>
           </SelectTrigger>
           <SelectContent align="end">
             {FILTERS.map((value) => (

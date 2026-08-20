@@ -84,7 +84,12 @@ export function HabitDefaultsCard() {
                 }}
               >
                 <SelectTrigger id="default-frequency" className="w-full">
-                  <SelectValue />
+                  <SelectValue>
+                    {(selected: string | null) =>
+                      HABIT_DAY_PRESETS.find((p) => p.id === selected)
+                        ?.label ?? HABIT_DAY_PRESETS[0].label
+                    }
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {HABIT_DAY_PRESETS.map((preset) => (

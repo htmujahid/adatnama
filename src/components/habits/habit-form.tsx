@@ -182,7 +182,12 @@ export function HabitForm({
                 }}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue />
+                  <SelectValue>
+                    {(selected: string | null) =>
+                      HABIT_DAY_PRESETS.find((p) => p.id === selected)
+                        ?.label ?? "Custom"
+                    }
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {HABIT_DAY_PRESETS.map((preset) => (

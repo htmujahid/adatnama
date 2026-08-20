@@ -97,7 +97,21 @@ export function CategorySelect({
         }}
       >
         <SelectTrigger id={id} className={className ?? "w-full"}>
-          <SelectValue placeholder="Select a category" />
+          <SelectValue placeholder="Select a category">
+            {(selected: string | null) => {
+              const category = categories.find((c) => c.id === selected)
+              if (!category) return "Select a category"
+              return (
+                <span className="inline-flex items-center gap-2">
+                  <span
+                    className="size-2.5 shrink-0 rounded-full ring-1 ring-border"
+                    style={{ backgroundColor: category.color }}
+                  />
+                  {category.name}
+                </span>
+              )
+            }}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {categories.map((category) => (

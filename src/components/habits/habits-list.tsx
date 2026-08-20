@@ -76,7 +76,15 @@ export function HabitsList() {
           onValueChange={(value) => setCategory(value === "all" ? null : value)}
         >
           <SelectTrigger size="sm" className="w-44">
-            <SelectValue />
+            <SelectValue>
+              {(selected: string | null) => {
+                if (!selected || selected === "all") return "All categories"
+                return (
+                  categories.find((cat) => cat.id === selected)?.name ??
+                  "All categories"
+                )
+              }}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent align="end">
             <SelectItem value="all">All categories</SelectItem>

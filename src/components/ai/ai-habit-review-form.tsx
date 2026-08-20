@@ -254,7 +254,12 @@ function HabitPlanForm({
                     }}
                   >
                     <SelectTrigger id={field.name} className="w-full">
-                      <SelectValue />
+                      <SelectValue>
+                        {(selected: string | null) =>
+                          HABIT_DAY_PRESETS.find((p) => p.id === selected)
+                            ?.label ?? "Select frequency"
+                        }
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {HABIT_DAY_PRESETS.map((preset) => (

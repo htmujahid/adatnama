@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { and, eq, useLiveQuery } from "@tanstack/react-db"
 import { Link } from "@tanstack/react-router"
-import { ArchiveIcon, ListChecksIcon, PencilIcon } from "lucide-react"
+import { ArchiveIcon, HistoryIcon, PencilIcon } from "lucide-react"
 
 import { CategoryBadge } from "@/components/categories/category-badge"
 import { ArchiveHabitDialog } from "@/components/habits/archive-habit-dialog"
@@ -97,6 +97,20 @@ export function HabitDetailHeader({ habitId }: { habitId: string }) {
           nativeButton={false}
           render={
             <Link
+              to="/home/habits/$habitId/history"
+              params={{ habitId: habit.id }}
+            />
+          }
+        >
+          <HistoryIcon />
+          History
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          nativeButton={false}
+          render={
+            <Link
               to="/home/habits/$habitId/edit"
               params={{ habitId: habit.id }}
             />
@@ -104,15 +118,6 @@ export function HabitDetailHeader({ habitId }: { habitId: string }) {
         >
           <PencilIcon />
           Edit
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          nativeButton={false}
-          render={<Link to="/home/habits" />}
-        >
-          <ListChecksIcon />
-          All habits
         </Button>
       </PageHeader>
 

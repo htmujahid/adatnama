@@ -62,7 +62,7 @@ export function StreaksStatsCards() {
   ] as const
 
   return (
-    <div className="grid gap-4 sm:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {stats.map((stat) => (
         <Card key={stat.label} size="sm">
           <CardHeader>

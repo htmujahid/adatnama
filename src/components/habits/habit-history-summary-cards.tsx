@@ -1,7 +1,7 @@
 import { eq, useLiveQuery } from "@tanstack/react-db"
-import { FlameIcon, SnowflakeIcon, TrophyIcon } from "lucide-react"
+import { eachDayOfInterval, format, parseISO } from "date-fns"
+import { CalendarCheckIcon, CalendarDaysIcon, TargetIcon } from "lucide-react"
 
-import { habitStatus, STATUS_META } from "@/components/habits/habit-status"
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
@@ -13,9 +13,9 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { checkinsCollection } from "@/lib/collection/checkins"
 import { useHabitsCollection } from "@/lib/collection/habits"
-import { foldHabitCheckinRows } from "@/lib/habits"
+import { foldHabitCheckinRows, isScheduledOn } from "@/lib/habits"
 
-export function HabitStatsCards({ habitId }: { habitId: string }) {
+export function HabitHistorySummaryCards({ habitId }: { habitId: string }) {
   const habitsCollection = useHabitsCollection()
   const { data: rows = [], isLoading } = useLiveQuery({
     query: (q) =>
@@ -52,28 +52,36 @@ export function HabitStatsCards({ habitId }: { habitId: string }) {
     return null
   }
 
-  const statusMeta = STATUS_META[habitStatus(habit)]
+  const today = new Date()
+  const totalCheckins = rows.filter((row) => row.checkin != null).length
+  const started = parseISO(habit.startedAt)
+  const start = started > today ? today : started
+  const scheduledDays = eachDayOfInterval({ start, end: today }).filter(
+    (day) => isScheduledOn(habit, day),
+  ).length
+  const completionRate =
+    scheduledDays > 0 ? Math.round((totalCheckins / scheduledDays) * 100) : 0
 
   const stats = [
     {
-      label: "Current streak",
-      value: `${habit.streak} days`,
-      badge: statusMeta.label,
-      icon: FlameIcon,
-    },
-    {
-      label: "Best streak",
-      value: `${habit.longestStreak} days`,
+      label: "Total check-ins",
+      value: `${totalCheckins}`,
       badge: "All time",
-      icon: TrophyIcon,
+      icon: CalendarCheckIcon,
     },
     {
-      label: "Freezes left",
-      value: `${habit.freezesLeft} of ${habit.freezesTotal}`,
-      badge: "Available",
-      icon: SnowflakeIcon,
+      label: "Completion rate",
+      value: `${completionRate}%`,
+      badge: "Since start",
+      icon: TargetIcon,
     },
-  ]
+    {
+      label: "Tracking since",
+      value: `${habit.startedDaysAgo} days`,
+      badge: format(start, "MMM d, yyyy"),
+      icon: CalendarDaysIcon,
+    },
+  ] as const
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

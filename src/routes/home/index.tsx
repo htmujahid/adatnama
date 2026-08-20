@@ -23,7 +23,7 @@ function HomePage() {
         description="Here's how your habits are doing."
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <TodayStatCard />
         <WeeklyRateCard />
         <LevelCard />

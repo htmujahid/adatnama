@@ -41,6 +41,7 @@ import { Route as HomeCirclesCircleIdEditRouteImport } from './routes/home/circl
 import { Route as HomeCirclesJoinCodeRouteImport } from './routes/home/circles/join.$code'
 import { Route as HomeHabitsHabitIdIndexRouteImport } from './routes/home/habits/$habitId/index'
 import { Route as HomeHabitsHabitIdEditRouteImport } from './routes/home/habits/$habitId/edit'
+import { Route as HomeHabitsHabitIdHistoryRouteImport } from './routes/home/habits/$habitId/history'
 
 const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/_auth',
@@ -202,6 +203,12 @@ const HomeHabitsHabitIdEditRoute = HomeHabitsHabitIdEditRouteImport.update({
   path: '/edit',
   getParentRoute: () => HomeHabitsHabitIdRouteRoute,
 } as any)
+const HomeHabitsHabitIdHistoryRoute =
+  HomeHabitsHabitIdHistoryRouteImport.update({
+    id: '/history',
+    path: '/history',
+    getParentRoute: () => HomeHabitsHabitIdRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof MarketingIndexRoute
@@ -232,6 +239,7 @@ export interface FileRoutesByFullPath {
   '/home/circles/$circleId/edit': typeof HomeCirclesCircleIdEditRoute
   '/home/circles/join/$code': typeof HomeCirclesJoinCodeRoute
   '/home/habits/$habitId/edit': typeof HomeHabitsHabitIdEditRoute
+  '/home/habits/$habitId/history': typeof HomeHabitsHabitIdHistoryRoute
   '/home/circles/$circleId/': typeof HomeCirclesCircleIdIndexRoute
   '/home/habits/$habitId/': typeof HomeHabitsHabitIdIndexRoute
 }
@@ -261,6 +269,7 @@ export interface FileRoutesByTo {
   '/home/circles/$circleId/edit': typeof HomeCirclesCircleIdEditRoute
   '/home/circles/join/$code': typeof HomeCirclesJoinCodeRoute
   '/home/habits/$habitId/edit': typeof HomeHabitsHabitIdEditRoute
+  '/home/habits/$habitId/history': typeof HomeHabitsHabitIdHistoryRoute
   '/home/circles/$circleId': typeof HomeCirclesCircleIdIndexRoute
   '/home/habits/$habitId': typeof HomeHabitsHabitIdIndexRoute
 }
@@ -296,6 +305,7 @@ export interface FileRoutesById {
   '/home/circles/$circleId/edit': typeof HomeCirclesCircleIdEditRoute
   '/home/circles/join/$code': typeof HomeCirclesJoinCodeRoute
   '/home/habits/$habitId/edit': typeof HomeHabitsHabitIdEditRoute
+  '/home/habits/$habitId/history': typeof HomeHabitsHabitIdHistoryRoute
   '/home/circles/$circleId/': typeof HomeCirclesCircleIdIndexRoute
   '/home/habits/$habitId/': typeof HomeHabitsHabitIdIndexRoute
 }
@@ -330,6 +340,7 @@ export interface FileRouteTypes {
     | '/home/circles/$circleId/edit'
     | '/home/circles/join/$code'
     | '/home/habits/$habitId/edit'
+    | '/home/habits/$habitId/history'
     | '/home/circles/$circleId/'
     | '/home/habits/$habitId/'
   fileRoutesByTo: FileRoutesByTo
@@ -359,6 +370,7 @@ export interface FileRouteTypes {
     | '/home/circles/$circleId/edit'
     | '/home/circles/join/$code'
     | '/home/habits/$habitId/edit'
+    | '/home/habits/$habitId/history'
     | '/home/circles/$circleId'
     | '/home/habits/$habitId'
   id:
@@ -393,6 +405,7 @@ export interface FileRouteTypes {
     | '/home/circles/$circleId/edit'
     | '/home/circles/join/$code'
     | '/home/habits/$habitId/edit'
+    | '/home/habits/$habitId/history'
     | '/home/circles/$circleId/'
     | '/home/habits/$habitId/'
   fileRoutesById: FileRoutesById
@@ -631,6 +644,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HomeHabitsHabitIdEditRouteImport
       parentRoute: typeof HomeHabitsHabitIdRouteRoute
     }
+    '/home/habits/$habitId/history': {
+      id: '/home/habits/$habitId/history'
+      path: '/history'
+      fullPath: '/home/habits/$habitId/history'
+      preLoaderRoute: typeof HomeHabitsHabitIdHistoryRouteImport
+      parentRoute: typeof HomeHabitsHabitIdRouteRoute
+    }
   }
 }
 
@@ -686,12 +706,14 @@ const HomeCirclesCircleIdRouteRouteWithChildren =
 
 interface HomeHabitsHabitIdRouteRouteChildren {
   HomeHabitsHabitIdEditRoute: typeof HomeHabitsHabitIdEditRoute
+  HomeHabitsHabitIdHistoryRoute: typeof HomeHabitsHabitIdHistoryRoute
   HomeHabitsHabitIdIndexRoute: typeof HomeHabitsHabitIdIndexRoute
 }
 
 const HomeHabitsHabitIdRouteRouteChildren: HomeHabitsHabitIdRouteRouteChildren =
   {
     HomeHabitsHabitIdEditRoute: HomeHabitsHabitIdEditRoute,
+    HomeHabitsHabitIdHistoryRoute: HomeHabitsHabitIdHistoryRoute,
     HomeHabitsHabitIdIndexRoute: HomeHabitsHabitIdIndexRoute,
   }
 

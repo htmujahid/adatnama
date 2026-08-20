@@ -78,9 +78,17 @@ export function CategoriesTable() {
   function handleDelete() {
     if (!executor || !deleting) return
     const deletingId = deleting.id
+    const linkedHabitIds = habits
+      .filter((habit) => habit.categoryId === deletingId)
+      .map((habit) => habit.id)
     executor
       .createOfflineTransaction({ mutationFnName: "categories.delete" })
       .mutate(() => {
+        if (linkedHabitIds.length > 0) {
+          habitsCollection.update(linkedHabitIds, (drafts) => {
+            for (const draft of drafts) draft.categoryId = null
+          })
+        }
         categoriesCollection.delete(deletingId)
       })
     setDeleting(undefined)

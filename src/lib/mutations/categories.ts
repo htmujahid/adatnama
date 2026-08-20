@@ -10,6 +10,7 @@ import type {
   CategoriesCollection,
   CategoryRecord,
 } from "@/lib/collection/categories"
+import type { HabitsCollection } from "@/lib/collection/habits"
 
 export const categoryMutationFns: OfflineConfig["mutationFns"] = {
   "categories.create": async ({ transaction }) => {
@@ -40,14 +41,23 @@ export const categoryMutationFns: OfflineConfig["mutationFns"] = {
     collection.utils.writeUpdate(result.category)
   },
   "categories.delete": async ({ transaction }) => {
-    const mutation = transaction.mutations[0]
-    const collection = mutation.collection as unknown as CategoriesCollection
+    const deleteMutation = transaction.mutations.find(
+      (mutation) => mutation.type === "delete",
+    )
+    if (!deleteMutation) return
+    const collection =
+      deleteMutation.collection as unknown as CategoriesCollection
     const result = await deleteCategory({
-      data: { id: String(mutation.key) },
+      data: { id: String(deleteMutation.key) },
     })
     if (result.error) {
       throw new NonRetriableError(result.error.message)
     }
-    collection.utils.writeDelete(String(mutation.key))
+    collection.utils.writeDelete(String(deleteMutation.key))
+    for (const mutation of transaction.mutations) {
+      if (mutation.type !== "update") continue
+      const habits = mutation.collection as unknown as HabitsCollection
+      habits.utils.writeUpdate(mutation.modified)
+    }
   },
 }

@@ -110,10 +110,10 @@ function HabitPlanForm({
         description: value.description.trim(),
         target: value.target.trim(),
         schedule: value.schedule,
-        categoryId: value.categoryId,
+        categoryId: value.categoryId || null,
         categoryName:
           categories.find((category) => category.id === value.categoryId)
-            ?.name ?? "",
+            ?.name ?? "Uncategorized",
         freezesTotal: value.freezesTotal,
       })
     },
@@ -217,25 +217,14 @@ function HabitPlanForm({
               )}
             </form.Field>
 
-            <form.Field
-              name="categoryId"
-              validators={{
-                onChange: ({ value }) =>
-                  value.trim() ? undefined : "Category is required",
-              }}
-            >
+            <form.Field name="categoryId">
               {(field) => (
-                <Field data-invalid={field.state.meta.errors.length > 0}>
+                <Field>
                   <FieldLabel htmlFor={field.name}>Category</FieldLabel>
                   <CategorySelect
                     id={field.name}
                     value={field.state.value}
                     onChange={field.handleChange}
-                  />
-                  <FieldError
-                    errors={field.state.meta.errors.map((fieldError) => ({
-                      message: String(fieldError),
-                    }))}
                   />
                 </Field>
               )}

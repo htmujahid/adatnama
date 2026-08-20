@@ -9,6 +9,7 @@ import {
   updateHabit,
 } from "@/actions/habits"
 import type { HabitRow } from "@/actions/habits"
+import type { CheckinsCollection } from "@/lib/collection/checkins"
 import type { HabitsCollection } from "@/lib/collection/habits"
 
 function habitInputFrom(modified: HabitRow) {
@@ -85,14 +86,22 @@ export const habitMutationFns: OfflineConfig["mutationFns"] = {
     collection.utils.writeUpdate(result.habit)
   },
   "habits.delete": async ({ transaction }) => {
-    const mutation = transaction.mutations[0]
-    const collection = mutation.collection as unknown as HabitsCollection
+    const habitMutation = transaction.mutations.find(
+      (mutation) => mutation.collection.id === "habits",
+    )
+    if (!habitMutation) return
+    const collection = habitMutation.collection as unknown as HabitsCollection
     const result = await deleteHabit({
-      data: { id: String(mutation.key) },
+      data: { id: String(habitMutation.key) },
     })
     if (result.error) {
       throw new NonRetriableError(result.error.message)
     }
-    collection.utils.writeDelete(String(mutation.key))
+    collection.utils.writeDelete(String(habitMutation.key))
+    for (const mutation of transaction.mutations) {
+      if (mutation.collection.id !== "checkins") continue
+      const checkins = mutation.collection as unknown as CheckinsCollection
+      checkins.utils.writeDelete(String(mutation.key))
+    }
   },
 }

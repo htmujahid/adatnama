@@ -19,6 +19,7 @@ import { useCategoriesCollection } from "@/lib/collection/categories"
 import { useOfflineExecutor } from "@/lib/db/offline"
 
 const CREATE_VALUE = "__create__"
+const NONE_VALUE = "__none__"
 
 export function CategorySelect({
   id,
@@ -93,14 +94,14 @@ export function CategorySelect({
             setDialogOpen(true)
             return
           }
-          onChange(next)
+          onChange(next === NONE_VALUE ? "" : next)
         }}
       >
         <SelectTrigger id={id} className={className ?? "w-full"}>
-          <SelectValue placeholder="Select a category">
+          <SelectValue placeholder="No category">
             {(selected: string | null) => {
               const category = categories.find((c) => c.id === selected)
-              if (!category) return "Select a category"
+              if (!category) return "No category"
               return (
                 <span className="inline-flex items-center gap-2">
                   <span
@@ -114,6 +115,10 @@ export function CategorySelect({
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
+          <SelectItem value={NONE_VALUE} className="text-muted-foreground">
+            No category
+          </SelectItem>
+          <SelectSeparator />
           {categories.map((category) => (
             <SelectItem key={category.id} value={category.id}>
               <span className="inline-flex items-center gap-2">

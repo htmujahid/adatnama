@@ -65,7 +65,7 @@ export function HabitForm({
     onSubmit: async ({ value }) => {
       await onSubmit({
         name: value.name.trim(),
-        categoryId: value.categoryId,
+        categoryId: value.categoryId || null,
         description: value.description.trim(),
         target: value.target.trim(),
         days: value.days,
@@ -140,26 +140,18 @@ export function HabitForm({
           )}
         </form.Field>
 
-        <form.Field
-          name="categoryId"
-          validators={{
-            onChange: ({ value }) =>
-              value.trim() ? undefined : "Category is required",
-          }}
-        >
+        <form.Field name="categoryId">
           {(field) => (
-            <Field data-invalid={field.state.meta.errors.length > 0}>
+            <Field>
               <FieldLabel htmlFor={field.name}>Category</FieldLabel>
               <CategorySelect
                 id={field.name}
                 value={field.state.value}
                 onChange={field.handleChange}
               />
-              <FieldError
-                errors={field.state.meta.errors.map((fieldError) => ({
-                  message: String(fieldError),
-                }))}
-              />
+              <FieldDescription>
+                Optional — organize related habits together.
+              </FieldDescription>
             </Field>
           )}
         </form.Field>

@@ -11,7 +11,7 @@ import { persistence } from "@/lib/db/browser"
 export type HabitInput = {
   name: string
   description: string
-  categoryId: string
+  categoryId: string | null
   target: string
   days: ReadonlyArray<number>
   reminderTime: string | null

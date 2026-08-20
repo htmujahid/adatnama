@@ -5,7 +5,7 @@ export type HabitDraft = {
   description: string
   target: string
   schedule: string
-  categoryId: string
+  categoryId: string | null
   categoryName: string
   freezesTotal: number
 }

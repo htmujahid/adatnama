@@ -46,6 +46,14 @@ async function selectHabit(
   return { ...row, days: days.map((day) => day.dayOfWeek) }
 }
 
+function ownedCategoryId(categoryId: string | null, userId: string) {
+  if (categoryId === null) return null
+  return sql<string | null>`(
+    select "id" from "category"
+    where "id" = ${categoryId} and "userId" = ${userId}
+  )`
+}
+
 async function replaceScheduleDays(habitId: string, days: Array<number>) {
   await db
     .deleteFrom("habit_schedule_day")
@@ -104,12 +112,13 @@ export const createHabit = createServerFn({ method: "POST" })
     }
 
     const now = new Date().toISOString()
+    const categoryId = ownedCategoryId(data.categoryId, session.user.id)
     await db
       .insertInto("habit")
       .values({
         id: data.id,
         userId: session.user.id,
-        categoryId: data.categoryId,
+        categoryId,
         name: data.name,
         description: data.description,
         target: data.target,
@@ -123,7 +132,7 @@ export const createHabit = createServerFn({ method: "POST" })
       })
       .onConflict((oc) =>
         oc.column("id").doUpdateSet({
-          categoryId: data.categoryId,
+          categoryId,
           name: data.name,
           description: data.description,
           target: data.target,
@@ -152,7 +161,7 @@ export const updateHabit = createServerFn({ method: "POST" })
     const result = await db
       .updateTable("habit")
       .set({
-        categoryId: data.categoryId,
+        categoryId: ownedCategoryId(data.categoryId, session.user.id),
         name: data.name,
         description: data.description,
         reminderTime: data.reminderTime,

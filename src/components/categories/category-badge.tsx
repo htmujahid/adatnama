@@ -29,7 +29,7 @@ export function CategoryBadge({
           backgroundColor: category?.color ?? "var(--muted-foreground)",
         }}
       />
-      {category?.name ?? categoryId}
+      {category?.name ?? "Uncategorized"}
     </Badge>
   )
 }

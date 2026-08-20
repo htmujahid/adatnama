@@ -25,13 +25,14 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { Skeleton } from "@/components/ui/skeleton"
-import { checkinsCollection } from "@/lib/collection/checkins"
+import { useCheckinsCollection } from "@/lib/collection/checkins"
 import { useHabitsCollection } from "@/lib/collection/habits"
 import { useOfflineExecutor } from "@/lib/db/offline"
 import { foldHabitCheckinRows } from "@/lib/habits"
 
 export function ArchivedHabitsList() {
   const habitsCollection = useHabitsCollection()
+  const checkinsCollection = useCheckinsCollection()
   const executor = useOfflineExecutor()
   const today = new Date()
   const { data: rows = [], isLoading } = useLiveQuery({
@@ -70,9 +71,13 @@ export function ArchivedHabitsList() {
 
   function remove(habitId: string) {
     if (!executor) return
+    const checkinIds = checkinsCollection.toArray
+      .filter((checkin) => checkin.habitId === habitId)
+      .map((checkin) => checkin.id)
     executor
       .createOfflineTransaction({ mutationFnName: "habits.delete" })
       .mutate(() => {
+        if (checkinIds.length > 0) checkinsCollection.delete(checkinIds)
         habitsCollection.delete(habitId)
       })
   }

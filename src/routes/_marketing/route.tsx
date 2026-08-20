@@ -8,6 +8,12 @@ export const Route = createFileRoute("/_marketing")({
     if (context.session) {
       throw redirect({ to: "/home" })
     }
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(display-mode: standalone)").matches
+    ) {
+      throw redirect({ to: "/login" })
+    }
   },
   component: MarketingLayout,
 })

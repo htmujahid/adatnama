@@ -36,6 +36,12 @@ export const HOTKEY_REFERENCE: Array<HotkeyReference> = [
     hotkey: "Shift+N",
   },
   {
+    id: "ai-assistant",
+    group: "Actions",
+    description: "Open the AI assistant",
+    hotkey: "A",
+  },
+  {
     id: "toggle-theme",
     group: "Actions",
     description: "Cycle theme (light / dark / system)",

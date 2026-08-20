@@ -5,6 +5,7 @@ import {
   useRouterState,
 } from "@tanstack/react-router"
 
+import { AiAssistant } from "@/components/layouts/ai-assistant"
 import { AppHotkeys } from "@/components/layouts/app-hotkeys"
 import { AppSidebar } from "@/components/layouts/app-sidebar"
 import { CommandMenu } from "@/components/layouts/command-menu"
@@ -75,6 +76,7 @@ function HomeLayout() {
             </BreadcrumbList>
           </Breadcrumb>
           <div className="ml-auto flex items-center gap-2">
+            <AiAssistant />
             <CommandMenu />
             <OfflineStatusBadge />
           </div>

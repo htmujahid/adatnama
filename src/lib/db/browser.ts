@@ -1,34 +1,56 @@
-if (typeof window === "undefined") {
-  throw new Error("src/lib/db/browser.ts is only available in the browser.")
-}
-
-const {
-  BrowserCollectionCoordinator,
-  createBrowserWASQLitePersistence,
-  openBrowserWASQLiteOPFSDatabase,
-} = await import("@tanstack/browser-db-sqlite-persistence")
+import type {
+  BrowserCollectionCoordinator as BrowserCollectionCoordinatorType,
+  BrowserWASQLiteDatabase,
+} from "@tanstack/browser-db-sqlite-persistence"
+import type { PersistedCollectionPersistence } from "@tanstack/db-sqlite-persistence-core"
 
 const DATABASE_NAME = "adatnama.sqlite"
 
-const database = await openBrowserWASQLiteOPFSDatabase({
-  databaseName: DATABASE_NAME,
-})
+let browserDatabase: BrowserWASQLiteDatabase | undefined
+let browserCoordinator: BrowserCollectionCoordinatorType | undefined
 
-const coordinator = new BrowserCollectionCoordinator({
-  dbName: "adatnama",
-})
+// Collection factories run during SSR too (routes are imported eagerly), but
+// OPFS/wa-sqlite only exist in the browser, so the server gets an inert
+// stand-in that never gets read from — real data arrives on hydration.
+function createServerPersistenceStub(): PersistedCollectionPersistence {
+  return {
+    adapter: {
+      loadSubset: async () => [],
+      applyCommittedTx: async () => {},
+      ensureIndex: async () => {},
+    },
+  }
+}
 
-export const persistence = createBrowserWASQLitePersistence({
-  database,
-  coordinator,
-})
+export const persistence: PersistedCollectionPersistence =
+  typeof window === "undefined"
+    ? createServerPersistenceStub()
+    : await (async () => {
+        const {
+          BrowserCollectionCoordinator,
+          createBrowserWASQLitePersistence,
+          openBrowserWASQLiteOPFSDatabase,
+        } = await import("@tanstack/browser-db-sqlite-persistence")
+
+        browserDatabase = await openBrowserWASQLiteOPFSDatabase({
+          databaseName: DATABASE_NAME,
+        })
+        browserCoordinator = new BrowserCollectionCoordinator({
+          dbName: "adatnama",
+        })
+
+        return createBrowserWASQLitePersistence({
+          database: browserDatabase,
+          coordinator: browserCoordinator,
+        })
+      })()
 
 export async function clearBrowserPersistence(): Promise<void> {
   const { IndexedDBAdapter, LocalStorageAdapter } =
     await import("@tanstack/offline-transactions")
-  coordinator.dispose()
+  browserCoordinator?.dispose()
   try {
-    await database.close?.()
+    await browserDatabase?.close?.()
   } catch {
     // the OPFS worker is terminated even when close fails
   }

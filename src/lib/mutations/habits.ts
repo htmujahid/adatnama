@@ -23,6 +23,15 @@ function habitInputFrom(modified: HabitRow) {
   }
 }
 
+function habitUpdateInputFrom(modified: HabitRow) {
+  return {
+    categoryId: modified.categoryId,
+    name: modified.name,
+    description: modified.description,
+    reminderTime: modified.reminderTime,
+  }
+}
+
 export const habitMutationFns: OfflineConfig["mutationFns"] = {
   "habits.create": async ({ transaction }) => {
     const mutation = transaction.mutations[0]
@@ -45,7 +54,7 @@ export const habitMutationFns: OfflineConfig["mutationFns"] = {
     const collection = mutation.collection as unknown as HabitsCollection
     const modified = mutation.modified as unknown as HabitRow
     const result = await updateHabit({
-      data: { id: String(mutation.key), ...habitInputFrom(modified) },
+      data: { id: String(mutation.key), ...habitUpdateInputFrom(modified) },
     })
     if (result.error || !result.habit) {
       throw new NonRetriableError(result.error?.message ?? "Update failed.")

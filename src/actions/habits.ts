@@ -17,6 +17,13 @@ export type HabitInput = {
   days: Array<number>
 }
 
+export type HabitUpdateInput = {
+  categoryId: string | null
+  name: string
+  description: string
+  reminderTime: string | null
+}
+
 export type HabitRow = HabitTable & { days: Array<number> }
 
 async function selectHabit(
@@ -134,7 +141,7 @@ export const createHabit = createServerFn({ method: "POST" })
   })
 
 export const updateHabit = createServerFn({ method: "POST" })
-  .validator((data: { id: string } & HabitInput) => data)
+  .validator((data: { id: string } & HabitUpdateInput) => data)
   .handler(async ({ data }) => {
     const headers = getRequestHeaders()
     const session = await auth.api.getSession({ headers })
@@ -148,9 +155,7 @@ export const updateHabit = createServerFn({ method: "POST" })
         categoryId: data.categoryId,
         name: data.name,
         description: data.description,
-        target: data.target,
         reminderTime: data.reminderTime,
-        freezesTotal: data.freezesTotal,
         updatedAt: new Date().toISOString(),
       })
       .where("id", "=", data.id)
@@ -160,7 +165,6 @@ export const updateHabit = createServerFn({ method: "POST" })
     if (result.numUpdatedRows === 0n) {
       return { error: { message: "Habit not found." }, habit: null }
     }
-    await replaceScheduleDays(data.id, data.days)
 
     const habit = await selectHabit(data.id, session.user.id)
     await syncReminderSchedule(session.user.id)

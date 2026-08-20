@@ -1,7 +1,7 @@
 import { eq, useLiveQuery } from "@tanstack/react-db"
 import { Link, useNavigate } from "@tanstack/react-router"
 
-import { HabitForm } from "@/components/habits/habit-form"
+import { EditHabitForm } from "@/components/habits/edit-habit-form"
 import { HabitNotFound } from "@/components/habits/habit-not-found"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -41,15 +41,12 @@ export function EditHabitCard({ habitId }: { habitId: string }) {
   return (
     <Card>
       <CardContent>
-        <HabitForm
+        <EditHabitForm
           defaultValues={{
             name: habit.name,
             description: habit.description,
             categoryId: habit.categoryId ?? "",
-            days: habit.days,
-            target: habit.target,
             reminderTime: habit.reminderTime ?? "",
-            freezesTotal: habit.freezesTotal,
           }}
           submitLabel="Save changes"
           cancel={
@@ -76,10 +73,7 @@ export function EditHabitCard({ habitId }: { habitId: string }) {
                   draft.categoryId = input.categoryId
                   draft.name = input.name
                   draft.description = input.description
-                  draft.target = input.target
                   draft.reminderTime = input.reminderTime
-                  draft.freezesTotal = input.freezesTotal
-                  draft.days = [...input.days]
                   draft.updatedAt = new Date().toISOString()
                 })
               })

@@ -5,6 +5,7 @@ import {
   useRouterState,
 } from "@tanstack/react-router"
 
+import { AppHotkeys } from "@/components/layouts/app-hotkeys"
 import { AppSidebar } from "@/components/layouts/app-sidebar"
 import { CommandMenu } from "@/components/layouts/command-menu"
 import { OfflineStatusBadge } from "@/components/pwa/offline-status-badge"
@@ -83,6 +84,7 @@ function HomeLayout() {
           <Outlet />
         </div>
       </SidebarInset>
+      <AppHotkeys />
     </SidebarProvider>
   )
 }

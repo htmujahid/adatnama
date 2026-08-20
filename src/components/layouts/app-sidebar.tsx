@@ -7,12 +7,12 @@ import {
   AwardIcon,
   CalendarCheckIcon,
   FlameIcon,
-  LifeBuoy,
   ListChecksIcon,
   Settings2Icon,
   TrendingUpIcon,
 } from "lucide-react"
 
+import { HotkeysSheet } from "@/components/layouts/hotkeys-sheet"
 import {
   NavCircles,
   NavCirclesSkeleton,
@@ -84,11 +84,6 @@ const data = {
       url: "/home/preferences",
       icon: Settings2Icon,
     },
-    {
-      title: "Support",
-      url: "mailto:htmujahid@gmail.com",
-      icon: LifeBuoy,
-    },
   ],
 }
 
@@ -141,7 +136,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         )}
       </SidebarContent>
       <SidebarFooter>
-        <NavSecondary items={data.navSecondary} />
+        <NavSecondary items={data.navSecondary}>
+          <HotkeysSheet />
+        </NavSecondary>
         <NavUser user={user} onSignOut={handleSignOut} />
       </SidebarFooter>
     </Sidebar>

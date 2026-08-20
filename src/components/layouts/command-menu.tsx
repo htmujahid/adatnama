@@ -1,7 +1,9 @@
 "use client"
 
 import * as React from "react"
+import { formatForDisplay } from "@tanstack/hotkeys"
 import { useLiveQuery } from "@tanstack/react-db"
+import { useHotkey } from "@tanstack/react-hotkeys"
 import { useNavigate } from "@tanstack/react-router"
 import {
   ArchiveIcon,
@@ -42,6 +44,7 @@ import { Kbd } from "@/components/ui/kbd"
 import { useThemeMode } from "@/hooks/use-theme-mode"
 import { circlesCollection } from "@/lib/collection/circles"
 import { habitsCollection } from "@/lib/collection/habits"
+import { getHotkeyReference } from "@/lib/hotkeys"
 
 const MAX_RESULTS = 6
 
@@ -57,16 +60,9 @@ export function CommandMenu() {
     query: (q) => q.from({ circle: circlesCollection }),
   })
 
-  React.useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "k" && (event.metaKey || event.ctrlKey)) {
-        event.preventDefault()
-        setOpen((value) => !value)
-      }
-    }
-    document.addEventListener("keydown", onKeyDown)
-    return () => document.removeEventListener("keydown", onKeyDown)
-  }, [])
+  useHotkey(getHotkeyReference("command-menu").hotkey!, () => {
+    setOpen((value) => !value)
+  })
 
   const runCommand = React.useCallback((action: () => void) => {
     setOpen(false)
@@ -98,7 +94,9 @@ export function CommandMenu() {
           <SearchIcon className="text-muted-foreground" />
         </InputGroupAddon>
         <InputGroupAddon align="inline-end" className="hidden sm:flex">
-          <Kbd>⌘K</Kbd>
+          <Kbd>
+            {formatForDisplay(getHotkeyReference("command-menu").hotkey!)}
+          </Kbd>
         </InputGroupAddon>
       </InputGroup>
 

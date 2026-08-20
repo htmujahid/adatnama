@@ -16,6 +16,7 @@ function isExternalUrl(url: string) {
 
 export function NavSecondary({
   items,
+  children,
   ...props
 }: {
   items: {
@@ -23,6 +24,7 @@ export function NavSecondary({
     url: string
     icon: LucideIcon
   }[]
+  children?: React.ReactNode
 } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
   return (
     <SidebarGroup {...props}>
@@ -58,6 +60,7 @@ export function NavSecondary({
               </SidebarMenuItem>
             )
           })}
+          {children}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

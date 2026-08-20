@@ -17,6 +17,7 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
+import { useOnlineStatus } from "@/hooks/use-online-status"
 import {
   SidebarInset,
   SidebarProvider,
@@ -42,6 +43,7 @@ function toBreadcrumbLabel(segment: string) {
 }
 
 function HomeLayout() {
+  const online = useOnlineStatus()
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })
@@ -76,9 +78,8 @@ function HomeLayout() {
             </BreadcrumbList>
           </Breadcrumb>
           <div className="ml-auto flex items-center gap-2">
-            <AiAssistant />
+            {online ? <AiAssistant /> : <OfflineStatusBadge />}
             <CommandMenu />
-            <OfflineStatusBadge />
           </div>
         </header>
 

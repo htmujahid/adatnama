@@ -82,18 +82,18 @@ export function CommandMenu() {
             setOpen(true)
           }
         }}
-        className="w-8 h-8 shrink-0 cursor-pointer sm:w-56"
+        className="w-8 h-8 shrink-0 cursor-pointer lg:w-56"
       >
         <InputGroupInput
           placeholder="Search or jump to..."
           readOnly
           tabIndex={-1}
-          className="hidden cursor-pointer caret-transparent sm:block"
+          className="hidden cursor-pointer caret-transparent lg:block"
         />
         <InputGroupAddon>
           <SearchIcon className="text-muted-foreground" />
         </InputGroupAddon>
-        <InputGroupAddon align="inline-end" className="hidden sm:flex">
+        <InputGroupAddon align="inline-end" className="hidden lg:flex">
           <Kbd>
             {formatForDisplay(getHotkeyReference("command-menu").hotkey!)}
           </Kbd>

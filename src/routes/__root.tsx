@@ -87,8 +87,12 @@ export const Route = createRootRouteWithContext<RouterContext>()({
           content: description,
         },
         {
+          property: "og:url",
+          content: "https://adatnama.com",
+        },
+        {
           property: "og:image",
-          content: "/og-image.png",
+          content: "https://adatnama.com/og-image.png",
         },
         {
           property: "og:image:width",
@@ -116,7 +120,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         },
         {
           name: "twitter:image",
-          content: "/og-image.png",
+          content: "https://adatnama.com/og-image.png",
         },
       ],
       links: [

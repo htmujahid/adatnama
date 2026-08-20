@@ -4,8 +4,12 @@
   "compatibility_date": "2025-09-02",
   "compatibility_flags": ["nodejs_compat"],
   "main": "./src/worker.ts",
+  "routes": [
+    { "pattern": "adatnama.com", "custom_domain": true },
+    { "pattern": "www.adatnama.com", "custom_domain": true },
+  ],
   "vars": {
-    "VAPID_SUBJECT": "mailto:admin@adatnama.app",
+    "VAPID_SUBJECT": "mailto:htmujahid@gmail.com",
     "VAPID_PUBLIC_KEY": "BLLN50CkFeTwmlTp-tvfkhxAFh0wDIbddWtsKBurcaX_VazEJPPcd0gQTfaU5pftxhmRvCUsm0xOf2g7NP0Nr_g",
   },
   "durable_objects": {

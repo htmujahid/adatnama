@@ -10,9 +10,10 @@ import {
   shareHabitToCircle,
   unshareHabitFromCircle,
 } from "@/actions/circle-habits"
-import type { CircleMemberHabits } from "@/actions/circle-habits"
 import { listCircles, previewCircleByCode } from "@/actions/circles"
 import type { CircleMember } from "@/actions/circles"
+import { groupCircleHabits } from "@/lib/circle-habits"
+import type { CircleMemberHabits } from "@/lib/circle-habits"
 import { persistence } from "@/lib/db/browser"
 
 export type CircleRecord = {
@@ -86,13 +87,13 @@ export const circleHabitsCollection = memoizeById((organizationId: string) =>
       getKey: (member: CircleMemberHabits) => member.ownerUserId,
       enabled: organizationId !== "",
       queryFn: async () => {
-        const { error, members } = await listCircleHabits({
+        const { error, payload } = await listCircleHabits({
           data: { organizationId },
         })
         if (error) {
           throw new Error(error.message)
         }
-        return members
+        return groupCircleHabits(payload, new Date())
       },
     }),
   ),

@@ -11,6 +11,7 @@ export function useRefreshSession() {
   const session = useSessionCollection()
   const router = useRouter()
   return async () => {
+    await session.toArrayWhenReady()
     await session.utils.refetch()
     await router.invalidate({ sync: true })
   }

@@ -7,7 +7,6 @@ import {
   ListChecksIcon,
 } from "lucide-react"
 
-import type { CircleSharedHabit } from "@/actions/circle-habits"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -36,6 +35,7 @@ import {
 } from "@/components/ui/item"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useHomeUser } from "@/hooks/use-home-user"
+import type { CircleSharedHabit } from "@/lib/circle-habits"
 import {
   circleHabitsCollection,
   useCirclesCollection,

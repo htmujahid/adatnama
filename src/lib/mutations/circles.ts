@@ -5,7 +5,6 @@ import type { OfflineConfig } from "@tanstack/offline-transactions"
 import { safeRandomUUID } from "@tanstack/react-db"
 
 import { duplicateCircleHabit } from "@/actions/circle-habits"
-import type { CircleSharedHabit } from "@/actions/circle-habits"
 import {
   createCircle,
   joinCircleByCode,
@@ -14,6 +13,7 @@ import {
   updateCircle,
   updateMemberRole,
 } from "@/actions/circles"
+import type { CircleSharedHabit } from "@/lib/circle-habits"
 import { useCirclesCollection } from "@/lib/collection/circles"
 import type { CircleRecord, CirclesCollection } from "@/lib/collection/circles"
 import { useHabitsCollection } from "@/lib/collection/habits"

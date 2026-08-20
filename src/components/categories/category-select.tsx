@@ -72,7 +72,7 @@ export function CategorySelect({
           onClick={() => setDialogOpen(true)}
         >
           <TagIcon />
-          No categories yet — create one
+          <span className="truncate">No categories yet — create one</span>
         </Button>
         <CreateCategoryDialog
           open={dialogOpen}

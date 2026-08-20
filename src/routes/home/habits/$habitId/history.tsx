@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import { HabitHistoryCalendarCard } from "@/components/habits/habit-history-calendar-card"
-import { HabitHistoryHeader } from "@/components/habits/habit-history-header"
-import { HabitHistoryList } from "@/components/habits/habit-history-list"
-import { HabitHistorySummaryCards } from "@/components/habits/habit-history-summary-cards"
+import { HabitHistoryCalendarCard } from "@/components/habits/history/habit-history-calendar-card"
+import { HabitHistoryHeader } from "@/components/habits/history/habit-history-header"
+import { HabitHistoryList } from "@/components/habits/history/habit-history-list"
+import { HabitHistorySummaryCards } from "@/components/habits/history/habit-history-summary-cards"
 
 export const Route = createFileRoute("/home/habits/$habitId/history")({
   component: HabitHistoryPage,

@@ -1,7 +1,7 @@
 import { safeRandomUUID, useLiveQuery } from "@tanstack/react-db"
 import { Link, useNavigate } from "@tanstack/react-router"
 
-import { HabitForm } from "@/components/habits/habit-form"
+import { HabitForm } from "@/components/habits/new/habit-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"

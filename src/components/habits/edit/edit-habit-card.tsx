@@ -1,7 +1,7 @@
 import { eq, useLiveQuery } from "@tanstack/react-db"
 import { Link, useNavigate } from "@tanstack/react-router"
 
-import { EditHabitForm } from "@/components/habits/edit-habit-form"
+import { EditHabitForm } from "@/components/habits/edit/edit-habit-form"
 import { HabitNotFound } from "@/components/habits/habit-not-found"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"

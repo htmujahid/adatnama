@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { ListChecksIcon } from "lucide-react"
 
-import { NewHabitCard } from "@/components/habits/new-habit-card"
+import { NewHabitCard } from "@/components/habits/new/new-habit-card"
 import { PageHeader } from "@/components/layouts/page-header"
 import { Button } from "@/components/ui/button"
 

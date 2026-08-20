@@ -4,7 +4,7 @@ import { Link } from "@tanstack/react-router"
 import { ArchiveIcon, HistoryIcon, PencilIcon } from "lucide-react"
 
 import { CategoryBadge } from "@/components/categories/category-badge"
-import { ArchiveHabitDialog } from "@/components/habits/archive-habit-dialog"
+import { ArchiveHabitDialog } from "@/components/habits/detail/archive-habit-dialog"
 import { HabitNotFound } from "@/components/habits/habit-not-found"
 import { habitStatus, STATUS_META } from "@/components/habits/habit-status"
 import { PageHeader } from "@/components/layouts/page-header"

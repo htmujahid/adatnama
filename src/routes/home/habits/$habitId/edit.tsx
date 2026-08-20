@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import { EditHabitCard } from "@/components/habits/edit-habit-card"
-import { EditHabitHeader } from "@/components/habits/edit-habit-header"
+import { EditHabitCard } from "@/components/habits/edit/edit-habit-card"
+import { EditHabitHeader } from "@/components/habits/edit/edit-habit-header"
 
 export const Route = createFileRoute("/home/habits/$habitId/edit")({
   component: EditHabitPage,

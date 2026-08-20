@@ -1,12 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router"
 
-import { HabitCirclesCard } from "@/components/habits/habit-circles-card"
-import { HabitDetailHeader } from "@/components/habits/habit-detail-header"
-import { HabitDetailsCard } from "@/components/habits/habit-details-card"
-import { HabitHistoryCard } from "@/components/habits/habit-history-card"
-import { HabitMilestonesCard } from "@/components/habits/habit-milestones-card"
-import { HabitStatsCards } from "@/components/habits/habit-stats-cards"
-import { HabitWeekCard } from "@/components/habits/habit-week-card"
+import { HabitCirclesCard } from "@/components/habits/detail/habit-circles-card"
+import { HabitDetailHeader } from "@/components/habits/detail/habit-detail-header"
+import { HabitDetailsCard } from "@/components/habits/detail/habit-details-card"
+import { HabitHistoryCard } from "@/components/habits/detail/habit-history-card"
+import { HabitMilestonesCard } from "@/components/habits/detail/habit-milestones-card"
+import { HabitStatsCards } from "@/components/habits/detail/habit-stats-cards"
+import { HabitWeekCard } from "@/components/habits/detail/habit-week-card"
 
 export const Route = createFileRoute("/home/habits/$habitId/")({
   component: HabitDetailPage,

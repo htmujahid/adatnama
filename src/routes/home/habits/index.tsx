@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { ArchiveIcon, PlusIcon } from "lucide-react"
 
-import { DailyHabitsCard } from "@/components/habits/daily-habits-card"
-import { HabitsList } from "@/components/habits/habits-list"
-import { RemindersCard } from "@/components/habits/reminders-card"
-import { TotalHabitsCard } from "@/components/habits/total-habits-card"
+import { DailyHabitsCard } from "@/components/habits/list/daily-habits-card"
+import { HabitsList } from "@/components/habits/list/habits-list"
+import { RemindersCard } from "@/components/habits/list/reminders-card"
+import { TotalHabitsCard } from "@/components/habits/list/total-habits-card"
 import { PageHeader } from "@/components/layouts/page-header"
 import { Button } from "@/components/ui/button"
 

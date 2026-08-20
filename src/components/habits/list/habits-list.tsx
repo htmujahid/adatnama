@@ -3,7 +3,7 @@ import { eq, isNull, useLiveQuery } from "@tanstack/react-db"
 import { Link } from "@tanstack/react-router"
 import { ListChecksIcon, PlusIcon, SearchIcon } from "lucide-react"
 
-import { HabitCard } from "@/components/habits/habit-card"
+import { HabitCard } from "@/components/habits/list/habit-card"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import {

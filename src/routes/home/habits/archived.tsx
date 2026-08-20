@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { ListChecksIcon } from "lucide-react"
 
-import { ArchivedHabitsList } from "@/components/habits/archived-habits-list"
+import { ArchivedHabitsList } from "@/components/habits/list/archived-habits-list"
 import { PageHeader } from "@/components/layouts/page-header"
 import { Button } from "@/components/ui/button"
 

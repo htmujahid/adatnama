@@ -56,8 +56,8 @@ export function HabitHistorySummaryCards({ habitId }: { habitId: string }) {
   const totalCheckins = rows.filter((row) => row.checkin != null).length
   const started = parseISO(habit.startedAt)
   const start = started > today ? today : started
-  const scheduledDays = eachDayOfInterval({ start, end: today }).filter(
-    (day) => isScheduledOn(habit, day),
+  const scheduledDays = eachDayOfInterval({ start, end: today }).filter((day) =>
+    isScheduledOn(habit, day),
   ).length
   const completionRate =
     scheduledDays > 0 ? Math.round((totalCheckins / scheduledDays) * 100) : 0

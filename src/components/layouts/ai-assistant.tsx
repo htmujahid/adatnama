@@ -23,7 +23,14 @@ export function AiAssistant() {
   return (
     <ResponsiveDialog open={open} onOpenChange={setOpen}>
       <ResponsiveDialogTrigger
-        render={<Button variant="outline" size="sm" className="w-8 lg:w-auto" aria-label="Ask AI" />}
+        render={
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-8 lg:w-auto"
+            aria-label="Ask AI"
+          />
+        }
       >
         <SparklesIcon />
         <span className="hidden lg:inline">Ask AI</span>

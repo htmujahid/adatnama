@@ -20,7 +20,9 @@ export function HabitHistoryCalendarCard({ habitId }: { habitId: string }) {
   const habitsCollection = useHabitsCollection()
   const { data: habits = [], isLoading: habitsLoading } = useLiveQuery({
     query: (q) =>
-      q.from({ habit: habitsCollection }).where(({ habit }) => eq(habit.id, habitId)),
+      q
+        .from({ habit: habitsCollection })
+        .where(({ habit }) => eq(habit.id, habitId)),
   })
   const { data: checkins = [], isLoading: checkinsLoading } = useLiveQuery({
     query: (q) =>

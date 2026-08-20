@@ -158,9 +158,7 @@ export function EditHabitForm({
                 onBlur={field.handleBlur}
                 onChange={(event) => field.handleChange(event.target.value)}
               />
-              <FieldDescription>
-                Leave blank for no reminder.
-              </FieldDescription>
+              <FieldDescription>Leave blank for no reminder.</FieldDescription>
             </Field>
           )}
         </form.Field>

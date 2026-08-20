@@ -25,18 +25,18 @@ A local-first streak & habit tracker built on the TanStack ecosystem and deploye
 
 Built almost entirely on [TanStack](https://tanstack.com):
 
-| Package | Used for |
-| --- | --- |
-| [Start](https://tanstack.com/start) | Full-stack React framework, SSR, server functions |
-| [Router](https://tanstack.com/router) | File-based routing with typed navigation |
-| [Query](https://tanstack.com/query) | Server-state fetching and caching |
-| [DB](https://tanstack.com/db) | Local-first collections with live queries, offline transactions, and browser SQLite persistence |
-| [Table](https://tanstack.com/table) | Data tables |
-| [Form](https://tanstack.com/form) | Type-safe forms |
-| [AI](https://tanstack.com/ai) | The habit-aware AI assistant |
-| [Charts](https://tanstack.com/charts) | Insights visualizations |
-| [Hotkeys](https://tanstack.com/hotkeys) | Keyboard shortcuts |
-| [Virtual](https://tanstack.com/virtual) | Virtualized lists |
+| Package                                 | Used for                                                                                        |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| [Start](https://tanstack.com/start)     | Full-stack React framework, SSR, server functions                                               |
+| [Router](https://tanstack.com/router)   | File-based routing with typed navigation                                                        |
+| [Query](https://tanstack.com/query)     | Server-state fetching and caching                                                               |
+| [DB](https://tanstack.com/db)           | Local-first collections with live queries, offline transactions, and browser SQLite persistence |
+| [Table](https://tanstack.com/table)     | Data tables                                                                                     |
+| [Form](https://tanstack.com/form)       | Type-safe forms                                                                                 |
+| [AI](https://tanstack.com/ai)           | The habit-aware AI assistant                                                                    |
+| [Charts](https://tanstack.com/charts)   | Insights visualizations                                                                         |
+| [Hotkeys](https://tanstack.com/hotkeys) | Keyboard shortcuts                                                                              |
+| [Virtual](https://tanstack.com/virtual) | Virtualized lists                                                                               |
 
 Plus: **React 19**, **Better Auth** (username/password + Google), **Kysely** on **Cloudflare D1**, **Cloudflare Workers / R2 / Durable Objects**, **Tailwind CSS 4** + **shadcn/ui**, **Zod**, and **Vite**.
 

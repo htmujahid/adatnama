@@ -17,12 +17,12 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb"
 import { Separator } from "@/components/ui/separator"
-import { useOnlineStatus } from "@/hooks/use-online-status"
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { useOnlineStatus } from "@/hooks/use-online-status"
 
 export const Route = createFileRoute("/home")({
   ssr: false,

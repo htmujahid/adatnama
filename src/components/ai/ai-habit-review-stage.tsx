@@ -90,7 +90,7 @@ export function AiHabitReviewStage({
             <AlertDescription>{state.message}</AlertDescription>
           </Alert>
         </ResponsiveDialogBody>
-        <ResponsiveDialogFooter>
+        <ResponsiveDialogFooter className="max-md:pb-[max(1rem,env(safe-area-inset-bottom))]">
           <ResponsiveDialogClose
             render={<Button type="button" variant="outline" />}
           >

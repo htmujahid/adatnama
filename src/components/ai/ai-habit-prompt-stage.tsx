@@ -55,7 +55,7 @@ export function AiHabitPromptStage({
           onChange={(event) => setDraft(event.target.value)}
         />
       </ResponsiveDialogBody>
-      <ResponsiveDialogFooter>
+      <ResponsiveDialogFooter className="max-md:pb-[max(1rem,env(safe-area-inset-bottom))]">
         <Button
           type="button"
           disabled={!draft.trim()}

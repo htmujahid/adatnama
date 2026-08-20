@@ -121,7 +121,7 @@ function HabitPlanForm({
 
   return (
     <form
-      className={cn(!isMobile && "flex flex-col gap-6")}
+      className={cn("flex flex-col", isMobile ? "min-h-0 flex-1" : "gap-6")}
       onSubmit={(event) => {
         event.preventDefault()
         event.stopPropagation()
@@ -311,7 +311,7 @@ function HabitPlanForm({
         </FieldGroup>
       </ResponsiveDialogBody>
 
-      <ResponsiveDialogFooter>
+      <ResponsiveDialogFooter className="max-md:pb-[max(1rem,env(safe-area-inset-bottom))]">
         <Button
           type="button"
           variant="outline"

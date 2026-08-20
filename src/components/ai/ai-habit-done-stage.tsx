@@ -57,7 +57,7 @@ export function AiHabitDoneStage({
           </ItemContent>
         </Item>
       </ResponsiveDialogBody>
-      <ResponsiveDialogFooter>
+      <ResponsiveDialogFooter className="max-md:pb-[max(1rem,env(safe-area-inset-bottom))]">
         <Button type="button" variant="outline" onClick={onStartOver}>
           Start over
         </Button>

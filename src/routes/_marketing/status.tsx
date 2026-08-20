@@ -1,4 +1,5 @@
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query"
+import { useState } from "react"
+import { useLiveQuery } from "@tanstack/react-db"
 import { createFileRoute } from "@tanstack/react-router"
 import { format } from "date-fns"
 import {
@@ -26,13 +27,13 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item"
-import { statusQueryOptions } from "@/lib/query/status"
-import type { ComponentStatus } from "@/lib/query/status"
+import { statusCollection, useStatusCollection } from "@/lib/collection/status"
+import type { ComponentStatus } from "@/lib/collection/status"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_marketing/status")({
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(statusQueryOptions())
+    await context.dbClient.collection(statusCollection).toArrayWhenReady()
   },
   component: StatusPage,
 })
@@ -91,8 +92,13 @@ const statusStyles: Record<
 }
 
 function StatusPage() {
-  const queryClient = useQueryClient()
-  const { data, isFetching } = useSuspenseQuery(statusQueryOptions())
+  const statusCollectionInstance = useStatusCollection()
+  const [isFetching, setIsFetching] = useState(false)
+  const { data: statuses = [] } = useLiveQuery({
+    query: (q) => q.from({ status: statusCollection }),
+  })
+  const data = statuses.at(0)
+  if (!data) return null
   const overall = statusStyles[data.status]
   const OverallIcon = overall.icon
 
@@ -111,11 +117,11 @@ function StatusPage() {
           size="icon"
           aria-label="Refresh status"
           disabled={isFetching}
-          onClick={() =>
-            queryClient.invalidateQueries({
-              queryKey: statusQueryOptions().queryKey,
-            })
-          }
+          onClick={async () => {
+            setIsFetching(true)
+            await statusCollectionInstance.utils.refetch()
+            setIsFetching(false)
+          }}
         >
           <RefreshCwIcon className={cn(isFetching && "animate-spin")} />
         </Button>

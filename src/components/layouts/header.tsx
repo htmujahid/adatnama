@@ -1,5 +1,4 @@
-import { useQueryClient } from "@tanstack/react-query"
-import { Link, useRouter } from "@tanstack/react-router"
+import { Link } from "@tanstack/react-router"
 import { BadgeCheckIcon, HomeIcon, LogOutIcon, MenuIcon } from "lucide-react"
 
 import { BrandMark } from "@/components/layouts/brand-mark"
@@ -26,11 +25,10 @@ import {
 } from "@/components/ui/sheet"
 import { useSession } from "@/hooks/use-session"
 import { authClient } from "@/lib/auth-client"
-import { sessionQueryOptions } from "@/lib/query/auth"
+import { useRefreshSession } from "@/lib/mutations/auth"
 
 function HeaderAuth() {
-  const router = useRouter()
-  const queryClient = useQueryClient()
+  const refreshSession = useRefreshSession()
   const session = useSession()
 
   if (!session) {
@@ -102,10 +100,7 @@ function HeaderAuth() {
         <DropdownMenuItem
           onClick={async () => {
             await authClient.signOut()
-            queryClient.removeQueries({
-              queryKey: sessionQueryOptions().queryKey,
-            })
-            await router.invalidate({ sync: true })
+            await refreshSession()
           }}
         >
           <LogOutIcon />

@@ -1,13 +1,8 @@
 import { useState } from "react"
 import { eq, useLiveQuery } from "@tanstack/react-db"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
 import { UsersIcon } from "lucide-react"
 
-import {
-  shareHabitToCircle,
-  unshareHabitFromCircle,
-} from "@/actions/circle-habits"
 import { CircleColorDot } from "@/components/circles/circle-color-dot"
 import { Button } from "@/components/ui/button"
 import {
@@ -24,14 +19,15 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Switch } from "@/components/ui/switch"
-import { useCirclesCollection } from "@/lib/collection/circles"
-import { useHabitsCollection } from "@/lib/collection/habits"
-import { habitSharesQueryOptions } from "@/lib/query/circles"
+import {
+  circlesCollection,
+  habitSharesCollection,
+  useHabitSharesCollection,
+} from "@/lib/collection/circles"
+import { habitsCollection } from "@/lib/collection/habits"
 
 export function HabitCirclesCard({ habitId }: { habitId: string }) {
-  const queryClient = useQueryClient()
-  const circlesCollection = useCirclesCollection()
-  const habitsCollection = useHabitsCollection()
+  const shares = useHabitSharesCollection(habitId)
   const [pendingId, setPendingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const { data: habit } = useLiveQuery({
@@ -44,9 +40,9 @@ export function HabitCirclesCard({ habitId }: { habitId: string }) {
   const { data: circles = [] } = useLiveQuery({
     query: (q) => q.from({ circle: circlesCollection }),
   })
-  const { data: sharedOrgIds = [], isLoading } = useQuery(
-    habitSharesQueryOptions(habitId),
-  )
+  const { data: sharedOrgIds = [], isLoading } = useLiveQuery({
+    query: (q) => q.from({ share: habitSharesCollection(habitId) }),
+  })
 
   if (!habit || habit.archivedAt !== null) {
     return null
@@ -55,16 +51,20 @@ export function HabitCirclesCard({ habitId }: { habitId: string }) {
   async function toggle(organizationId: string, next: boolean) {
     setPendingId(organizationId)
     setError(null)
-    const action = next ? shareHabitToCircle : unshareHabitFromCircle
-    const { error: toggleError } = await action({
-      data: { habitId, organizationId },
-    })
-    setPendingId(null)
-    if (toggleError) {
-      setError(toggleError.message)
-      return
+    try {
+      const tx = next
+        ? shares.insert({ id: organizationId })
+        : shares.delete(organizationId)
+      await tx.isPersisted.promise
+    } catch (toggleError) {
+      setError(
+        toggleError instanceof Error
+          ? toggleError.message
+          : "Unable to update sharing.",
+      )
+    } finally {
+      setPendingId(null)
     }
-    await queryClient.invalidateQueries({ queryKey: ["circles"] })
   }
 
   return (
@@ -105,7 +105,7 @@ export function HabitCirclesCard({ habitId }: { habitId: string }) {
               </FieldContent>
               <Switch
                 id={`share-${circle.id}`}
-                checked={sharedOrgIds.includes(circle.id)}
+                checked={sharedOrgIds.some((share) => share.id === circle.id)}
                 disabled={isLoading || pendingId !== null}
                 onCheckedChange={(checked) => toggle(circle.id, checked)}
               />

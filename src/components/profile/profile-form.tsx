@@ -1,7 +1,5 @@
 import { useState } from "react"
 import { useForm } from "@tanstack/react-form"
-import { useQueryClient } from "@tanstack/react-query"
-import { useRouter } from "@tanstack/react-router"
 import { CheckIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -14,15 +12,14 @@ import {
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { authClient } from "@/lib/auth-client"
-import { sessionQueryOptions } from "@/lib/query/auth"
+import { useRefreshSession } from "@/lib/mutations/auth"
 
 export function ProfileForm({
   user,
 }: {
   user: { name: string; username?: string | null; email: string }
 }) {
-  const router = useRouter()
-  const queryClient = useQueryClient()
+  const refreshSession = useRefreshSession()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
@@ -52,8 +49,7 @@ export function ProfileForm({
         }
       }
 
-      queryClient.removeQueries({ queryKey: sessionQueryOptions().queryKey })
-      await router.invalidate({ sync: true })
+      await refreshSession()
       setSuccess(true)
     },
   })

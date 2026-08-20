@@ -1,31 +1,22 @@
 import { useState } from "react"
-import { useQueryClient } from "@tanstack/react-query"
-import { useRouter } from "@tanstack/react-router"
 
-import { removeAvatar, uploadAvatar } from "@/actions/avatar"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { FieldDescription, FieldError } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
 import { formatBytes, useFileUpload } from "@/hooks/use-file-upload"
 import { AVATAR_ACCEPT, AVATAR_MAX_SIZE_BYTES } from "@/lib/avatar"
-import { sessionQueryOptions } from "@/lib/query/auth"
+import { useAvatarActions } from "@/lib/mutations/auth"
 
 export function AvatarForm({
   user,
 }: {
   user: { name: string; image?: string | null }
 }) {
-  const router = useRouter()
-  const queryClient = useQueryClient()
+  const { upload, remove } = useAvatarActions()
   const [error, setError] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [isRemoving, setIsRemoving] = useState(false)
-
-  const refreshSession = async () => {
-    queryClient.removeQueries({ queryKey: sessionQueryOptions().queryKey })
-    await router.invalidate({ sync: true })
-  }
 
   const [, { openFileDialog, getInputProps, clearFiles }] = useFileUpload({
     accept: AVATAR_ACCEPT,
@@ -40,14 +31,16 @@ export function AvatarForm({
       const formData = new FormData()
       formData.set("file", file)
 
-      const { error: uploadError } = await uploadAvatar({ data: formData })
-      clearFiles()
-
-      if (uploadError) {
-        setError(uploadError.message)
-      } else {
-        await refreshSession()
+      try {
+        await upload(formData)
+      } catch (uploadError) {
+        setError(
+          uploadError instanceof Error
+            ? uploadError.message
+            : "Unable to upload image.",
+        )
       }
+      clearFiles()
       setIsUploading(false)
     },
     onError: (errors) => setError(errors[0] ?? null),
@@ -57,11 +50,14 @@ export function AvatarForm({
     setError(null)
     setIsRemoving(true)
 
-    const { error: removeError } = await removeAvatar()
-    if (removeError) {
-      setError(removeError.message)
-    } else {
-      await refreshSession()
+    try {
+      await remove()
+    } catch (removeError) {
+      setError(
+        removeError instanceof Error
+          ? removeError.message
+          : "Unable to remove image.",
+      )
     }
     setIsRemoving(false)
   }

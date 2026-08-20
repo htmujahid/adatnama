@@ -16,12 +16,12 @@ export type CategoryInput = {
 }
 
 export const categoriesCollection = collectionOptions("categories", (client) =>
-  persistedCollectionOptions<CategoryRecord, string>({
+  persistedCollectionOptions({
     ...queryCollectionOptions({
       id: "categories",
       queryKey: ["categories"],
       queryClient: client.requireDependency<QueryClient>("queryClient"),
-      getKey: (category) => category.id,
+      getKey: (category: CategoryRecord) => category.id,
       queryFn: () => listCategories(),
     }),
     persistence,

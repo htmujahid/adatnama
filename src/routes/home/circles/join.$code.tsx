@@ -1,13 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router"
 
 import { JoinCircleCard } from "@/components/circles/join-circle-card"
-import { circlePreviewQueryOptions } from "@/lib/query/circles"
+import { circlePreviewCollection } from "@/lib/collection/circles"
 
 export const Route = createFileRoute("/home/circles/join/$code")({
   loader: async ({ context, params }) => {
-    await context.queryClient.ensureQueryData(
-      circlePreviewQueryOptions(params.code),
-    )
+    await context.dbClient
+      .collection(circlePreviewCollection(params.code))
+      .toArrayWhenReady()
   },
   component: JoinCirclePage,
 })

@@ -1,8 +1,6 @@
 import { useState } from "react"
 import { useForm } from "@tanstack/react-form"
-import { useQueryClient } from "@tanstack/react-query"
 
-import { setPassword } from "@/actions/auth"
 import { Button } from "@/components/ui/button"
 import {
   Field,
@@ -13,10 +11,10 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
-import { accountsQueryOptions } from "@/lib/query/auth"
+import { useSetPasswordAction } from "@/lib/mutations/auth"
 
 export function SetPasswordForm() {
-  const queryClient = useQueryClient()
+  const setPassword = useSetPasswordAction()
   const [error, setError] = useState<string | null>(null)
 
   const form = useForm({
@@ -26,16 +24,16 @@ export function SetPasswordForm() {
     onSubmit: async ({ value }) => {
       setError(null)
 
-      const { error: setPasswordError } = await setPassword({ data: value })
-      if (setPasswordError) {
-        setError(setPasswordError.message)
-        return
+      try {
+        await setPassword(value)
+        form.reset()
+      } catch (setPasswordError) {
+        setError(
+          setPasswordError instanceof Error
+            ? setPasswordError.message
+            : "Unable to set password.",
+        )
       }
-
-      form.reset()
-      await queryClient.invalidateQueries({
-        queryKey: accountsQueryOptions().queryKey,
-      })
     },
   })
 

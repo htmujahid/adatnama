@@ -19,12 +19,12 @@ export type HabitInput = {
 }
 
 export const habitsCollection = collectionOptions("habits", (client) =>
-  persistedCollectionOptions<HabitRow, string>({
+  persistedCollectionOptions({
     ...queryCollectionOptions({
       id: "habits",
       queryKey: ["habits"],
       queryClient: client.requireDependency<QueryClient>("queryClient"),
-      getKey: (habit) => habit.id,
+      getKey: (habit: HabitRow) => habit.id,
       queryFn: () => listHabits(),
     }),
     persistence,

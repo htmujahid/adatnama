@@ -11,12 +11,12 @@ import type { UserPreferencesTable } from "@/lib/db/schema"
 export const preferencesCollection = collectionOptions(
   "preferences",
   (client) =>
-    persistedCollectionOptions<UserPreferencesTable, string>({
+    persistedCollectionOptions({
       ...queryCollectionOptions({
         id: "preferences",
         queryKey: ["preferences"],
         queryClient: client.requireDependency<QueryClient>("queryClient"),
-        getKey: (preferences) => preferences.userId,
+        getKey: (preferences: UserPreferencesTable) => preferences.userId,
         queryFn: () => listPreferences(),
       }),
       persistence,

@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { eq, useLiveQuery } from "@tanstack/react-db"
-import { useQuery } from "@tanstack/react-query"
 import {
   CircleCheckIcon,
   CopyIcon,
@@ -8,7 +7,7 @@ import {
   ListChecksIcon,
 } from "lucide-react"
 
-import { duplicateCircleHabit } from "@/actions/circle-habits"
+import type { CircleSharedHabit } from "@/actions/circle-habits"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -37,10 +36,13 @@ import {
 } from "@/components/ui/item"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useHomeUser } from "@/hooks/use-home-user"
-import { useCirclesCollection } from "@/lib/collection/circles"
-import { useHabitsCollection } from "@/lib/collection/habits"
+import {
+  circleHabitsCollection,
+  useCirclesCollection,
+} from "@/lib/collection/circles"
+import { habitsCollection } from "@/lib/collection/habits"
 import { formatHabitDays } from "@/lib/habits"
-import { circleHabitsQueryOptions } from "@/lib/query/circles"
+import { useDuplicateCircleHabitAction } from "@/lib/mutations/circles"
 
 function initialsFor(name: string) {
   return name
@@ -53,7 +55,7 @@ function initialsFor(name: string) {
 export function CircleSharedHabitsCard({ circleId }: { circleId: string }) {
   const user = useHomeUser()
   const circlesCollection = useCirclesCollection()
-  const habitsCollection = useHabitsCollection()
+  const duplicateCircleHabit = useDuplicateCircleHabitAction()
   const [pendingId, setPendingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const { data: matches = [] } = useLiveQuery({
@@ -66,28 +68,33 @@ export function CircleSharedHabitsCard({ circleId }: { circleId: string }) {
   const { data: ownHabits = [] } = useLiveQuery({
     query: (q) => q.from({ habit: habitsCollection }),
   })
-  const { data: members, isLoading } = useQuery({
-    ...circleHabitsQueryOptions(circle?.id ?? ""),
-    enabled: circle !== undefined,
+  const { data: members, isLoading } = useLiveQuery({
+    query: (q) => q.from({ member: circleHabitsCollection(circle?.id ?? "") }),
   })
 
   if (!circle) {
     return null
   }
 
-  async function duplicate(habitId: string) {
+  async function duplicate(habit: CircleSharedHabit) {
     if (!circle) return
-    setPendingId(habitId)
+    setPendingId(habit.id)
     setError(null)
-    const { error: duplicateError } = await duplicateCircleHabit({
-      data: { habitId, organizationId: circle.id },
-    })
-    setPendingId(null)
-    if (duplicateError) {
-      setError(duplicateError.message)
-      return
+    try {
+      await duplicateCircleHabit({
+        userId: user.id,
+        habit,
+        organizationId: circle.id,
+      }).isPersisted.promise
+    } catch (duplicateError) {
+      setError(
+        duplicateError instanceof Error
+          ? duplicateError.message
+          : "Unable to duplicate habit.",
+      )
+    } finally {
+      setPendingId(null)
     }
-    await habitsCollection.utils.refetch()
   }
 
   return (
@@ -100,7 +107,7 @@ export function CircleSharedHabitsCard({ circleId }: { circleId: string }) {
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
-        {isLoading || members === undefined ? (
+        {isLoading ? (
           <div className="flex flex-col gap-2">
             <Skeleton className="h-6 w-40" />
             <Skeleton className="h-14 w-full" />
@@ -180,7 +187,7 @@ export function CircleSharedHabitsCard({ circleId }: { circleId: string }) {
                                 variant="outline"
                                 size="sm"
                                 disabled={pendingId !== null}
-                                onClick={() => duplicate(habit.id)}
+                                onClick={() => duplicate(habit)}
                               >
                                 <CopyIcon />
                                 Duplicate

@@ -1,24 +1,25 @@
 import { useState } from "react"
-import { useSuspenseQuery } from "@tanstack/react-query"
+import { useLiveQuery } from "@tanstack/react-db"
 import { Link, useNavigate } from "@tanstack/react-router"
 
-import { joinCircleByCode } from "@/actions/circles"
 import { CircleColorDot } from "@/components/circles/circle-color-dot"
 import { CircleInviteInvalid } from "@/components/circles/circle-invite-invalid"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { FieldError } from "@/components/ui/field"
 import { Spinner } from "@/components/ui/spinner"
-import { useCirclesCollection } from "@/lib/collection/circles"
-import { circlePreviewQueryOptions } from "@/lib/query/circles"
+import { circlePreviewCollection } from "@/lib/collection/circles"
+import { useJoinCircleAction } from "@/lib/mutations/circles"
 
 export function JoinCircleCard({ code }: { code: string }) {
   const navigate = useNavigate()
-  const circlesCollection = useCirclesCollection()
-  const { data } = useSuspenseQuery(circlePreviewQueryOptions(code))
+  const joinCircle = useJoinCircleAction()
+  const { data } = useLiveQuery({
+    query: (q) => q.from({ preview: circlePreviewCollection(code) }),
+  })
   const [pending, setPending] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const circle = data.circle
+  const circle = data.at(0)?.circle
 
   if (!circle) {
     return <CircleInviteInvalid />
@@ -51,19 +52,21 @@ export function JoinCircleCard({ code }: { code: string }) {
               onClick={async () => {
                 setPending(true)
                 setError(null)
-                const { error: joinError, slug } = await joinCircleByCode({
-                  data: { code },
-                })
-                setPending(false)
-                if (joinError || !slug) {
-                  setError(joinError?.message ?? "Unable to join circle.")
-                  return
+                try {
+                  await joinCircle({ code })
+                  await navigate({
+                    to: "/home/circles/$circleId",
+                    params: { circleId: circle.slug },
+                  })
+                } catch (joinError) {
+                  setError(
+                    joinError instanceof Error
+                      ? joinError.message
+                      : "Unable to join circle.",
+                  )
+                } finally {
+                  setPending(false)
                 }
-                await circlesCollection.utils.refetch()
-                await navigate({
-                  to: "/home/circles/$circleId",
-                  params: { circleId: slug },
-                })
               }}
             >
               {pending && <Spinner data-icon="inline-start" />}

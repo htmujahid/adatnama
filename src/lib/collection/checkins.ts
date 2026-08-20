@@ -14,12 +14,12 @@ export type CheckinRecord = Omit<HabitCheckinTable, "status"> & {
 }
 
 export const checkinsCollection = collectionOptions("checkins", (client) =>
-  persistedCollectionOptions<CheckinRecord, string>({
+  persistedCollectionOptions({
     ...queryCollectionOptions({
       id: "checkins",
       queryKey: ["checkins"],
       queryClient: client.requireDependency<QueryClient>("queryClient"),
-      getKey: (checkin) => checkin.id,
+      getKey: (checkin: CheckinRecord) => checkin.id,
       queryFn: () => listCheckins() as Promise<Array<CheckinRecord>>,
     }),
     persistence,

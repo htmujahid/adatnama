@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from "@tanstack/react-query"
+import { useLiveQuery } from "@tanstack/react-db"
 
 import { PasswordForm } from "@/components/profile/password-form"
 import { SetPasswordForm } from "@/components/profile/set-password-form"
@@ -9,10 +9,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { accountsQueryOptions } from "@/lib/query/auth"
+import { accountsCollection } from "@/lib/collection/auth"
 
 export function PasswordCard() {
-  const { data: accounts } = useSuspenseQuery(accountsQueryOptions())
+  const { data: accounts = [] } = useLiveQuery({
+    query: (q) => q.from({ account: accountsCollection }),
+  })
   const hasPassword = accounts.some(
     (account) => account.providerId === "credential",
   )

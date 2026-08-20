@@ -11,7 +11,7 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools"
 
 import { RegisterServiceWorker } from "@/components/pwa/register-service-worker"
-import { sessionQueryOptions } from "@/lib/query/auth"
+import { sessionCollection } from "@/lib/collection/auth"
 
 import appCss from "../styles.css?url"
 
@@ -24,10 +24,11 @@ interface RouterContext {
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   beforeLoad: async ({ context, location }) => {
-    const options = sessionQueryOptions()
-    const session = await context.queryClient
-      .ensureQueryData(options)
-      .catch(() => context.queryClient.getQueryData(options.queryKey) ?? null)
+    const collection = context.dbClient.collection(sessionCollection)
+    const sessions = await collection
+      .toArrayWhenReady()
+      .catch(() => collection.toArray)
+    const session = sessions.at(0) ?? null
     if (!session && location.pathname.startsWith("/home")) {
       throw redirect({ to: "/login" })
     }

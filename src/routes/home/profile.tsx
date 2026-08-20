@@ -3,11 +3,11 @@ import { createFileRoute } from "@tanstack/react-router"
 import { AccountCard } from "@/components/profile/account-card"
 import { PasswordCard } from "@/components/profile/password-card"
 import { ProfilePictureCard } from "@/components/profile/profile-picture-card"
-import { accountsQueryOptions } from "@/lib/query/auth"
+import { accountsCollection } from "@/lib/collection/auth"
 
 export const Route = createFileRoute("/home/profile")({
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData(accountsQueryOptions())
+    await context.dbClient.collection(accountsCollection).toArrayWhenReady()
   },
   component: ProfilePage,
 })

@@ -2,8 +2,7 @@
 
 import * as React from "react"
 import { useLiveQuery } from "@tanstack/react-db"
-import { useQueryClient } from "@tanstack/react-query"
-import { Link, useRouter } from "@tanstack/react-router"
+import { Link } from "@tanstack/react-router"
 import {
   AwardIcon,
   CalendarCheckIcon,
@@ -32,7 +31,7 @@ import {
 import { useHomeUser } from "@/hooks/use-home-user"
 import { authClient } from "@/lib/auth-client"
 import { circlesCollection } from "@/lib/collection/circles"
-import { sessionQueryOptions } from "@/lib/query/auth"
+import { useRefreshSession } from "@/lib/mutations/auth"
 
 import { NavSecondary } from "./nav-secondary"
 
@@ -95,8 +94,7 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = useHomeUser()
-  const router = useRouter()
-  const queryClient = useQueryClient()
+  const refreshSession = useRefreshSession()
   const { data: circles = [], isLoading: circlesLoading } = useLiveQuery({
     query: (q) => q.from({ circle: circlesCollection }),
   })
@@ -112,8 +110,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const handleSignOut = async () => {
     await authClient.signOut()
-    queryClient.removeQueries({ queryKey: sessionQueryOptions().queryKey })
-    await router.invalidate({ sync: true })
+    await refreshSession()
   }
 
   return (

@@ -1,7 +1,6 @@
 import { useState } from "react"
 import { useForm } from "@tanstack/react-form"
-import { useQueryClient } from "@tanstack/react-query"
-import { useNavigate, useRouter } from "@tanstack/react-router"
+import { useNavigate } from "@tanstack/react-router"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -15,7 +14,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { authClient } from "@/lib/auth-client"
-import { sessionQueryOptions } from "@/lib/query/auth"
+import { useRefreshSession } from "@/lib/mutations/auth"
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -41,9 +40,8 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export function LoginForm() {
-  const router = useRouter()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
+  const refreshSession = useRefreshSession()
   const [error, setError] = useState<string | null>(null)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
 
@@ -60,8 +58,7 @@ export function LoginForm() {
         setError(signInError.message ?? "Unable to sign in.")
         return
       }
-      queryClient.removeQueries({ queryKey: sessionQueryOptions().queryKey })
-      await router.invalidate({ sync: true })
+      await refreshSession()
       await navigate({ to: "/home" })
     },
   })

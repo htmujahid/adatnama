@@ -201,7 +201,7 @@ async function sendReminderPush(
       },
       options: {
         ttl: PUSH_TTL_SECONDS,
-        urgency: "normal",
+        urgency: "high",
         topic: habit.id.replace(/-/g, "").slice(0, 32),
       },
     },

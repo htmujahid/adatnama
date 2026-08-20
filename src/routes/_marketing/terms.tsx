@@ -5,7 +5,7 @@ export const Route = createFileRoute("/_marketing/terms")({
   component: TermsPage,
 })
 
-const EFFECTIVE_DATE = "August 19, 2026"
+const EFFECTIVE_DATE = "August 20, 2026"
 
 const SUMMARY_POINTS = [
   {
@@ -38,6 +38,7 @@ const SECTIONS = [
     paragraphs: [
       "Adatnama is a habit and streak tracker: you create habits, check in on them, and the app tracks streaks, freezes, statistics, and optional shared circles. The service is currently provided free of charge.",
       "Adatnama works offline by keeping a copy of your data on your device, and syncs that data to your account when you're online.",
+      "The optional AI planner can draft a habit from a goal you describe. Drafts are generated automatically and can be wrong or a poor fit; review a draft before accepting it. Nothing is added to your account until you do.",
     ],
   },
   {
@@ -52,14 +53,14 @@ const SECTIONS = [
   {
     title: "4. Your content",
     paragraphs: [
-      "Everything you put into Adatnama — habits, check-ins, notes, categories, circle names and descriptions, your profile picture — remains yours.",
+      "Everything you put into Adatnama remains yours: habits, check-ins, notes, categories, circle names and descriptions, and your profile picture.",
       "So that the app can function, you grant us a limited license to store, process, and transmit that content: syncing it between your devices, computing streaks and statistics from it, showing shared habits to the circles you chose, and delivering the reminders you set. That license exists only to operate the service and ends when your content is deleted.",
     ],
   },
   {
     title: "5. Circles and sharing",
     paragraphs: [
-      "Circles are private, invite-only groups. When you share a habit into a circle, its members can see that habit's details, your streak, and your daily progress on it — and may copy the habit's setup (name, schedule, target) into their own list. Your check-in history is never copied.",
+      "Circles are private, invite-only groups. When you share a habit into a circle, its members can see that habit's details, your streak, and your daily progress on it, and they may copy the habit's setup (name, schedule, target) into their own list. Your check-in history is never copied.",
       "Circle owners and admins can manage members, including removing them. Anyone can leave a circle at any time. Whoever shares an invite link or code is responsible for who they let in.",
     ],
   },

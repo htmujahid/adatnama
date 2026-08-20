@@ -25,7 +25,7 @@ const PRINCIPLES = [
   {
     title: "Habits fit around your life, not the other way",
     description:
-      "Not everything is an every-day habit. Gym three times a week, a family call on weekends — each habit runs on its own schedule, and only those days count.",
+      "Not everything is an every-day habit. Gym three times a week, a family call on weekends: each habit runs on its own schedule, and only those days count.",
   },
   {
     title: "It's easier together",
@@ -56,8 +56,8 @@ function AboutPage() {
             </p>
             <p className="mt-4 text-lg text-muted-foreground">
               Streaks work because the feedback is immediate and losing one
-              stings. But most trackers make that sting too sharp — one missed
-              day and weeks of effort reset to zero, which is usually the moment
+              stings. But most trackers make that sting too sharp. One missed
+              day resets weeks of effort to zero, which is usually the moment
               people quit. Adatnama keeps the streak motivating and takes the
               cruelty out: freezes absorb the occasional bad day, schedules only
               expect a habit on the days you planned it, and the history always

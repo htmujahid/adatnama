@@ -5,7 +5,7 @@ export const Route = createFileRoute("/_marketing/privacy")({
   component: PrivacyPage,
 })
 
-const EFFECTIVE_DATE = "August 19, 2026"
+const EFFECTIVE_DATE = "August 20, 2026"
 
 const SUMMARY_POINTS = [
   {
@@ -37,12 +37,13 @@ const SECTIONS = [
   {
     title: "2. Information you give us",
     list: [
-      "Account details — your name and username, and a password if you set one. If you sign in with Google, we receive your name, email address, and profile picture from your Google account; we never see your Google password.",
-      "Profile picture — if you upload one, we store the image so it can be shown on your profile and in your circles.",
-      "Habit data — the habits you create (name, description, target, schedule, reminder time, freeze allowance), your check-ins, the notes you attach to them, your categories, and archive notes.",
-      "Circle data — the name, description, and color of circles you create, who belongs to them, member roles, and which of your habits you have chosen to share into each circle.",
-      "Preferences — defaults for new habits (schedule and freezes). Your theme choice (light or dark) is stored only in your browser, not on our servers.",
-      "Notifications — if you enable reminder notifications, your browser gives us a push subscription (a delivery address for notifications), which we store so reminders can reach you.",
+      "Account details: your name and username, and a password if you set one. If you sign in with Google, we receive your name, email address, and profile picture from your Google account; we never see your Google password.",
+      "Profile picture: if you upload one, we store the image so it can be shown on your profile and in your circles.",
+      "Habit data: the habits you create (name, description, target, schedule, reminder time, freeze allowance), your check-ins, the notes you attach to them, your categories, and archive notes.",
+      "Circle data: the name, description, and color of circles you create, who belongs to them, member roles, and which of your habits you have chosen to share into each circle.",
+      "Preferences: defaults for new habits (schedule and freezes). Your theme choice (light or dark) is stored only in your browser, not on our servers.",
+      "Notifications: if you enable reminder notifications, your browser gives us a push subscription (a delivery address for notifications), which we store so reminders can reach you.",
+      "AI planner prompts: if you ask the AI planner to draft a habit, the goal you type is sent to our AI provider (OpenAI) to generate the suggestion. The prompt is used only to produce that draft; nothing is stored in your account unless you accept the draft, at which point it is saved like any habit you created yourself.",
     ],
   },
   {
@@ -57,13 +58,13 @@ const SECTIONS = [
     title: "4. How your information is used",
     paragraphs: [
       "We use your data for exactly one purpose: making the app work for you. That means syncing your habits between your devices, computing streaks and statistics, showing shared habits to the circles you chose, and sending you the reminders you asked for.",
-      "We do not sell your data, we do not show ads, and we do not share your information with third parties beyond the hosting infrastructure that runs the service.",
+      "We do not sell your data, we do not show ads, and we do not share your information with third parties beyond the hosting infrastructure that runs the service and, if you use the AI planner, the AI provider that generates your suggestion from the goal you typed.",
     ],
   },
   {
     title: "5. What other people can see",
     paragraphs: [
-      "Nothing, unless you share it. Every habit is private to your account until you toggle it into a circle. Members of that circle can then see the habit's name, details, your streak, and your daily progress on it — and can copy the habit's setup (not your history) into their own list.",
+      "Nothing, unless you share it. Every habit is private to your account until you toggle it into a circle. Members of that circle can then see the habit's name, details, your streak, and your daily progress on it, and they can copy the habit's setup (not your history) into their own list.",
       "Un-share a habit or leave a circle and that visibility ends. Your private habits, notes, and everything else in your account are never visible to other users.",
     ],
   },
@@ -76,7 +77,7 @@ const SECTIONS = [
   {
     title: "7. How long we keep data",
     paragraphs: [
-      "Your data is kept for as long as your account exists. When you delete a habit, category, or circle, it is deleted — archiving a habit, by contrast, keeps its history so you can restore it later.",
+      "Your data is kept for as long as your account exists. When you delete a habit, category, or circle, it is deleted. Archiving a habit, by contrast, keeps its history so you can restore it later.",
       "To delete your account and everything attached to it, contact us at the address below and we will remove it.",
     ],
   },

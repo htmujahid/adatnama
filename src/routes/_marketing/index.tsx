@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import {
+  BellIcon,
   CalendarDaysIcon,
   ChartColumnIcon,
   CheckIcon,
@@ -13,6 +14,7 @@ import {
   RefreshCwIcon,
   SmartphoneIcon,
   SnowflakeIcon,
+  SparklesIcon,
   TrophyIcon,
   UsersIcon,
   WifiOffIcon,
@@ -35,6 +37,7 @@ const RIBBON_ITEMS = [
   { icon: CircleCheckIcon, label: "One-tap check-ins" },
   { icon: SnowflakeIcon, label: "Automatic streak freezes" },
   { icon: CalendarDaysIcon, label: "Custom schedules" },
+  { icon: SparklesIcon, label: "AI habit planner" },
   { icon: UsersIcon, label: "Private circles" },
   { icon: WifiOffIcon, label: "Offline-first" },
 ]
@@ -77,6 +80,16 @@ const FAQ = [
     question: "Can my friends see my habits?",
     answer:
       "Only if you want them to. Circles are small private groups you join by invite link or code, and you choose exactly which habits to share into each one. Everything else stays private.",
+  },
+  {
+    question: "Can it remind me to check in?",
+    answer:
+      "Yes. Give any habit a reminder time and turn on notifications, and a push notification arrives at that time in your timezone, on the days the habit is scheduled. If you've already checked in, the reminder stays quiet.",
+  },
+  {
+    question: "What if I don't know which habit to start with?",
+    answer:
+      "Describe the goal to the built-in AI planner, something like “build a morning routine”. It drafts a habit for you with a name, a measurable target, and a schedule, and you can edit every field before adding it.",
   },
   {
     question: "Does it work without an internet connection?",
@@ -440,6 +453,76 @@ function MilestonesVisual() {
   )
 }
 
+function AiPlannerVisual() {
+  return (
+    <div aria-hidden="true" className="flex flex-col gap-2">
+      <div className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-muted-foreground">
+        <SparklesIcon className="size-3.5 shrink-0 text-primary" />
+        Build a morning routine
+      </div>
+      <div className="flex flex-col gap-2.5 rounded-xl border border-border bg-background p-3">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium">Morning stretch</span>
+          <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+            Draft
+          </span>
+        </div>
+        <div className="flex flex-wrap gap-1.5 text-xs text-muted-foreground">
+          <span className="rounded-full border border-border px-2 py-0.5">
+            10 minutes
+          </span>
+          <span className="rounded-full border border-border px-2 py-0.5">
+            Weekdays
+          </span>
+          <span className="flex items-center gap-1.5 rounded-full border border-border px-2 py-0.5">
+            <span className="size-1.5 rounded-full bg-emerald-500" />
+            Health
+          </span>
+        </div>
+        <div className="flex gap-2">
+          <span className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground">
+            Add habit
+          </span>
+          <span className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground">
+            Edit first
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ReminderVisual() {
+  return (
+    <div aria-hidden="true" className="flex flex-col gap-2">
+      <div className="flex items-start gap-3 rounded-xl border border-border bg-background p-3 shadow-sm">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+          <FlameIcon className="size-4" />
+        </span>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="text-sm font-medium">Morning run</span>
+            <span className="text-xs text-muted-foreground">6:30</span>
+          </div>
+          <span className="text-xs text-muted-foreground">
+            Time to check in. Today's target: 5 km.
+          </span>
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        <span className="flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground">
+          <CalendarDaysIcon className="size-3" />
+          Only on scheduled days
+        </span>
+        <span className="flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground">
+          <CheckIcon className="size-3" />
+          Quiet once you're done
+        </span>
+      </div>
+    </div>
+  )
+}
+
 function NoteVisual() {
   return (
     <div
@@ -585,8 +668,8 @@ function PrivacyMock() {
         </div>
 
         <p className="mt-3 border-t border-border pt-4 text-sm text-muted-foreground">
-          Sharing is per habit and per circle &mdash; flip it off anytime and
-          the habit is yours alone again.
+          Sharing is per habit and per circle. Flip it off anytime and the habit
+          is yours alone again.
         </p>
       </div>
     </div>
@@ -645,9 +728,9 @@ function App() {
             </h1>
 
             <p className="mt-6 max-w-2xl text-lg text-pretty text-muted-foreground sm:text-xl">
-              Adatnama turns daily check-ins into streaks worth protecting
-              &mdash; with freezes for the bad days, schedules that fit real
-              life, and friends who keep you honest.
+              Adatnama turns daily check-ins into streaks worth protecting.
+              Freezes cover the bad days, schedules bend to real life, and
+              friends keep you honest.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -731,8 +814,8 @@ function App() {
               </h3>
               <p className="text-sm text-pretty text-muted-foreground">
                 Daily check-ins add up to a 12-month heatmap, weekly completion
-                rates, and streak charts &mdash; the kind of record that makes a
-                good month visible at a glance.
+                rates, and streak charts: the kind of record that makes a good
+                month visible at a glance.
               </p>
             </div>
             <div className="mt-auto">
@@ -794,6 +877,44 @@ function App() {
             </div>
           </div>
 
+          <div className="flex min-w-0 flex-col gap-5 rounded-2xl border border-border bg-card p-6 sm:p-8 lg:col-span-3">
+            <div className="flex flex-col gap-2">
+              <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <SparklesIcon className="size-5" />
+              </span>
+              <h3 className="mt-2 font-heading text-lg font-semibold">
+                Start with a sentence
+              </h3>
+              <p className="text-sm text-pretty text-muted-foreground">
+                Tell the AI planner what you want to build and it drafts the
+                habit for you: name, measurable target, schedule, and category.
+                Edit anything, then add it with one tap.
+              </p>
+            </div>
+            <div className="mt-auto">
+              <AiPlannerVisual />
+            </div>
+          </div>
+
+          <div className="flex min-w-0 flex-col gap-5 rounded-2xl border border-border bg-card p-6 sm:p-8 lg:col-span-3">
+            <div className="flex flex-col gap-2">
+              <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <BellIcon className="size-5" />
+              </span>
+              <h3 className="mt-2 font-heading text-lg font-semibold">
+                Reminders that find you
+              </h3>
+              <p className="text-sm text-pretty text-muted-foreground">
+                Give a habit a time and a notification arrives right then, in
+                your timezone, even when the app is closed. Already checked in?
+                The reminder stays quiet.
+              </p>
+            </div>
+            <div className="mt-auto">
+              <ReminderVisual />
+            </div>
+          </div>
+
           <div className="flex min-w-0 flex-col justify-between gap-6 rounded-2xl border border-border bg-card p-6 sm:flex-row sm:items-center sm:p-8 lg:col-span-6">
             <div className="flex max-w-md flex-col gap-2">
               <span className="flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -850,7 +971,7 @@ function App() {
                 {
                   title: "You set the strictness",
                   description:
-                    "From zero freezes for the non-negotiables up to five for the forgiving ones — per habit.",
+                    "Each habit gets its own allowance, from zero freezes for the non-negotiables up to five for the forgiving ones.",
                 },
                 {
                   title: "The record stays honest",
@@ -880,7 +1001,7 @@ function App() {
         <SectionHeading
           eyebrow="How it works"
           title="Tracked in under a minute"
-          description="No setup marathon, no complicated rules. Add a habit tonight, check in tomorrow morning — that's the whole onboarding."
+          description="No setup marathon, no complicated rules. Add a habit tonight and check in tomorrow morning. That's the whole onboarding."
         />
 
         <ol className="mx-auto mt-16 grid max-w-5xl gap-10 sm:grid-cols-3 sm:gap-8">
@@ -914,7 +1035,7 @@ function App() {
           <SectionHeading
             eyebrow="Ideas"
             title="What will you track?"
-            description="Anything you can do in a day can be a habit. Group yours with color-coded categories you create — here are a few to borrow."
+            description="Anything you can do in a day can be a habit. Group yours with color-coded categories you create. Here are a few ideas to borrow."
           />
 
           <div className="mx-auto mt-12 flex max-w-4xl flex-wrap justify-center gap-2.5">
@@ -933,9 +1054,9 @@ function App() {
           </div>
 
           <p className="mt-8 text-center text-sm text-muted-foreground">
-            Each habit gets its own schedule, target, and streak &mdash; so
-            &ldquo;10k steps every day&rdquo; and &ldquo;piano on
-            weekends&rdquo; live comfortably side by side.
+            Each habit gets its own schedule, target, and streak, so &ldquo;10k
+            steps every day&rdquo; and &ldquo;piano on weekends&rdquo; live
+            comfortably side by side.
           </p>
         </div>
       </section>
@@ -950,8 +1071,8 @@ function App() {
             Your habits are nobody else's business
           </h2>
           <p className="text-lg text-pretty text-muted-foreground">
-            A habit tracker sees the personal stuff &mdash; what you're working
-            on, what you're struggling with. Adatnama treats that accordingly.
+            A habit tracker sees the personal stuff: what you're working on and
+            what you're struggling with. Adatnama treats that accordingly.
           </p>
           <ul className="flex flex-col gap-4">
             {[
@@ -959,13 +1080,13 @@ function App() {
                 icon: LockIcon,
                 title: "Private unless you share",
                 description:
-                  "Every habit stays yours alone until you deliberately share it into a circle — and only that circle sees it.",
+                  "Every habit stays yours alone until you deliberately share it into a circle, and only that circle sees it.",
               },
               {
                 icon: HardDriveIcon,
                 title: "Stored on your device",
                 description:
-                  "Your habits live in a local database on your device and sync to your account — that's what makes offline check-ins work.",
+                  "Your habits live in a local database on your device and sync to your account. That's what makes offline check-ins work.",
               },
               {
                 icon: EyeOffIcon,

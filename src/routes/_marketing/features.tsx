@@ -6,8 +6,10 @@ import {
   ChartColumnIcon,
   CheckIcon,
   CircleCheckIcon,
+  CommandIcon,
   CopyIcon,
   FlameIcon,
+  KeyRoundIcon,
   LinkIcon,
   MedalIcon,
   MoonStarIcon,
@@ -15,6 +17,7 @@ import {
   SearchIcon,
   SmartphoneIcon,
   SnowflakeIcon,
+  SparklesIcon,
   TagIcon,
   TrophyIcon,
   UsersIcon,
@@ -233,7 +236,7 @@ const STATUS_BADGES = [
   {
     label: "Broken",
     className: "bg-muted text-muted-foreground",
-    caption: "out of freezes — start again",
+    caption: "out of freezes, start again",
   },
 ] as const
 
@@ -422,13 +425,13 @@ const CIRCLE_POINTS = [
     icon: UsersIcon,
     title: "Share only what you choose",
     description:
-      "Habits are private by default. Toggle each one into a circle — everything else stays yours alone.",
+      "Habits are private by default. Toggle each one into a circle, and everything else stays yours alone.",
   },
   {
     icon: CopyIcon,
     title: "Borrow a habit that works",
     description:
-      "Copy a member's habit into your own list — name, schedule, and target included — and start your own streak.",
+      "Copy a member's habit into your own list with its name, schedule, and target, and start your own streak.",
   },
 ] as const
 
@@ -593,6 +596,98 @@ function CalendarVisual() {
   )
 }
 
+/* ----------------------------- ai planner mock ---------------------------- */
+
+const AI_QUICK_PROMPTS = [
+  "Build a morning routine",
+  "Track a daily reading habit",
+  "Start a workout streak",
+] as const
+
+function AiPlannerFlowVisual() {
+  return (
+    <div aria-hidden="true" className="relative">
+      <div className="absolute -inset-x-10 -top-10 -z-10 h-56 rounded-full bg-primary/15 blur-3xl" />
+      <div className="flex flex-col gap-4">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+          <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm">
+            <SparklesIcon className="size-4 shrink-0 text-primary" />
+            <span>Start a workout streak</span>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {AI_QUICK_PROMPTS.map((prompt) => (
+              <span
+                key={prompt}
+                className="rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground"
+              >
+                {prompt}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="font-heading text-sm font-semibold">
+              Strength workout
+            </p>
+            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+              Draft
+            </span>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            A short strength session to start the day with momentum.
+          </p>
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1">
+              <p className="text-xs font-medium text-muted-foreground">
+                Target
+              </p>
+              <div className="rounded-lg border border-border bg-background px-3 py-1.5 text-sm">
+                20 minutes
+              </div>
+            </div>
+            <div className="flex flex-col gap-1">
+              <p className="text-xs font-medium text-muted-foreground">
+                Schedule
+              </p>
+              <div className="rounded-lg border border-border bg-background px-3 py-1.5 text-sm">
+                Weekdays
+              </div>
+            </div>
+            <div className="flex flex-col gap-1">
+              <p className="text-xs font-medium text-muted-foreground">
+                Category
+              </p>
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-1.5 text-sm">
+                <span className="size-2 rounded-full bg-emerald-500" />
+                Health
+              </div>
+            </div>
+            <div className="flex flex-col gap-1">
+              <p className="text-xs font-medium text-muted-foreground">
+                Freezes
+              </p>
+              <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-1.5 text-sm">
+                <SnowflakeIcon className="size-3.5 text-sky-600 dark:text-sky-400" />
+                3 per streak
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 flex gap-2">
+            <span className="flex h-8 flex-1 items-center justify-center rounded-lg bg-primary text-xs font-medium text-primary-foreground">
+              Add habit
+            </span>
+            <span className="flex h-8 items-center justify-center rounded-lg border border-border px-3 text-xs font-medium text-muted-foreground">
+              Try again
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /* --------------------------------- page ---------------------------------- */
 
 const EVERYDAY_ITEMS = [
@@ -610,15 +705,27 @@ const EVERYDAY_ITEMS = [
   },
   {
     icon: BellIcon,
-    title: "A time for every habit",
+    title: "Reminders that reach you",
     description:
-      "Give any habit a reminder time so it has a fixed place in your day — 6:30 for the run, 21:00 for reading.",
+      "Give any habit a time and a push notification arrives right then, in your timezone, even with the app closed. It only fires on scheduled days, and never after you've already checked in.",
+  },
+  {
+    icon: CommandIcon,
+    title: "Fast from the keyboard",
+    description:
+      "A command menu on Ctrl+K or Cmd+K, N for a new habit, A for the AI planner, and G-then-a-letter to jump to any page. Press ? anytime to see the full list.",
   },
   {
     icon: MoonStarIcon,
     title: "Light and dark",
     description:
       "Choose light, dark, or follow your device. Your preference is remembered everywhere you sign in.",
+  },
+  {
+    icon: KeyRoundIcon,
+    title: "Sign in your way",
+    description:
+      "Use your Google account or a plain username and password. Either way, your habits follow you across devices.",
   },
 ] as const
 
@@ -648,8 +755,7 @@ function FeaturesPage() {
             <p className="max-w-xl text-lg text-pretty text-muted-foreground">
               A habit tracker has one job: make it easy to show up today and
               satisfying to look back on a month. Every feature below serves one
-              of those two ends &mdash; starting with how simple a habit is to
-              set up.
+              of those two ends, starting with how simple a habit is to set up.
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <Button
@@ -674,7 +780,7 @@ function FeaturesPage() {
         </div>
       </section>
 
-      {/* 01 — Daily tracking: split */}
+      {/* 01. Daily tracking: split */}
       <section className="border-y border-border bg-muted/30">
         <div className="mx-auto grid w-full max-w-7xl items-center gap-12 px-4 py-24 sm:px-6 sm:py-32 lg:grid-cols-2 lg:gap-20 lg:px-8">
           <div className="flex flex-col items-start gap-5">
@@ -684,7 +790,7 @@ function FeaturesPage() {
             </h2>
             <p className="text-lg text-pretty text-muted-foreground">
               Open the app and today's habits are the first thing you see.
-              Checking in is one tap &mdash; everything else is optional.
+              Checking in is one tap, and everything else is optional.
             </p>
             <ul className="flex flex-col gap-4">
               {[
@@ -701,7 +807,7 @@ function FeaturesPage() {
                 {
                   title: "Same-day only, by design",
                   description:
-                    "Check-ins happen on the day itself, not retroactively — which is what makes the history worth trusting.",
+                    "Check-ins happen on the day itself, not retroactively. That's what makes the history worth trusting.",
                 },
               ].map((point) => (
                 <li key={point.title} className="flex gap-3">
@@ -721,7 +827,7 @@ function FeaturesPage() {
         </div>
       </section>
 
-      {/* 02 — Streaks: typographic milestones + week timeline */}
+      {/* 02. Streaks: typographic milestones + week timeline */}
       <section className="mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8">
         <div className="max-w-2xl">
           <Eyebrow>02 &middot; Streaks &amp; freezes</Eyebrow>
@@ -730,9 +836,8 @@ function FeaturesPage() {
           </h2>
           <p className="mt-4 text-lg text-pretty text-muted-foreground">
             Every habit tracks its current run and your personal best. Miss a
-            scheduled day and a freeze covers it automatically &mdash; you give
-            each habit zero to five, and frozen days stay visible in the
-            history.
+            scheduled day and a freeze covers it automatically. You give each
+            habit zero to five, and frozen days stay visible in the history.
           </p>
         </div>
 
@@ -786,8 +891,8 @@ function FeaturesPage() {
             ))}
           </div>
           <p className="text-sm text-muted-foreground">
-            Thursday was missed &mdash; a freeze covered it automatically and
-            the streak carried on.
+            Thursday was missed. A freeze covered it automatically and the
+            streak carried on.
           </p>
         </div>
 
@@ -811,11 +916,58 @@ function FeaturesPage() {
         </div>
       </section>
 
-      {/* 03 — On your terms: divided list rows */}
+      {/* 03. AI planner: split */}
+      <section className="border-t border-border">
+        <div className="mx-auto grid w-full max-w-7xl items-center gap-12 px-4 py-24 sm:px-6 sm:py-32 lg:grid-cols-2 lg:gap-20 lg:px-8">
+          <div className="flex flex-col items-start gap-5">
+            <Eyebrow>03 &middot; AI planner</Eyebrow>
+            <h2 className="font-heading text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+              Know the goal but not the habit? Describe it
+            </h2>
+            <p className="text-lg text-pretty text-muted-foreground">
+              The built-in assistant turns a goal into a trackable habit. You
+              stay in charge: nothing is saved until you approve the draft.
+            </p>
+            <ul className="flex flex-col gap-4">
+              {[
+                {
+                  title: "From goal to plan",
+                  description:
+                    "Type what you're after, or pick a quick prompt, and the planner proposes a name, a one-line description, and a concrete target for each check-in.",
+                },
+                {
+                  title: "Sensible defaults, all editable",
+                  description:
+                    "It also picks a schedule and one of your categories to file it under. Change any field before the habit is created.",
+                },
+                {
+                  title: "Always one key away",
+                  description:
+                    "Press A anywhere in the app to open the assistant. Accept a draft and it becomes a normal habit, streak and all.",
+                },
+              ].map((point) => (
+                <li key={point.title} className="flex gap-3">
+                  <SparklesIcon className="mt-1 size-4 shrink-0 text-primary" />
+                  <div>
+                    <p className="font-medium">{point.title}</p>
+                    <p className="text-sm text-pretty text-muted-foreground">
+                      {point.description}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <AiPlannerFlowVisual />
+        </div>
+      </section>
+
+      {/* 04. On your terms: divided list rows */}
       <section className="border-y border-border bg-muted/30">
         <div className="mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8">
           <div className="max-w-2xl">
-            <Eyebrow>03 &middot; Made to fit your week</Eyebrow>
+            <Eyebrow>04 &middot; Made to fit your week</Eyebrow>
             <h2 className="mt-3 font-heading text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
               Habits on your terms
             </h2>
@@ -849,7 +1001,7 @@ function FeaturesPage() {
         </div>
       </section>
 
-      {/* 04 — Circles: reversed split */}
+      {/* 05. Circles: reversed split */}
       <section className="mx-auto grid w-full max-w-7xl items-center gap-12 px-4 py-24 sm:px-6 sm:py-32 lg:grid-cols-2 lg:gap-20 lg:px-8">
         <div className="flex flex-col gap-4 max-lg:order-last">
           <InviteVisual />
@@ -857,7 +1009,7 @@ function FeaturesPage() {
         </div>
 
         <div className="flex flex-col items-start gap-5">
-          <Eyebrow>04 &middot; Circles</Eyebrow>
+          <Eyebrow>05 &middot; Circles</Eyebrow>
           <h2 className="font-heading text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
             Small, private groups that keep you honest
           </h2>
@@ -882,11 +1034,11 @@ function FeaturesPage() {
         </div>
       </section>
 
-      {/* 05 — Progress: bento */}
+      {/* 06. Progress: bento */}
       <section className="border-y border-border bg-muted/30">
         <div className="mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
-            <Eyebrow>05 &middot; Progress</Eyebrow>
+            <Eyebrow>06 &middot; Progress</Eyebrow>
             <h2 className="mt-3 font-heading text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
               Watch the check-ins add up
             </h2>
@@ -960,9 +1112,9 @@ function FeaturesPage() {
                   Achievements and levels
                 </h3>
                 <p className="text-sm text-pretty text-muted-foreground">
-                  Eight badges for real moments — your first check-in, a perfect
-                  week, a 100-day run — plus a level that grows with every
-                  check-in.
+                  Eight badges for real moments like your first check-in, a
+                  perfect week, and a 100-day run, plus a level that grows with
+                  every check-in.
                 </p>
               </div>
               <div className="mt-auto">
@@ -973,16 +1125,16 @@ function FeaturesPage() {
         </div>
       </section>
 
-      {/* 06 — Everyday comfort: plain checklist */}
+      {/* 07. Everyday comfort: plain checklist */}
       <section className="mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 sm:py-32 lg:px-8">
         <div className="max-w-2xl">
-          <Eyebrow>06 &middot; Everyday comfort</Eyebrow>
+          <Eyebrow>07 &middot; Everyday comfort</Eyebrow>
           <h2 className="mt-3 font-heading text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
             Comfortable everywhere you are
           </h2>
           <p className="mt-4 text-lg text-pretty text-muted-foreground">
-            The practical bits that make it pleasant to live with &mdash; online
-            or off, on any screen, at any hour.
+            The practical bits that make it pleasant to live with: online or
+            off, on any screen, at any hour.
           </p>
         </div>
 
